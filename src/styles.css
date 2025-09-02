@@ -1,1 +1,19 @@
 /* You can add global styles to this file, and also import other style files */
+
+/* Reset global margins y box-sizing para que el header pueda ocupar todo el ancho */
+html, body, app-root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
+/* Asegura que el contenido no introduzca espacio lateral involuntario */
+body {
+  min-height: 100vh;
+}

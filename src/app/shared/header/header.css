@@ -1,0 +1,89 @@
+/* Estilos para el header */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  /* Fondo azul */
+  background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 100%);
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  position: relative;
+  left: 0;
+  top: 0;
+  z-index: 10;
+}
+
+.app-header .brand {
+  font-weight: 700;
+  font-size: 1.125rem;
+  color: #ffffff;
+}
+
+.app-header .actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.45rem 0.75rem;
+  border-radius: 0.375rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid transparent;
+  font-size: 0.9rem;
+}
+
+.btn-outline {
+  /* Botón Iniciar sesión: fondo blanco sólido para alto contraste */
+  background: #ffffff;
+  color: #1e3a8a; /* texto en azul oscuro para contraste */
+  border-color: rgba(0,0,0,0.06);
+  box-shadow: 0 1px 0 rgba(0,0,0,0.04);
+  transition: background 0.12s ease, transform 0.08s ease, box-shadow 0.12s ease;
+}
+
+.btn-primary {
+  background: #ffffff;
+  color: #1e3a8a;
+  border-color: transparent;
+}
+
+.btn:hover {
+  opacity: 0.95;
+}
+
+.btn-outline:hover {
+  background: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+}
+
+.btn-outline:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(37,99,235,0.18); /* foco accesible */
+}
+
+/* Responsive: en pantallas pequeñas apilar botones */
+@media (max-width: 480px) {
+  .app-header {
+    padding: 0.5rem;
+  }
+  .app-header .brand {
+    font-size: 1rem;
+  }
+  .app-header .actions {
+    gap: 0.4rem;
+  }
+  .btn {
+    padding: 0.35rem 0.6rem;
+    font-size: 0.85rem;
+  }
+}

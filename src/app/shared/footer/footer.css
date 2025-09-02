@@ -1,0 +1,40 @@
+/* Estilos básicos para el footer */
+.app-footer {
+  width: 100%;
+  background: #07123a; /* tono oscuro para contraste */
+  color: #ffffff;
+  padding: 1rem 0;
+  box-sizing: border-box;
+}
+
+.app-footer .container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.9rem;
+}
+
+.app-footer .links a {
+  color: rgba(255,255,255,0.85);
+  margin-left: 1rem;
+  text-decoration: none;
+}
+
+.app-footer .links a:hover {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+  .app-footer .container {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.5rem;
+  }
+  .app-footer .links a { margin-left: 0.5rem; }
+}
+
