@@ -1,0 +1,95 @@
+PS C:\Users\herna\Downloads\OldBaker-Front> ng serve
+Application bundle generation failed. [16.967 seconds]
+
+▲ [WARNING] Expected identifier but found whitespace [plugin angular-compiler] [css-syntax-error]
+
+    src/app/app.css:200:8:
+      200 │   width: 100%; /* evitar 100vw */
+          ╵         ^
+
+
+▲ [WARNING] Unexpected "100%" [plugin angular-compiler] [css-syntax-error]
+
+    src/app/app.css:200:9:
+      200 │   width: 100%; /* evitar 100vw */
+          ╵          ~~~~
+
+
+X [ERROR] NG2012: Component imports must be standalone components, directives, pipes, or must be NgModules. [plugin angular-compiler]
+
+    src/app/app.ts:10:42:
+      10 │   imports: [RouterOutlet, Header, Footer, SharedNotification],
+         ╵                                           ~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../core/notification.service' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/auth/components/login/login.ts:7:36:
+      7 │ ...NotificationService } from '../../../../core/notification.service';
+        ╵                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] NG2003: No suitable injection token for parameter 'notifications' of class 'Login'.
+  Consider using the @Inject decorator to specify an injection token. [plugin angular-compiler]
+
+    src/app/features/auth/components/login/login.ts:46:12:
+      46 │     private notifications: NotificationService
+         ╵             ~~~~~~~~~~~~~
+
+  This type does not have a value, so it cannot be used as injection token.
+
+    src/app/features/auth/components/login/login.ts:46:27:
+      46 │     private notifications: NotificationService
+         ╵                            ~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2395: Individual declarations in merged declaration 'Notification' must be all exported or all local. [plugin angular-compiler]
+
+    src/app/shared/notification/notification.ts:4:30:
+      4 │ ...rt { NotificationService, Notification } from '../../../core/not...
+        ╵                              ~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../core/notification.service' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/shared/notification/notification.ts:4:50:
+      4 │ ...nService, Notification } from '../../../core/notification.service';
+        ╵                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2395: Individual declarations in merged declaration 'Notification' must be all exported or all local. [plugin angular-compiler]
+
+    src/app/shared/notification/notification.ts:13:13:
+      13 │ export class Notification implements OnInit, OnDestroy {
+         ╵              ~~~~~~~~~~~~
+
+
+X [ERROR] NG2003: No suitable injection token for parameter 'notificationsService' of class 'Notification'.
+  Consider using the @Inject decorator to specify an injection token. [plugin angular-compiler]
+
+    src/app/shared/notification/notification.ts:21:22:
+      21 │   constructor(private notificationsService: NotificationService) {}
+         ╵                       ~~~~~~~~~~~~~~~~~~~~
+
+  This type does not have a value, so it cannot be used as injection token.
+
+    src/app/shared/notification/notification.ts:21:44:
+      21 │   constructor(private notificationsService: NotificationService) {}
+         ╵                                             ~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS7006: Parameter 'list' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/shared/notification/notification.ts:24:66:
+      24 │ ...sub = this.notificationsService.notifications$.subscribe(list => {
+         ╵                                                             ~~~~
+
+
+X [ERROR] TS7006: Parameter 'n' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/shared/notification/notification.ts:27:38:
+      27 │       const newIds = new Set(list.map(n => n.id));
+         ╵                                       ^
+
+
+Watch mode enabled. Watching for file changes...

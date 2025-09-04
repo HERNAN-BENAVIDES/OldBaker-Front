@@ -1,0 +1,20 @@
+<div class="sb-notifications" aria-live="polite">
+  <ng-container *ngFor="let n of notifications; trackBy: trackById">
+    <div class="sb-notification" [ngClass]="n.type"
+         (mouseenter)="pause(n.id)" (mouseleave)="resume(n)">
+      <div class="left">
+        <div class="icon" aria-hidden="true">{{ icon(n.type) }}</div>
+      </div>
+      <div class="body">
+        <div class="message">{{ n.message }}</div>
+        <div class="meta">
+          <button class="close" (click)="dismiss(n.id)" aria-label="Cerrar">×</button>
+        </div>
+        <div class="progress" *ngIf="(n.timeout ?? 0) > 0">
+          <div class="bar" [style.width.%]="progressFor(n.id)"></div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>
+

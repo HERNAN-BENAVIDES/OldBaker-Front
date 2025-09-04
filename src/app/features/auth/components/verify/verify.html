@@ -1,0 +1,26 @@
+<div class="verify-page">
+  <div class="verify-card">
+    <h2>Verificar cuenta</h2>
+
+    <p class="hint">Se envió un código de 6 dígitos al correo: <strong>{{ emailToShow || 'tu correo' }}</strong></p>
+
+    <form [formGroup]="verifyForm" (ngSubmit)="onSubmit()" novalidate>
+      <label for="codigo">Código de verificación</label>
+      <input id="codigo" type="text" formControlName="codigo" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="123456" />
+      <div class="error" *ngIf="codigo?.touched && codigo?.invalid">
+        <span *ngIf="codigo?.errors?.['required']">El código es obligatorio.</span>
+        <span *ngIf="codigo?.errors?.['pattern']">El código debe tener 6 dígitos numéricos.</span>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" type="submit" [disabled]="isLoading">{{ isLoading ? 'Verificando...' : 'Verificar' }}</button>
+        <button type="button" class="btn secondary" (click)="router.navigate(['/'])">Cancelar</button>
+      </div>
+
+      <div class="inline-messages">
+        <div *ngIf="successMessage" class="msg success">{{ successMessage }}</div>
+        <div *ngIf="errorMessage" class="msg error">{{ errorMessage }}</div>
+      </div>
+    </form>
+  </div>
+</div>

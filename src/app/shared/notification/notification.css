@@ -1,0 +1,96 @@
+/* filepath: c:\Users\herna\Downloads\OldBaker-Front\src\app\shared\notification\notification.css */
+.sb-notifications {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.sb-notification {
+  pointer-events: auto;
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  min-width: 220px;
+  max-width: 380px;
+  background: #ffffff;
+  color: #0f172a;
+  border-radius: 10px;
+  padding: 0.65rem 0.75rem;
+  box-shadow: 0 8px 24px rgba(16,24,40,0.12);
+  box-sizing: border-box;
+  overflow: hidden;
+  border-left: 4px solid transparent;
+}
+
+.sb-notification.success { border-left-color: #16a34a; }
+.sb-notification.error   { border-left-color: #dc2626; }
+.sb-notification.info    { border-left-color: #2563eb; }
+
+.sb-notification .left {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  background: rgba(15,23,42,0.04);
+  flex: 0 0 auto;
+  font-weight: 700;
+}
+
+.sb-notification.success .left { background: rgba(16,185,129,0.08); }
+.sb-notification.error .left   { background: rgba(239,68,68,0.06); }
+.sb-notification.info .left    { background: rgba(59,130,246,0.06); }
+
+.sb-notification .body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.sb-notification .message {
+  font-size: 0.95rem;
+  line-height: 1.2rem;
+  color: #0f172a;
+}
+
+.sb-notification .meta {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.sb-notification .close {
+  background: transparent;
+  border: none;
+  color: rgba(15,23,42,0.6);
+  font-size: 1.1rem;
+  padding: 0;
+  cursor: pointer;
+}
+
+.sb-notification .progress {
+  height: 4px;
+  background: rgba(15,23,42,0.04);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 0.35rem;
+}
+
+.sb-notification .progress .bar {
+  height: 100%;
+  background: linear-gradient(90deg, rgba(37,99,235,0.9), rgba(16,185,129,0.9));
+  width: 0%;
+  transition: width 120ms linear;
+}
+
+@media (max-width: 520px) {
+  .sb-notifications { left: 0.5rem; right: 0.5rem; top: 0.5rem; }
+  .sb-notification { max-width: none; }
+}
+

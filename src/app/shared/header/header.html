@@ -1,7 +1,18 @@
 <header class="app-header">
   <a routerLink="/" class="brand" aria-label="Ir al inicio">OldBaker</a>
   <nav class="actions">
-    <a routerLink="/login" class="btn btn-outline">Iniciar sesión</a>
-    <a routerLink="/register" class="btn btn-primary">Registrarse</a>
+    <!-- mostrar botones de login/registro sólo si no está autenticado -->
+    <ng-container *ngIf="(isAuthenticated$ | async) === false; else logged">
+      <a routerLink="/login" class="btn btn-outline">Iniciar sesión</a>
+      <a routerLink="/register" class="btn btn-primary">Registrarse</a>
+    </ng-container>
+
+    <!-- estado autenticado: mostrar nombre y menú de cuenta -->
+    <ng-template #logged>
+      <button class="btn btn-outline" type="button" routerLink="/account" aria-label="Cuenta">
+        Cuenta
+      </button>
+      <button class="btn" (click)="logout()" aria-label="Cerrar sesión">Cerrar sesión</button>
+    </ng-template>
   </nav>
 </header>

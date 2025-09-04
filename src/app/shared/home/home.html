@@ -1,0 +1,18 @@
+<section class="home-hero">
+  <h2 class="products-title">Nuestros productos</h2>
+  <div class="products-bg">
+    <div class="products-grid">
+      <article class="product" *ngFor="let p of products">
+        <div class="product-image">
+          <img [src]="p.image" [alt]="p.name" (error)="onImageError($event)" />
+        </div>
+        <div class="product-body">
+          <h3 class="product-name">{{ p.name }}</h3>
+          <p class="product-desc">{{ p.description }}</p>
+          <span class="price">{{ p.price | currency:'COP':'symbol':'1.0-0' }}</span>
+          <button class="btn small">Agregar</button>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
