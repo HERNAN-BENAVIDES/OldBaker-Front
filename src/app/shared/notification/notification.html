@@ -1,5 +1,5 @@
 <ng-container *ngFor="let n of notifications; trackBy: trackById">
-  <div class="sb-overlay" (mouseenter)="pause(n.id)" (mouseleave)="resume(n)" role="dialog" aria-modal="true">
+  <div class="sb-overlay" tabindex="0" (mouseenter)="pause(n.id)" (mouseleave)="resume(n)" role="dialog" aria-modal="true">
     <div class="sb-modal" [ngClass]="n.type">
       <button class="sb-close" aria-label="Cerrar" (click)="dismiss(n.id)">×</button>
 

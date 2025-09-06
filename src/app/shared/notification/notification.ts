@@ -18,9 +18,35 @@ export class NotificationComponent implements OnInit, OnDestroy {
   private timerMap = new Map<number, number>();
   progress = new Map<number, number>();
 
+  // manejador de teclado para ESC y ENTER
+  private keyHandler = (e: KeyboardEvent) => {
+    try {
+      // solo actuar si el foco está dentro de una notificación (overlay)
+      const active = document.activeElement as HTMLElement | null;
+      if (!active || !active.closest) { return; }
+      if (!active.closest('.sb-overlay')) { return; }
+
+      if (!this.notifications || this.notifications.length === 0) { return; }
+      const top = this.notifications[this.notifications.length - 1]; // la notificación más reciente
+      if (!top) { return; }
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        this.dismiss(top.id);
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        // simular acción del botón Aceptar -> dismiss
+        this.dismiss(top.id);
+      }
+    } catch (err) {
+      // ignore
+    }
+  }
+
   constructor(private notificationsService: NotificationService) {}
 
   ngOnInit(): void {
+    // registrar listener global de teclado
+    document.addEventListener('keydown', this.keyHandler);
     this.sub = this.notificationsService.notifications$.subscribe((list: Notification[]) => {
       // start timers for new notifications
       const prevIds = new Set(this.notifications.map(n => n.id));
@@ -40,6 +66,17 @@ export class NotificationComponent implements OnInit, OnDestroy {
       }
 
       this.notifications = list;
+
+      // si hay notificaciones, enfocar automáticamente el último overlay para que Enter/Escape actúen sobre ella
+      try {
+        if (this.notifications && this.notifications.length > 0) {
+          setTimeout(() => {
+            const els = document.querySelectorAll('.sb-overlay');
+            const el = els[els.length - 1] as HTMLElement | undefined;
+            if (el) { el.focus(); }
+          }, 0);
+        }
+      } catch (e) { /* ignore */ }
     });
   }
 
@@ -48,6 +85,8 @@ export class NotificationComponent implements OnInit, OnDestroy {
     for (const id of Array.from(this.timerMap.keys())) {
       this.clearTimer(id);
     }
+    // limpiar listener de teclado
+    document.removeEventListener('keydown', this.keyHandler);
   }
 
   trackById(_i: number, item: Notification) {
