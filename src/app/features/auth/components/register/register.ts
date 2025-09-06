@@ -5,6 +5,7 @@ import { RouterModule, Router } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
 import { AuthService } from '../../services/auth.service';
 import { NotificationService } from '../../../../shared/notification/notification.service';
+import {environment} from '../../../../../environments/environment';
 
 function passwordStrength(control: AbstractControl): ValidationErrors | null {
   const value = control.value as string;
@@ -29,6 +30,7 @@ function passwordsMatch(group: AbstractControl): ValidationErrors | null {
   styleUrls: ['./register.css']
 })
 export class Register {
+  private readonly baseUrl = `${environment.apiUrl}/oauth2/authorization/google`;
   registerForm: FormGroup;
   hidePassword = true;
   isLoading = false;
@@ -49,7 +51,7 @@ export class Register {
 
   signUpWithGoogle() {
     // Redirige al endpoint de autorización OAuth2 para iniciar flujo con Google
-    window.location.href = 'https://localhost:8443/oauth2/authorization/google';
+    window.location.href = this.baseUrl;
   }
 
   onSubmit() {
