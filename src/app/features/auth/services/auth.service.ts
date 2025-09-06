@@ -140,6 +140,22 @@ export class AuthService {
 
   // Solicita recuperación de contraseña
   requestPasswordReset(email: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}/auth/forgot`, { email });
+    // Enviar el email como texto plano, no como JSON
+    return this.http.post(`${this.baseUrl}/auth/forgot`, email, {
+      headers: new HttpHeaders({ 'Content-Type': 'text/plain' })
+    });
+  }
+
+  // Verificar código de restablecimiento: enviar código como texto plano
+  verifyResetCode(code: string): Observable<any> {
+    return this.http.post(`${this.baseUrl}/auth/reset/verify`, code, {
+      headers: new HttpHeaders({ 'Content-Type': 'text/plain' })
+    });
+  }
+
+  // Ejecutar el restablecimiento de contraseña. Body: { token, password }
+  resetPassword(token: string, password: string): Observable<any> {
+    const body = { token, password };
+    return this.http.post(`${this.baseUrl}/auth/reset`, body);
   }
 }
