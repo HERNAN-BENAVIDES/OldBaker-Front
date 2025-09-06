@@ -126,7 +126,7 @@ export class NotificationComponent implements OnInit, OnDestroy {
   icon(type: Notification['type']) {
     switch (type) {
       case 'success': return '✔';
-      case 'error': return '⚠';
+      case 'error': return '✖';
       default: return 'ℹ';
     }
   }

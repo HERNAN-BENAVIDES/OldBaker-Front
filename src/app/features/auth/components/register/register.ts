@@ -66,18 +66,48 @@ export class Register {
     console.log('[Register] submitting', { nombre, email });
     this.isLoading = true;
     this.authService.register({ nombre, email, password }).subscribe({
-      next: (res) => {
-        console.log('[Register] response', res);
+      next: (res: any) => {
         this.isLoading = false;
+
+        // Manejar caso en que el backend responda con success:false en el body
+        if (res && res.success === false) {
+          const msg = res.mensaje ?? res.data?.mensaje ?? 'Error en el registro';
+          this.errorMessage = msg;
+          this.notifications.showError(msg);
+          return;
+        }
+
+        // Asumir éxito si llegamos aquí
         this.successMessage = 'Registro exitoso';
         this.notifications.showSuccess('Registro exitoso. Por favor verifica tu correo.');
-        // Intentar navegar y reportar resultado
-        this.router.navigate(['/verify']).then(result => console.log('[Register] navigate result', result)).catch(err => console.error('[Register] navigate error', err));
+
+        // Extraer el objeto usuario desde diferentes formatos posibles de la respuesta
+        const usuario = res?.data?.usuario ?? res?.data ?? null;
+        try {
+          if (usuario) {
+            // Guardar en localStorage para que /verify pueda leer el email
+            try { localStorage.setItem('auth_user', JSON.stringify(usuario)); } catch (e) { console.warn('No se pudo guardar auth_user en localStorage', e); }
+
+            // Guardar id en sessionStorage para el flujo de verificación
+            const userId = usuario.id ?? usuario.userId ?? null;
+            if (userId != null) {
+              try { sessionStorage.setItem('oauth_user_id', String(userId)); } catch (e) { }
+            }
+          }
+        } catch (e) {
+          console.warn('Error procesando respuesta de registro', e);
+        }
+
+        // Navegar a /verify pasando el email como query param para mostrarlo en la vista
+        const emailToShow = usuario?.email ?? email;
+        this.router.navigate(['/verify'], { queryParams: { email: emailToShow } }).then(r => console.log('[Register] navigate /verify', r));
       },
       error: (err) => {
         console.log('[Register] error', err);
         this.isLoading = false;
-        this.errorMessage = err?.error?.message || 'Error en el registro';
+        // Priorizar 'mensaje' proveniente del backend si existe
+        const serverMsg = err?.error?.mensaje ?? err?.error?.message ?? err?.message ?? 'Error en el registro';
+        this.errorMessage = serverMsg;
         this.notifications.showError(this.errorMessage ?? 'Error en el registro');
         console.error('Registro error', err);
       }
