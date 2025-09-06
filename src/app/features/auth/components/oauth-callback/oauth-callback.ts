@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-oauth-callback',
@@ -12,7 +13,7 @@ import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 export class OauthCallback implements OnInit {
   message = 'Procesando autenticación...';
 
-  constructor(private route: ActivatedRoute, private router: Router) {}
+  constructor(private route: ActivatedRoute, private router: Router, private authService: AuthService) {}
 
   ngOnInit(): void {
     // Primero revisar el parámetro 'data' que viene codificado por el backend
@@ -32,9 +33,37 @@ export class OauthCallback implements OnInit {
       }
 
       if (decoded) {
-        // Intentar extraer usuario y token según varias formas posibles
+        console.log('[OauthCallback] decoded payload:', decoded);
+
+        // Si viene la estructura estándar { success, mensaje, data: { accessToken, refreshToken, tokenType, usuario } }
+        if (decoded.success && decoded.data) {
+          try {
+            // usar el helper del servicio para guardar tokens y usuario correctamente
+            this.authService.saveAuthResponse(decoded);
+            console.log('[OauthCallback] saved auth response to localStorage');
+          } catch (e) {
+            console.warn('[OauthCallback] error saving auth response', e);
+          }
+
+          // si el usuario no está verificado, redirigir a /verify
+          const usuario = decoded.data.usuario ?? decoded.data?.user ?? null;
+          if (usuario && (usuario.verificado === false || usuario['verificado'] === 'false')) {
+            const userId = usuario.id ?? usuario.userId ?? null;
+            if (userId) {
+              try { sessionStorage.setItem('oauth_user_id', String(userId)); } catch (e) {}
+              this.router.navigate(['/verify']);
+              return;
+            }
+          }
+
+          // usuario verificado: ir a home
+          this.router.navigate(['/']);
+          return;
+        }
+
+        // Si no viene en el formato anterior, intentar extraer user/token de otras posiciones
         const user = decoded?.data?.data ?? decoded?.data ?? decoded?.user ?? decoded?.usuario ?? null;
-        const token = decoded?.token ?? decoded?.accessToken ?? decoded?.data?.token ?? null;
+        const token = decoded?.token ?? decoded?.accessToken ?? decoded?.data?.token ?? decoded?.data?.accessToken ?? null;
 
         if (user && (user.verificado === false || user['verificado'] === 'false')) {
           const userId = user?.id ?? null;
@@ -46,14 +75,8 @@ export class OauthCallback implements OnInit {
         }
 
         if (token) {
-          // Guardar token y redirigir a landing
+          // intentar guardar token simple y redirigir
           try { localStorage.setItem('auth_token', token); } catch (e) {}
-          this.router.navigate(['/']);
-          return;
-        }
-
-        // Si el usuario viene verificado o no hay token, pero hay usuario con verificado true -> home
-        if (user && (user.verificado === true || user['verificado'] === 'true')) {
           this.router.navigate(['/']);
           return;
         }

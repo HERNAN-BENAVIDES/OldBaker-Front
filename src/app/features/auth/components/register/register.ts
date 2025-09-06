@@ -93,6 +93,17 @@ export class Register {
             if (userId != null) {
               try { sessionStorage.setItem('oauth_user_id', String(userId)); } catch (e) { }
             }
+
+            // LOGS para depuración: mostrar lo almacenado justo antes de la navegación
+            try {
+              console.log('[Register] stored auth_user (localStorage):', localStorage.getItem('auth_user'));
+            } catch (e) { console.warn('[Register] error reading localStorage auth_user', e); }
+            try {
+              console.log('[Register] stored oauth_user_id (sessionStorage):', sessionStorage.getItem('oauth_user_id'));
+            } catch (e) { console.warn('[Register] error reading sessionStorage oauth_user_id', e); }
+            try {
+              console.log('[Register] full localStorage snapshot:', JSON.stringify(window.localStorage));
+            } catch (e) { /* ignore */ }
           }
         } catch (e) {
           console.warn('Error procesando respuesta de registro', e);

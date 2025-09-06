@@ -29,7 +29,8 @@ export class AuthService {
     return this.http.post(`${this.baseUrl}/register`, payload);
   }
 
-  verifyCode(param: { id: number; codigo: any }):Observable<any> {
+  // Cambiado para aceptar el payload { idUsuario: string; codigo: string }
+  verifyCode(param: { idUsuario: string; codigo: string }): Observable<any> {
     return this.http.post(`${this.baseUrl}/verify`, param);
   }
 
