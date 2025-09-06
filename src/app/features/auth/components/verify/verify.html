@@ -1,12 +1,31 @@
 <div class="verify-page">
-  <div class="verify-card">
-    <h2>Verificar cuenta</h2>
+  <div class="verify-card" role="main" aria-labelledby="verify-title">
+    <header class="verify-header">
+      <div class="icon-circle" aria-hidden="true">✔</div>
+      <div class="header-text">
+        <h2 id="verify-title">Verificar cuenta</h2>
+        <p class="subtitle">Introduce el código de 6 dígitos que te enviamos por correo</p>
+      </div>
+    </header>
 
-    <p class="hint">Se envió un código de 6 dígitos al correo: <strong>{{ emailToShow || 'tu correo' }}</strong></p>
+    <p class="hint">Se envió el código a: <strong class="email">{{ emailToShow || storedEmail || 'tu correo' }}</strong></p>
 
-    <form [formGroup]="verifyForm" (ngSubmit)="onSubmit()" novalidate>
-      <label for="codigo">Código de verificación</label>
-      <input id="codigo" type="text" formControlName="codigo" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="123456" />
+    <form [formGroup]="verifyForm" (ngSubmit)="onSubmit()" novalidate autocomplete="off">
+      <p class="sr-only" aria-hidden="true">Código de verificación, 6 dígitos</p>
+
+      <div class="otp-wrapper" (paste)="onPaste($event)" aria-label="Código de verificación">
+        <div *ngFor="let i of indices" class="otp-cell">
+          <input #otp
+                 class="otp-digit"
+                 type="tel"
+                 inputmode="numeric"
+                 maxlength="1"
+                 [attr.aria-label]="'Dígito ' + (i + 1)"
+                 (input)="onInput($event, i)"
+                 (keydown)="onKeyDown($event, i)" />
+        </div>
+      </div>
+
       <div class="error" *ngIf="codigo?.touched && codigo?.invalid">
         <span *ngIf="codigo?.errors?.['required']">El código es obligatorio.</span>
         <span *ngIf="codigo?.errors?.['pattern']">El código debe tener 6 dígitos numéricos.</span>
@@ -14,7 +33,12 @@
 
       <div class="actions">
         <button class="btn primary" type="submit" [disabled]="isLoading">{{ isLoading ? 'Verificando...' : 'Verificar' }}</button>
-        <button type="button" class="btn secondary" (click)="router.navigate(['/'])">Cancelar</button>
+        <button type="button" class="btn ghost" (click)="router.navigate(['/'])" aria-label="Cancelar">Cancelar</button>
+      </div>
+
+      <div class="resend-row">
+        <span>¿No recibiste el código?</span>
+        <button type="button" class="link" (click)="resendCode()">Reenviar código</button>
       </div>
 
       <div class="inline-messages">
@@ -22,5 +46,9 @@
         <div *ngIf="errorMessage" class="msg error">{{ errorMessage }}</div>
       </div>
     </form>
+
+    <footer class="verify-footer">
+      <small>Si tienes problemas para recibir el correo, revisa tu carpeta de spam o contacta soporte.</small>
+    </footer>
   </div>
 </div>
