@@ -12,9 +12,11 @@ import { AuthService } from '../../features/auth/services/auth.service';
   styleUrls: ['./header.css']
 })
 export class Header {
-  // declarar propiedades sin usar this en el inicializador
+  // declarar propiedades sin inicializar; se asignan en el constructor
   isAuthenticated$!: Observable<boolean>;
   currentUser$!: Observable<any>;
+  // estado para mostrar/ocultar el dropdown del avatar
+  showMenu = false;
 
   constructor(private authService: AuthService, private router: Router) {
     // asignar aquí para evitar "used before initialization"
@@ -26,6 +28,24 @@ export class Header {
     this.authService.logout();
     // navegar al inicio
     try { this.router.navigate(['/']); } catch (e) {}
+  }
+
+  toggleMenu(e?: Event) {
+    if (e) { e.stopPropagation(); }
+    this.showMenu = !this.showMenu;
+  }
+
+  logoutMenu() {
+    this.showMenu = false;
+    this.logout();
+  }
+
+  // devolver inicial para avatar a partir de nombre o email
+  avatarInitial(user: any): string {
+    if (!user) return '';
+    const name = user.nombre ?? user.name ?? user.email ?? '';
+    const ch = String(name).trim().charAt(0) || '';
+    return ch.toUpperCase();
   }
 
 }

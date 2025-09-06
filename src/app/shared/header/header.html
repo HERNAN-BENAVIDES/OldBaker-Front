@@ -7,12 +7,20 @@
       <a routerLink="/register" class="btn btn-primary">Registrarse</a>
     </ng-container>
 
-    <!-- estado autenticado: mostrar nombre y menú de cuenta -->
+    <!-- estado autenticado: mostrar avatar y nombre de perfil -->
     <ng-template #logged>
-      <button class="btn btn-outline" type="button" routerLink="/account" aria-label="Cuenta">
-        Cuenta
-      </button>
-      <button class="btn" (click)="logout()" aria-label="Cerrar sesión">Cerrar sesión</button>
+      <div class="user-info" *ngIf="(currentUser$ | async) as user" #menuRef>
+        <button class="avatar-btn" type="button" (click)="toggleMenu($event)" (keydown.enter)="toggleMenu($event)" aria-haspopup="true" [attr.aria-expanded]="showMenu" aria-label="Abrir menú de usuario" tabindex="0">
+          <span class="profile">
+            <span class="profile-name">{{ user.nombre || user.email }}</span>
+          </span>
+          <span class="avatar" aria-hidden="true">{{ avatarInitial(user) }}</span>
+        </button>
+
+        <div class="dropdown" *ngIf="showMenu" role="menu" aria-label="Menú de usuario">
+          <button class="dropdown-item" type="button" (click)="logoutMenu()">Cerrar sesión</button>
+        </div>
+      </div>
     </ng-template>
   </nav>
 </header>
