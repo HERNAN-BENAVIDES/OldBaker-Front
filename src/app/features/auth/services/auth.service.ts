@@ -39,6 +39,11 @@ export class AuthService {
     return this.http.post(`${this.baseUrl}/auth/login`, payload);
   }
 
+  setSession(data: any) {
+    // Actualiza el observable de usuario/logueo
+    this.currentUserSubj.next(data.usuario);
+  }
+
   // Permite que otros componentes notifiquen el usuario autenticado
   setUser(user: any): void {
     try { localStorage.setItem('auth_user', JSON.stringify(user)); } catch (e) {}

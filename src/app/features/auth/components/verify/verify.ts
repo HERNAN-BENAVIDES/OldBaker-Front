@@ -144,6 +144,20 @@ export class Verify implements AfterViewInit {
       next: (res: any) => {
         this.isLoading = false;
         if (res?.success) {
+          // Guardar tokens y usuario en localStorage
+          if (res.data) {
+            localStorage.setItem('access_token', res.data.accessToken);
+            localStorage.setItem('refresh_token', res.data.refreshToken);
+            localStorage.setItem('token_type', res.data.tokenType);
+            localStorage.setItem('auth_user', JSON.stringify(res.data.usuario));
+          }
+
+          // Después de guardar en localStorage
+          if (this.authService.setSession) {
+            this.authService.setSession(res.data);
+          }
+
+
           this.successMessage = res?.mensaje || 'Verificación exitosa';
           this.notifications.showSuccess(this.successMessage ?? 'Verificación exitosa');
           this.router.navigate(['/']);
