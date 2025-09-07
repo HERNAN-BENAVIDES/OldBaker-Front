@@ -65,7 +65,6 @@ export class Register {
 
     const { nombre, email, password } = this.registerForm.value;
 
-    console.log('[Register] submitting', { nombre, email });
     this.isLoading = true;
     this.authService.register({ nombre, email, password }).subscribe({
       next: (res: any) => {
@@ -96,16 +95,6 @@ export class Register {
               try { sessionStorage.setItem('oauth_user_id', String(userId)); } catch (e) { }
             }
 
-            // LOGS para depuración: mostrar lo almacenado justo antes de la navegación
-            try {
-              console.log('[Register] stored auth_user (localStorage):', localStorage.getItem('auth_user'));
-            } catch (e) { console.warn('[Register] error reading localStorage auth_user', e); }
-            try {
-              console.log('[Register] stored oauth_user_id (sessionStorage):', sessionStorage.getItem('oauth_user_id'));
-            } catch (e) { console.warn('[Register] error reading sessionStorage oauth_user_id', e); }
-            try {
-              console.log('[Register] full localStorage snapshot:', JSON.stringify(window.localStorage));
-            } catch (e) { /* ignore */ }
           }
         } catch (e) {
           console.warn('Error procesando respuesta de registro', e);
@@ -116,14 +105,11 @@ export class Register {
         this.router.navigate(['/verify'], { queryParams: { email: emailToShow } }).then(r => console.log('[Register] navigate /verify', r));
       },
       error: (err) => {
-        console.log('[Register] error', err);
         this.isLoading = false;
         // Priorizar 'mensaje' proveniente del backend si existe
         const serverMsg = err?.error?.mensaje ?? err?.error?.message ?? err?.message ?? 'Error en el registro';
         this.errorMessage = serverMsg;
-        this.notifications.showError(this.errorMessage ?? 'Error en el registro');
-        console.error('Registro error', err);
-      }
+        this.notifications.showError(this.errorMessage ?? 'Error en el registro');}
     });
   }
 

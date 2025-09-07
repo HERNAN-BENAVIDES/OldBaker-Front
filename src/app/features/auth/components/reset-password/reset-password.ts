@@ -15,7 +15,6 @@ import { NotificationService } from '../../../../shared/notification/notificatio
 export class ResetPasswordComponent {
   form: FormGroup;
   isLoading = false;
-  token: string | null = null;
 
   // propiedades para mostrar/ocultar contraseña usadas en la plantilla
   showPassword = false;
@@ -32,8 +31,6 @@ export class ResetPasswordComponent {
       password: ['', [Validators.required, Validators.minLength(8), Validators.pattern(/^(?=.*[A-Z])(?=.*\d).{8,}$/)]],
       confirm: ['', [Validators.required]]
     }, { validators: this.matchPasswords });
-
-    try { this.token = localStorage.getItem('reset_token'); } catch (e) { this.token = null; }
   }
 
   private matchPasswords(group: FormGroup) {
@@ -66,24 +63,40 @@ export class ResetPasswordComponent {
       this.form.markAllAsTouched();
       return;
     }
-    if (!this.token) {
-      this.notifications.showError('Token de restablecimiento no encontrado. Solicita de nuevo el código.');
+
+    // Obtener email desde localStorage (está guardado en el flujo de 'forgot') o desde auth_user
+    let email: string | null = null;
+    try {
+      email = localStorage.getItem('reset_email') || null;
+      if (!email) {
+        const raw = localStorage.getItem('auth_user');
+        if (raw) {
+          const u = JSON.parse(raw);
+          email = u?.email ?? null;
+        }
+      }
+    } catch (e) {
+      console.warn('[ResetPassword] error leyendo localStorage', e);
+      email = null;
+    }
+
+    if (!email) {
+      this.notifications.showError('No se encontró el correo asociado al restablecimiento. Vuelve a solicitar el código.');
       return;
     }
 
     this.isLoading = true;
-    const pwd = this.password?.value;
-    this.authService.resetPassword(this.token, pwd).subscribe({
+    const newPassword = this.password?.value as string;
+    this.authService.resetPassword(email, newPassword).subscribe({
       next: (res: any) => {
         this.isLoading = false;
-        console.log('[ResetPassword] response:', res);
         try { localStorage.removeItem('reset_token'); } catch (e) {}
+        try { localStorage.removeItem('reset_email'); } catch (e) {}
         this.notifications.showSuccess(res?.mensaje ?? 'Contraseña restablecida correctamente.');
         this.router.navigate(['/login']);
       },
       error: (err: any) => {
         this.isLoading = false;
-        console.log('[ResetPassword] error:', err);
         const msg = err?.error?.mensaje || err?.error?.message || 'Error al restablecer la contraseña.';
         this.notifications.showError(msg);
       }

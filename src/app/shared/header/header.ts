@@ -31,7 +31,6 @@ export class Header implements OnInit, OnDestroy {
   ngOnInit(): void {
     // subscribir para debug: ver si currentUser cambia cuando se hace logout
     this.userSub = this.currentUser$.subscribe(u => {
-      try { console.log('[Header] currentUser$', u); } catch (e) {}
     });
   }
 
@@ -64,9 +63,6 @@ export class Header implements OnInit, OnDestroy {
     if (email && token) {
       this.authService.logoutRequest({ email, token }).subscribe({
         next: (res: any) => {
-          // debug log response
-          try { console.log('[Header] logout response', res); } catch (e) {}
-
           // success
           try { this.notifications.showSuccess(res?.mensaje ?? 'Logout exitoso'); } catch (e) { /* ignore */ }
           try { this.authService.clearLocalAuth(); } catch (e) { /* ignore */ }

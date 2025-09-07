@@ -116,14 +116,12 @@ export class CodePassword implements AfterViewInit {
       this.authService.verifyCode({ idUsuario: String(this.userId), codigo: code }).subscribe({
         next: (res: any) => {
           this.isLoading = false;
-          console.log('[CodePassword] verifyCode response:', res);
           this.successMessage = res?.mensaje || 'Código verificado correctamente.';
           this.notifications.showSuccess(this.successMessage ?? 'Código verificado correctamente.');
           this.router.navigate(['/']);
         },
         error: (err: any) => {
           this.isLoading = false;
-          console.log('[CodePassword] verifyCode error:', err);
           const msg = err?.error?.mensaje || err?.error?.message || 'Error al verificar el código.';
           this.errorMessage = msg;
           this.notifications.showError(msg);
@@ -134,7 +132,6 @@ export class CodePassword implements AfterViewInit {
       this.authService.verifyResetCode(String(code)).subscribe({
         next: (res: any) => {
           this.isLoading = false;
-          console.log('[CodePassword] verifyResetCode response:', res);
           // respuesta esperada: { success: true, mensaje: '...', data: '<JWT>' }
           const token = res?.data ?? null;
           try { if (token) localStorage.setItem('reset_token', token); } catch (e) {}
@@ -143,7 +140,6 @@ export class CodePassword implements AfterViewInit {
         },
         error: (err: any) => {
           this.isLoading = false;
-          console.log('[CodePassword] verifyResetCode error:', err);
           const msg = err?.error?.mensaje || err?.error?.message || 'Error al verificar el código.';
           this.errorMessage = msg;
           this.notifications.showError(msg);

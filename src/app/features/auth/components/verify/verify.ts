@@ -140,11 +140,9 @@ export class Verify implements AfterViewInit {
 
     // Enviar idUsuario como string en el JSON al backend
     const idUsuario = String(this.userId);
-    console.log('[Verify] submitting', { idUsuario, codigo: code });
     this.authService.verifyCode({ idUsuario, codigo: code }).subscribe({
       next: (res: any) => {
         this.isLoading = false;
-        console.log('[Verify] response', res);
         if (res?.success) {
           this.successMessage = res?.mensaje || 'Verificación exitosa';
           this.notifications.showSuccess(this.successMessage ?? 'Verificación exitosa');

@@ -90,16 +90,12 @@ export class Login {
             const token = localStorage.getItem('auth_token');
             const refresh = localStorage.getItem('refresh_token');
             const user = localStorage.getItem('auth_user');
-            console.log('[Login] saved to localStorage', { tokenPresent: !!token, refreshPresent: !!refresh, userPresent: !!user });
-            console.log('[Login] auth_user', user);
           } catch (e) {
-            console.warn('[Login] error reading localStorage after save', e);
           }
           this.router.navigate(['/']);
           this.notifications.showSuccess(res.mensaje || 'Inicio de sesión exitoso');
           return;
         } catch (e) {
-          console.error('[Login] error saving auth response', e);
           this.notifications.showError('Error al procesar la respuesta de autenticación.');
           return;
         }

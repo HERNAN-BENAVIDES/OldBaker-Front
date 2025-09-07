@@ -65,7 +65,6 @@ export class AuthService {
     if (email && token) {
       this.logoutRequest({ email, token }).subscribe({
         next: (res) => {
-          console.log('[AuthService] logoutRequest success', res);
           try { localStorage.removeItem('auth_user'); } catch (e) {}
           try { localStorage.removeItem('auth_token'); } catch (e) {}
           try { localStorage.removeItem('refresh_token'); } catch (e) {}
@@ -153,9 +152,9 @@ export class AuthService {
     });
   }
 
-  // Ejecutar el restablecimiento de contraseña. Body: { token, password }
-  resetPassword(token: string, password: string): Observable<any> {
-    const body = { token, password };
+  // Ejecutar el restablecimiento de contraseña. Ahora envía { email, newPassword } según solicitud
+  resetPassword(email: string, newPassword: string): Observable<any> {
+    const body = { email, newPassword };
     return this.http.post(`${this.baseUrl}/auth/reset`, body);
   }
 }

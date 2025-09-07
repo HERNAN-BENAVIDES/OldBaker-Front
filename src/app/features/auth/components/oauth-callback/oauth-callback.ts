@@ -33,14 +33,11 @@ export class OauthCallback implements OnInit {
       }
 
       if (decoded) {
-        console.log('[OauthCallback] decoded payload:', decoded);
-
         // Si viene la estructura estándar { success, mensaje, data: { accessToken, refreshToken, tokenType, usuario } }
         if (decoded.success && decoded.data) {
           try {
             // usar el helper del servicio para guardar tokens y usuario correctamente
             this.authService.saveAuthResponse(decoded);
-            console.log('[OauthCallback] saved auth response to localStorage');
           } catch (e) {
             console.warn('[OauthCallback] error saving auth response', e);
           }
