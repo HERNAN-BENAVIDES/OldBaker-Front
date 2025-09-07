@@ -5,6 +5,7 @@ import { RouterModule, Router } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
 import { AuthService } from '../../services/auth.service';
 import { NotificationService } from '../../../../shared/notification/notification.service';
+import {environment} from '../../../../../environments/environment';
 
 interface AuthResponse {
   success: boolean;
@@ -33,7 +34,9 @@ interface AuthResponse {
   templateUrl: './login.html',
   styleUrls: ['./login.css']
 })
+
 export class Login {
+  private readonly baseUrl = `${environment.apiUrl}/oauth2/authorization/google`;
   loginForm: FormGroup;
   hidePassword = true;
   isLoading = false;
@@ -133,7 +136,7 @@ export class Login {
 
   signInWithGoogle() {
     // Redirigir al backend para iniciar OAuth con Google
-    window.location.href = 'https://localhost:8443/oauth2/authorization/google';
+    window.location.href = this.baseUrl;
   }
 
   get email() {
