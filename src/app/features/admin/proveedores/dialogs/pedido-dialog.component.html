@@ -1,0 +1,154 @@
+<h2 mat-dialog-title class="dialog-title">
+  <mat-icon>shopping_cart</mat-icon>
+  {{ data.isEdit ? 'Editar' : 'Crear' }} Pedido de Insumos
+</h2>
+
+<mat-dialog-content class="dialog-content">
+  <form [formGroup]="form">
+    <!-- Información básica del pedido -->
+    <mat-card class="info-card">
+      <mat-card-header>
+        <mat-card-title>Información del Pedido</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Nombre del Pedido</mat-label>
+            <input matInput formControlName="nombre" required>
+            <mat-error *ngIf="form.get('nombre')?.hasError('required')">
+              El nombre es requerido
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Proveedor</mat-label>
+            <mat-select formControlName="id_proveedor" required (selectionChange)="onProveedorChange()">
+              <mat-option value="">Seleccione un proveedor</mat-option>
+              <mat-option *ngFor="let proveedor of proveedores" [value]="proveedor.id_proveedor">
+                {{ proveedor.nombre }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="form.get('id_proveedor')?.hasError('required')">
+              Debe seleccionar un proveedor
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Descripción</mat-label>
+          <textarea matInput formControlName="descripcion" rows="2" required></textarea>
+          <mat-error *ngIf="form.get('descripcion')?.hasError('required')">
+            La descripción es requerida
+          </mat-error>
+        </mat-form-field>
+
+        <div class="form-row">
+          <mat-checkbox formControlName="es_pagable">
+            Pedido Pagable
+          </mat-checkbox>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Agregar insumos al pedido -->
+    <mat-card class="detalles-card" *ngIf="form.get('id_proveedor')?.value">
+      <mat-card-header>
+        <mat-card-title>Insumos del Proveedor</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="add-insumo-section">
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="flex-1">
+              <mat-label>Seleccionar Insumo</mat-label>
+              <mat-select [(value)]="selectedInsumoId">
+                <mat-option value="">Seleccione un insumo</mat-option>
+                <mat-option *ngFor="let insumo of insumosDisponibles" [value]="insumo.id_insumo">
+                  {{ insumo.nombre }} - ${{ insumo.costo_unitario | number:'1.0-0' }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="quantity-field">
+              <mat-label>Cantidad</mat-label>
+              <input matInput type="number" [(ngModel)]="cantidadInsumo" min="1" [ngModelOptions]="{standalone: true}">
+            </mat-form-field>
+
+            <button mat-raised-button color="accent" type="button" 
+                    (click)="agregarInsumoAPedido()" 
+                    [disabled]="!selectedInsumoId || !cantidadInsumo || cantidadInsumo <= 0">
+              <mat-icon>add</mat-icon>
+              Agregar
+            </button>
+          </div>
+        </div>
+
+        <!-- Tabla de insumos agregados -->
+        <div class="detalles-table" *ngIf="detallesPedido.length > 0">
+          <h4>Insumos en el Pedido</h4>
+          <mat-table [dataSource]="detallesPedido" class="detalles-data-table">
+            <ng-container matColumnDef="nombre">
+              <mat-header-cell *matHeaderCellDef>Insumo</mat-header-cell>
+              <mat-cell *matCellDef="let detalle">{{ detalle.nombre_insumo }}</mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="cantidad">
+              <mat-header-cell *matHeaderCellDef>Cantidad</mat-header-cell>
+              <mat-cell *matCellDef="let detalle; let i = index">
+                <mat-form-field appearance="outline" class="quantity-input">
+                  <input matInput type="number" 
+                         [(ngModel)]="detalle.cantidad_insumo" 
+                         [ngModelOptions]="{standalone: true}"
+                         (ngModelChange)="actualizarSubtotal(i)"
+                         min="1">
+                </mat-form-field>
+              </mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="costo_unitario">
+              <mat-header-cell *matHeaderCellDef>Costo Unit.</mat-header-cell>
+              <mat-cell *matCellDef="let detalle">
+                ${{ detalle.costo_unitario | number:'1.0-0' }}
+              </mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="subtotal">
+              <mat-header-cell *matHeaderCellDef>Subtotal</mat-header-cell>
+              <mat-cell *matCellDef="let detalle">
+                <strong>${{ detalle.costo_subtotal | number:'1.0-0' }}</strong>
+              </mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="acciones">
+              <mat-header-cell *matHeaderCellDef>Acciones</mat-header-cell>
+              <mat-cell *matCellDef="let detalle; let i = index">
+                <button mat-mini-fab color="warn" (click)="eliminarInsumo(i)" type="button">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </mat-cell>
+            </ng-container>
+
+            <mat-header-row *matHeaderRowDef="detalleColumns"></mat-header-row>
+            <mat-row *matRowDef="let row; columns: detalleColumns;"></mat-row>
+          </mat-table>
+
+          <!-- Total del pedido -->
+          <div class="total-section">
+            <mat-card class="total-card">
+              <h3>Total del Pedido: ${{ costoTotal | number:'1.0-0' }}</h3>
+            </mat-card>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="dialog-actions">
+  <button mat-button (click)="onCancel()">Cancelar</button>
+  <button mat-raised-button color="primary" 
+          (click)="onSave()" 
+          [disabled]="!form.valid || detallesPedido.length === 0">
+    <mat-icon>save</mat-icon>
+    {{ data.isEdit ? 'Actualizar' : 'Crear Pedido' }}
+  </button>
+</mat-dialog-actions>
