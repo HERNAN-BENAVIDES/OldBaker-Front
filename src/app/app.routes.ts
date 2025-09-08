@@ -1,29 +1,36 @@
 import { Routes } from '@angular/router';
 
 export const routes: Routes = [
+  // Rutas de autenticación - CORREGIDAS
   {
     path: 'login',
-    loadComponent: () => import('./features/auth/components/login/login').then(m => m.Login)
+    loadComponent: () => import('./features/auth/components/login/login')
+      .then(m => m.Login)
   },
   {
     path: 'register',
-    loadComponent: () => import('./features/auth/components/register/register').then(m => m.Register)
+    loadComponent: () => import('./features/auth/components/register/register')
+      .then(m => m.Register)
   },
-{
+  
+  // Rutas de administrador
+  {
     path: 'admin',
     loadComponent: () => import('./features/admin/proveedores/proveedores')
-      .then(c => c.AdminProveedoresComponent) 
+      .then(c => c.AdminProveedoresComponent)
   },
   {
     path: 'admin/proveedores',
     loadComponent: () => import('./features/admin/proveedores/proveedores')
-      .then(c => c.AdminProveedoresComponent) 
+      .then(c => c.AdminProveedoresComponent)
   },
   {
     path: 'admin/dashboard',
     redirectTo: 'admin',
     pathMatch: 'full'
   },
+  
+  // Rutas de auxiliar
   {
     path: 'auxiliar',
     loadComponent: () => import('./features/auxiliar/auxiliar-dashboard/auxiliar-dashboard')
@@ -44,6 +51,8 @@ export const routes: Routes = [
     loadComponent: () => import('./features/auxiliar/reportes-proveedores/reportes-proveedores.component')
       .then(c => c.ReportesProveedoresComponent)
   },
+  
+  // Rutas por defecto
   {
     path: '',
     pathMatch: 'full',
