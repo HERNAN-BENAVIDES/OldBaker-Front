@@ -175,6 +175,25 @@ main {
   fill: var(--gray-900);
 }
 
+/* Estilos para la navegación del admin */
+.admin-link {
+  background: linear-gradient(135deg, #722F37 0%, #5d252a 100%);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.admin-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(114, 47, 55, 0.3);
+}
+
 @media screen and (max-width: 650px) {
   .content {
     flex-direction: column;

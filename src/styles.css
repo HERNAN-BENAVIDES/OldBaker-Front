@@ -1,5 +1,8 @@
 /* You can add global styles to this file, and also import other style files */
 
+/*@import 'custom-theme.scss';
+
+/*@import 'admin-component.scss'; 
 /* Reset global margins y box-sizing para que el header pueda ocupar todo el ancho */
 html, body, app-root {
   margin: 0;
@@ -16,4 +19,10 @@ html, body, app-root {
 /* Asegura que el contenido no introduzca espacio lateral involuntario */
 body {
   min-height: 100vh;
+}
+
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
 }
