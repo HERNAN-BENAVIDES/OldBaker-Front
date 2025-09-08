@@ -26,6 +26,8 @@
   display: flex;
   gap: 0.5rem;
   align-items: center;
+  position: relative; /* permitir stacking context */
+  z-index: 1000; /* asegurar que la zona del header esté por encima de otros elementos */
 }
 
 .btn {
@@ -69,6 +71,120 @@
 .btn-outline:focus {
   outline: none;
   box-shadow: 0 0 0 4px rgba(37,99,235,0.18); /* foco accesible */
+}
+
+/* Estilos para usuario autenticado */
+.user-info {
+  display: flex;
+  align-items: center;
+  position: relative;
+  gap: 0.6rem; /* separación entre nombre y avatar */
+}
+
+.profile {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-right: 0.25rem;
+}
+
+.profile-name {
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
+.avatar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.15rem 0.35rem;
+  border-radius: 0.375rem;
+  position: relative; /* asegurar stacking context */
+  z-index: 2000; /* por encima de otros elementos */
+  pointer-events: auto; /* forzar que reciba clicks */
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.95);
+  color: #0b3b6f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.95rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+  margin-left: 8px; /* empuja avatar hacia la derecha del nombre */
+  pointer-events: none; /* asegurar que el avatar no capture clicks por sí mismo */
+}
+
+/* Dropdown */
+.dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  background: #ffffff;
+  color: #0b2540;
+  min-width: 160px;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(2,6,23,0.16);
+  padding: 0.4rem 0.2rem;
+  z-index: 50;
+
+  /* Animación de entrada */
+  transform-origin: top right;
+  animation: dropdown-in 220ms cubic-bezier(0.2, 0.9, 0.2, 1);
+}
+
+@keyframes dropdown-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(2px) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.dropdown-item {
+  width: 100%;
+  text-align: left;
+  padding: 0.5rem 0.9rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  color: inherit;
+  transition: background 140ms ease, color 140ms ease, transform 140ms ease;
+  border-radius: 6px;
+}
+
+.dropdown-item:hover {
+  background: rgba(37,99,235,0.08);
+  transform: translateY(-1px);
+}
+
+.dropdown-item:active {
+  transform: translateY(0);
+}
+
+/* pequeño pulso al abrir para el avatar */
+.avatar-btn:active .avatar,
+.avatar-btn:focus .avatar {
+  transition: box-shadow 160ms ease, transform 160ms ease;
+  transform: scale(0.98);
 }
 
 /* Responsive: en pantallas pequeñas apilar botones */

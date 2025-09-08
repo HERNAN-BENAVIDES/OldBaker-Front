@@ -1,0 +1,42 @@
+<ng-container *ngFor="let n of notifications; trackBy: trackById">
+  <div class="sb-overlay" tabindex="0" (mouseenter)="pause(n.id)" (mouseleave)="resume(n)" role="dialog" aria-modal="true">
+    <div class="sb-modal" [ngClass]="n.type">
+      <button class="sb-close" aria-label="Cerrar" (click)="dismiss(n.id)">×</button>
+
+      <div class="sb-modal-content">
+        <div class="sb-modal-icon" aria-hidden="true" [class.success]="n.type === 'success'" [class.error]="n.type === 'error'" [class.info]="n.type === 'info'">
+          <ng-container [ngSwitch]="n.type">
+            <!-- success: white inner circle with black check -->
+            <svg *ngSwitchCase="'success'" class="icon-svg" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" focusable="false" aria-hidden="true">
+              <circle cx="32" cy="32" r="20" fill="#ffffff"></circle>
+              <path d="M20 34 L28 42 L44 24" fill="none" stroke="#000" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+
+            <!-- error: white inner circle with black X -->
+            <svg *ngSwitchCase="'error'" class="icon-svg" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" focusable="false" aria-hidden="true">
+              <circle cx="32" cy="32" r="20" fill="#ffffff"></circle>
+              <path d="M22 22 L42 42 M42 22 L22 42" fill="none" stroke="#000" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+
+            <!-- info: white inner circle with black i -->
+            <svg *ngSwitchDefault class="icon-svg" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" focusable="false" aria-hidden="true">
+              <circle cx="32" cy="32" r="20" fill="#ffffff"></circle>
+              <circle cx="32" cy="24" r="2" fill="#000"></circle>
+              <rect x="30" y="30" width="4" height="12" rx="1" fill="#000"></rect>
+            </svg>
+          </ng-container>
+        </div>
+
+        <div class="sb-modal-message">{{ n.message }}</div>
+      </div>
+
+      <div class="sb-modal-actions">
+        <button class="sb-btn accept" (click)="dismiss(n.id)">Aceptar</button>
+      </div>
+
+      <div class="progress" *ngIf="(n.timeout ?? 0) > 0">
+        <div class="bar" [style.width.%]="progressFor(n.id)"></div>
+      </div>
+    </div>
+  </div>
+</ng-container>

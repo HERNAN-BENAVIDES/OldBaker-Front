@@ -9,12 +9,19 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSelectModule } from '@angular/material/select';
 import { MatPaginatorModule } from '@angular/material/paginator';
-
+import { NotificationComponent } from './shared/notification/notification';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet,  RouterLink, MatIconModule, Header, Footer, Footer],
+  imports: [
+    RouterOutlet,
+    RouterLink,
+    MatIconModule,
+    Header,
+    Footer,
+    NotificationComponent
+  ],
   templateUrl: './app.html',
   styleUrls: ['./app.css']
 })

@@ -2,6 +2,10 @@
   <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-card" novalidate>
     <h2>Crear cuenta</h2>
 
+    <!-- mensajes inline como respaldo -->
+    <div *ngIf="successMessage" class="alert success">{{ successMessage }}</div>
+    <div *ngIf="errorMessage" class="alert error">{{ errorMessage }}</div>
+
     <label for="nombre">Nombre completo</label>
     <input id="nombre" type="text" formControlName="nombre" placeholder="María Pérez" />
     <div class="error" *ngIf="nombre?.touched && nombre?.invalid">
