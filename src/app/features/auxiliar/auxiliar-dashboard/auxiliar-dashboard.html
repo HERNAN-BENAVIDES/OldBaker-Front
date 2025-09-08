@@ -1,0 +1,162 @@
+<header class="header">
+  <div class="header-content">
+    <div class="logo">
+      <span class="logo-icon">🍞</span>
+      <h1>Panel del Auxiliar - OldBaker</h1>
+    </div>
+    <div class="user-info">
+      <span class="user-icon">👤</span>
+      <span>Auxiliar</span>
+    </div>
+  </div>
+  <p class="subtitle">Verificación y gestión de pedidos de insumos</p>
+</header>
+
+<main class="main-content">
+  <h2>Módulos de Gestión</h2>
+  
+  <div class="modules-grid">
+    <!-- Detalles de Pedidos -->
+    <div class="module-card" (click)="navigateToModule('detalles-pedidos')">
+      <div class="module-icon">📋</div>
+      <div class="module-content">
+        <h3>Detalles de Pedidos</h3>
+        <p>Revisar y verificar los detalles de cada pedido recibido para confirmar su estado.</p>
+        <div class="module-stats">
+          <span class="stat-number">{{ moduleStats().pendingOrders }}</span>
+          <span class="stat-label">Pedidos pendientes</span>
+        </div>
+      </div>
+      <div class="module-arrow">→</div>
+    </div>
+
+    <!-- Pedidos de Insumos -->
+    <div class="module-card" (click)="navigateToModule('pedidos-insumos')">
+      <div class="module-icon">📦</div>
+      <div class="module-content">
+        <h3>Pedidos de Insumos</h3>
+        <p>Visualizar el listado completo de pedidos de insumos y su información detallada.</p>
+        <div class="module-stats">
+          <span class="stat-number">{{ moduleStats().activeOrders }}</span>
+          <span class="stat-label">Pedidos activos</span>
+        </div>
+      </div>
+      <div class="module-arrow">→</div>
+    </div>
+
+    <!-- Reportes a Proveedores -->
+    <div class="module-card" (click)="navigateToModule('reportes-proveedores')">
+      <div class="module-icon">⚠️</div>
+      <div class="module-content">
+        <h3>Reportes a Proveedores</h3>
+        <p>Generar reportes por pedidos incompletos, productos vencidos o devoluciones.</p>
+        <div class="module-stats">
+          <span class="stat-number">{{ moduleStats().pendingReports }}</span>
+          <span class="stat-label">Reporte pendiente</span>
+        </div>
+      </div>
+      <div class="module-arrow">→</div>
+    </div>
+  </div>
+
+  <!-- Panel de Estado -->
+  <div class="status-panel">
+    <h3>Estado General</h3>
+    <div class="status-grid">
+      <div class="status-item" [ngClass]="getStatusColor(moduleStats().approvedOrders)">
+        <div class="status-icon">✅</div>
+        <div class="status-info">
+          <span class="status-number">{{ moduleStats().approvedOrders }}</span>
+          <span class="status-label">Pedidos Aprobados</span>
+        </div>
+      </div>
+      <div class="status-item" [ngClass]="getStatusColor(moduleStats().pendingVerification)">
+        <div class="status-icon">⏳</div>
+        <div class="status-info">
+          <span class="status-number">{{ moduleStats().pendingVerification }}</span>
+          <span class="status-label">Pendientes de Verificación</span>
+        </div>
+      </div>
+      <div class="status-item" [ngClass]="getStatusColor(moduleStats().activeReports)">
+        <div class="status-icon">❌</div>
+        <div class="status-info">
+          <span class="status-number">{{ moduleStats().activeReports }}</span>
+          <span class="status-label">Reportes Activos</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Acciones Rápidas -->
+  <div class="quick-actions">
+    <h3>Acciones Rápidas</h3>
+    <div class="action-buttons">
+      <button 
+        class="action-btn primary" 
+        (click)="quickAction('verificar-pedido')"
+        [disabled]="isLoading()">
+        <span class="btn-icon">🔍</span>
+        Verificar Último Pedido
+      </button>
+      <button 
+        class="action-btn secondary" 
+        (click)="quickAction('crear-reporte')"
+        [disabled]="isLoading()">
+        <span class="btn-icon">📝</span>
+        Crear Reporte
+      </button>
+      <button 
+        class="action-btn tertiary" 
+        (click)="quickAction('ver-historial')"
+        [disabled]="isLoading()">
+        <span class="btn-icon">📊</span>
+        Ver Historial
+      </button>
+    </div>
+  </div>
+
+  <!-- Botón de Actualización Manual -->
+  <div class="refresh-section">
+    <button 
+      class="action-btn primary refresh-btn" 
+      (click)="refreshStats()"
+      [disabled]="isLoading()">
+      <span class="btn-icon">🔄</span>
+      Actualizar Datos
+    </button>
+  </div>
+</main>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" *ngIf="isLoading()">
+  <div class="spinner"></div>
+  <p class="loading-text">Cargando...</p>
+</div>
+
+<!-- Notification -->
+<div 
+  class="notification" 
+  [ngClass]="notificationType()" 
+  *ngIf="showNotification()">
+  <span class="notification-icon">
+    <span *ngIf="notificationType() === 'success'">✅</span>
+    <span *ngIf="notificationType() === 'error'">❌</span>
+    <span *ngIf="notificationType() === 'info'">ℹ️</span>
+    <span *ngIf="notificationType() === 'warning'">⚠️</span>
+  </span>
+  <span class="notification-message">{{ notificationMessage() }}</span>
+  <button 
+    class="notification-close" 
+    (click)="closeNotification()"
+    aria-label="Cerrar notificación">
+    ×
+  </button>
+</div>
+
+<!-- Footer opcional -->
+<footer class="footer" *ngIf="!isLoading()">
+  <div class="footer-content">
+    <p>&copy; 2024 OldBaker - Panel del Auxiliar</p>
+    <p>Última actualización: {{ getLastUpdateTime() }}</p>
+  </div>
+</footer>

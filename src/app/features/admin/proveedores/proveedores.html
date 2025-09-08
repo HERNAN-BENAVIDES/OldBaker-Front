@@ -1,0 +1,821 @@
+<!-- Dashboard Principal del Administrador -->
+<div class="admin-container">
+  
+  <!-- Header Principal -->
+  <div class="main-header">
+    <div class="header-content">
+      <div class="title-section">
+        <h1 class="main-title">
+          <mat-icon class="title-icon">admin_panel_settings</mat-icon>
+          Panel de Administración - OldBaker
+        </h1>
+        <p class="subtitle">Gestión completa del sistema de panadería</p>
+      </div>
+      <div class="admin-info">
+        <mat-icon>account_circle</mat-icon>
+        <span>Administrador</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard de Opciones -->
+  <div class="dashboard-container" *ngIf="activeModule === 'dashboard'">
+    <h2 class="section-title">Seleccione el módulo a gestionar</h2>
+    
+    <div class="modules-grid">
+      
+      <!-- Proveedores -->
+      <mat-card class="module-card" (click)="setActiveModule('proveedores')">
+        <mat-card-header>
+          <mat-icon class="module-icon">business</mat-icon>
+          <mat-card-title>Proveedores</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>Gestionar información de proveedores, contactos y cuentas bancarias.</p>
+          <div class="card-stats">
+            <span class="stat-number">{{ proveedoresDataSource.data.length }}</span>
+            <span class="stat-label">Proveedores</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Insumos por Proveedor -->
+      <mat-card class="module-card" (click)="setActiveModule('insumos-proveedor')">
+        <mat-card-header>
+          <mat-icon class="module-icon">inventory</mat-icon>
+          <mat-card-title>Insumos por Proveedor</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>Ver y gestionar qué insumos vende cada proveedor con precios y disponibilidad.</p>
+          <div class="card-stats">
+            <span class="stat-number">{{ insumosProveedorDataSource.data.length }}</span>
+            <span class="stat-label">Insumos</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Pedidos de Insumos -->
+      <mat-card class="module-card" (click)="setActiveModule('pedidos')">
+        <mat-card-header>
+          <mat-icon class="module-icon">shopping_cart</mat-icon>
+          <mat-card-title>Pedidos de Insumos</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>Crear y gestionar pedidos de insumos faltantes a proveedores.</p>
+          <div class="card-stats">
+            <span class="stat-number">{{ pedidosDataSource.data.length }}</span>
+            <span class="stat-label">Pedidos</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Detalles de Pedidos -->
+      <mat-card class="module-card" (click)="setActiveModule('detalles')">
+        <mat-card-header>
+          <mat-icon class="module-icon">receipt_long</mat-icon>
+          <mat-card-title>Detalles de Pedidos</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>Ver detalles específicos de cada pedido realizado a proveedores.</p>
+          <div class="card-stats">
+            <span class="stat-number">{{ detallesDataSource.data.length }}</span>
+            <span class="stat-label">Detalles</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Reportes a Proveedores -->
+      <mat-card class="module-card" (click)="setActiveModule('reportes')">
+        <mat-card-header>
+          <mat-icon class="module-icon">report_problem</mat-icon>
+          <mat-card-title>Reportes a Proveedores</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>Gestionar devoluciones y reportes de problemas con pedidos.</p>
+          <div class="card-stats">
+            <span class="stat-number">{{ reportesDataSource.data.length }}</span>
+            <span class="stat-label">Reportes</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Recetas -->
+      <mat-card class="module-card" (click)="setActiveModule('recetas')">
+        <mat-card-header>
+          <mat-icon class="module-icon">restaurant</mat-icon>
+          <mat-card-title>Recetas</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>Administrar recetas de productos con sus ingredientes y cantidades.</p>
+          <div class="card-stats">
+            <span class="stat-number">{{ recetasDataSource.data.length }}</span>
+            <span class="stat-label">Recetas</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Insumos -->
+      <mat-card class="module-card" (click)="setActiveModule('insumos')">
+        <mat-card-header>
+          <mat-icon class="module-icon">spa</mat-icon>
+          <mat-card-title>Insumos</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>Gestionar inventario actual de insumos individuales disponibles.</p>
+          <div class="card-stats">
+            <span class="stat-number">{{ insumosDataSource.data.length }}</span>
+            <span class="stat-label">Insumos</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Productos -->
+      <mat-card class="module-card" (click)="setActiveModule('productos')">
+        <mat-card-header>
+          <mat-icon class="module-icon">cake</mat-icon>
+          <mat-card-title>Productos</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>Administrar catálogo de productos finales que vende la panadería.</p>
+          <div class="card-stats">
+            <span class="stat-number">{{ productosDataSource.data.length }}</span>
+            <span class="stat-label">Productos</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+    </div>
+  </div>
+
+  <!-- Breadcrumb y botón volver -->
+  <div class="breadcrumb-container" *ngIf="activeModule !== 'dashboard'">
+    <button mat-raised-button class="back-btn" (click)="setActiveModule('dashboard')">
+      <mat-icon>arrow_back</mat-icon>
+      Volver al Dashboard
+    </button>
+    <div class="breadcrumb">
+      <span>Dashboard</span>
+      <mat-icon>chevron_right</mat-icon>
+      <span>{{ activeModule | titlecase }}</span>
+    </div>
+  </div>
+
+  <!-- ================= MÓDULO DE PROVEEDORES ================= -->
+  <div class="module-content" *ngIf="activeModule === 'proveedores'">
+    <div class="module-header">
+      <h2 class="module-title">
+        <mat-icon>business</mat-icon>
+        Gestión de Proveedores
+      </h2>
+      <button mat-raised-button class="add-btn" (click)="openAddDialog('proveedor')">
+        <mat-icon>add</mat-icon>
+        Agregar Proveedor
+      </button>
+    </div>
+
+    <div class="search-container">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Buscar proveedores...</mat-label>
+        <input matInput (keyup)="applyFilter($event, proveedoresDataSource)" placeholder="Nombre, teléfono o email">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+    </div>
+
+    <div class="table-container">
+      <mat-table [dataSource]="proveedoresDataSource" class="data-table">
+        <ng-container matColumnDef="id_proveedor">
+          <mat-header-cell *matHeaderCellDef>ID</mat-header-cell>
+          <mat-cell *matCellDef="let item"><span class="id-badge">{{ item.id_proveedor }}</span></mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="nombre">
+          <mat-header-cell *matHeaderCellDef>Nombre</mat-header-cell>
+          <mat-cell *matCellDef="let item">{{ item.nombre }}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="telefono">
+          <mat-header-cell *matHeaderCellDef>Teléfono</mat-header-cell>
+          <mat-cell *matCellDef="let item">
+            <div class="contact-info">
+              <mat-icon>phone</mat-icon>
+              <span>{{ item.telefono }}</span>
+            </div>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="email">
+          <mat-header-cell *matHeaderCellDef>Email</mat-header-cell>
+          <mat-cell *matCellDef="let item">
+            <div class="contact-info">
+              <mat-icon>email</mat-icon>
+              <span>{{ item.email }}</span>
+            </div>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="numero_cuenta">
+          <mat-header-cell *matHeaderCellDef>Número de Cuenta</mat-header-cell>
+          <mat-cell *matCellDef="let item">
+            <span class="account-number">{{ item.numero_cuenta }}</span>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="acciones">
+          <mat-header-cell *matHeaderCellDef class="actions-header">Acciones</mat-header-cell>
+          <mat-cell *matCellDef="let item" class="actions-cell">
+            <div class="actions-container">
+              <button mat-mini-fab class="action-btn edit-btn" (click)="openEditDialog('proveedor', item)" matTooltip="Editar">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-mini-fab class="action-btn delete-btn" (click)="deleteItem('proveedor', item)" matTooltip="Eliminar">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="proveedoresColumns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: proveedoresColumns;"></mat-row>
+      </mat-table>
+
+      <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+    </div>
+  </div>
+
+  <!-- ================= MÓDULO DE INSUMOS POR PROVEEDOR ================= -->
+  <div class="module-content" *ngIf="activeModule === 'insumos-proveedor'">
+    <div class="module-header">
+      <h2 class="module-title">
+        <mat-icon>inventory</mat-icon>
+        Gestión de Insumos por Proveedor
+      </h2>
+      <button mat-raised-button class="add-btn" (click)="openAddDialog('insumo-proveedor')">
+        <mat-icon>add</mat-icon>
+        Agregar Insumo
+      </button>
+    </div>
+
+    <div class="search-container">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Buscar insumos...</mat-label>
+        <input matInput (keyup)="applyFilter($event, insumosProveedorDataSource)" placeholder="Nombre, descripción o proveedor">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+    </div>
+
+    <div class="table-container">
+      <mat-table [dataSource]="insumosProveedorDataSource" class="data-table">
+        <ng-container matColumnDef="id_insumo">
+          <mat-header-cell *matHeaderCellDef>ID</mat-header-cell>
+          <mat-cell *matCellDef="let item"><span class="id-badge">{{ item.id_insumo }}</span></mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="nombre">
+          <mat-header-cell *matHeaderCellDef>Nombre</mat-header-cell>
+          <mat-cell *matCellDef="let item">{{ item.nombre }}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="descripcion">
+          <mat-header-cell *matHeaderCellDef>Descripción</mat-header-cell>
+          <mat-cell *matCellDef="let item">{{ item.descripcion }}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="costo_unitario">
+          <mat-header-cell *matHeaderCellDef>Costo Unitario</mat-header-cell>
+          <mat-cell *matCellDef="let item">
+            <span class="price">${{ item.costo_unitario | number:'1.0-0' }}</span>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="fecha_vencimiento">
+          <mat-header-cell *matHeaderCellDef>Fecha Vencimiento</mat-header-cell>
+          <mat-cell *matCellDef="let item">{{ item.fecha_vencimiento | date:'dd/MM/yyyy' }}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="cantidad_disponible">
+          <mat-header-cell *matHeaderCellDef>Cantidad Disponible</mat-header-cell>
+          <mat-cell *matCellDef="let item">
+            <span class="quantity" [ngClass]="{'low-stock': item.cantidad_disponible < 20}">
+              {{ item.cantidad_disponible }}
+            </span>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="nombre_proveedor">
+          <mat-header-cell *matHeaderCellDef>Proveedor</mat-header-cell>
+          <mat-cell *matCellDef="let item">{{ item.nombre_proveedor }}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="acciones">
+          <mat-header-cell *matHeaderCellDef class="actions-header">Acciones</mat-header-cell>
+          <mat-cell *matCellDef="let item" class="actions-cell">
+            <div class="actions-container">
+              <button mat-mini-fab class="action-btn edit-btn" (click)="openEditDialog('insumo-proveedor', item)" matTooltip="Editar">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-mini-fab class="action-btn delete-btn" (click)="deleteItem('insumo-proveedor', item)" matTooltip="Eliminar">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="insumosProveedorColumns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: insumosProveedorColumns;"></mat-row>
+      </mat-table>
+
+      <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+    </div>
+  </div>
+
+  <!-- ================= MÓDULO DE PEDIDOS DE INSUMOS ================= -->
+  <div class="module-content" *ngIf="activeModule === 'pedidos'">
+    <div class="module-header">
+      <h2 class="module-title">
+        <mat-icon>shopping_cart</mat-icon>
+        Gestión de Pedidos de Insumos
+      </h2>
+      <button mat-raised-button class="add-btn" (click)="openAddDialog('pedido')">
+        <mat-icon>add</mat-icon>
+        Hacer Pedido de Insumos
+      </button>
+    </div>
+
+    <div class="search-container">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Buscar pedidos...</mat-label>
+        <input matInput (keyup)="applyFilter($event, pedidosDataSource)" placeholder="Nombre o descripción">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+    </div>
+
+    <div class="table-container">
+      <mat-table [dataSource]="pedidosDataSource" class="data-table">
+        <ng-container matColumnDef="id_pedido">
+          <mat-header-cell *matHeaderCellDef>ID</mat-header-cell>
+          <mat-cell *matCellDef="let item"><span class="id-badge">{{ item.id_pedido }}</span></mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="nombre">
+          <mat-header-cell *matHeaderCellDef>Nombre</mat-header-cell>
+          <mat-cell *matCellDef="let item">{{ item.nombre }}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="descripcion">
+          <mat-header-cell *matHeaderCellDef>Descripción</mat-header-cell>
+          <mat-cell *matCellDef="let item">{{ item.descripcion }}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="nombre_proveedor">
+          <mat-header-cell *matHeaderCellDef>Proveedor</mat-header-cell>
+          <mat-cell *matCellDef="let item">{{ item.nombre_proveedor }}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="costo_total">
+          <mat-header-cell *matHeaderCellDef>Costo Total</mat-header-cell>
+          <mat-cell *matCellDef="let item">
+            <span class="price total">${{ item.costo_total | number:'1.0-0' }}</span>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="fecha_pedido">
+          <mat-header-cell *matHeaderCellDef>Fecha Pedido</mat-header-cell>
+          <mat-cell *matCellDef="let item">{{ item.fecha_pedido | date:'dd/MM/yyyy' }}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="es_pagable">
+          <mat-header-cell *matHeaderCellDef>Estado Pago</mat-header-cell>
+          <mat-cell *matCellDef="let item">
+            <span class="status" [ngClass]="item.es_pagable ? 'paid' : 'unpaid'">
+              {{ item.es_pagable ? 'Pagable' : 'No Pagable' }}
+            </span>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="acciones">
+          <mat-header-cell *matHeaderCellDef class="actions-header">Acciones</mat-header-cell>
+          <mat-cell *matCellDef="let item" class="actions-cell">
+            <div class="actions-container">
+              <button mat-mini-fab class="action-btn view-btn" (click)="openEditDialog('pedido', item)" matTooltip="Ver/Editar">
+                <mat-icon>visibility</mat-icon>
+              </button>
+              <button mat-mini-fab class="action-btn edit-btn" (click)="openEditDialog('pedido', item)" matTooltip="Editar">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-mini-fab class="action-btn delete-btn" (click)="deleteItem('pedido', item)" matTooltip="Eliminar">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="pedidosColumns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: pedidosColumns;"></mat-row>
+      </mat-table>
+
+      <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+    </div>
+  </div>
+
+  <!-- ================= MÓDULO DE DETALLES DE PEDIDOS ================= -->
+  <div class="module-content" *ngIf="activeModule === 'detalles'">
+    <div class="module-header">
+      <h2 class="module-title">
+        <mat-icon>receipt_long</mat-icon>
+        Gestión de Detalles de Pedidos
+      </h2>
+      <button mat-raised-button class="add-btn" (click)="openAddDialog('detalle')">
+        <mat-icon>add</mat-icon>
+        Agregar Detalle
+      </button>
+    </div>
+
+    <div class="search-container">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Buscar detalles...</mat-label>
+        <input matInput (keyup)="applyFilter($event, detallesDataSource)" placeholder="ID pedido o insumo">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+    </div>
+
+    <div class="table-container">
+      <mat-table [dataSource]="detallesDataSource" class="data-table">
+        <ng-container matColumnDef="id_detalle">
+          <mat-header-cell *matHeaderCellDef>ID</mat-header-cell>
+          <mat-cell *matCellDef="let item"><span class="id-badge">{{ item.id_detalle }}</span></mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="cantidad_insumo">
+          <mat-header-cell *matHeaderCellDef>Cantidad</mat-header-cell>
+          <mat-cell *matCellDef="let item">
+            <span class="quantity">{{ item.cantidad_insumo }}</span>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="costo_subtotal">
+          <mat-header-cell *matHeaderCellDef>Subtotal</mat-header-cell>
+          <mat-cell *matCellDef="let item">
+            <span class="price">${{ item.costo_subtotal | number:'1.0-0' }}</span>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="es_devuelto">
+          <mat-header-cell *matHeaderCellDef>Estado</mat-header-cell>
+          <mat-cell *matCellDef="let item">
+            <span class="status" [ngClass]="item.es_devuelto ? 'returned' : 'delivered'">
+              {{ item.es_devuelto ? 'Devuelto' : 'Entregado' }}
+            </span>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="id_insumo">
+          <mat-header-cell *matHeaderCellDef>ID Insumo</mat-header-cell>
+          <mat-cell *matCellDef="let item">{{ item.id_insumo }}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="id_pedido">
+          <mat-header-cell *matHeaderCellDef>ID Pedido</mat-header-cell>
+          <mat-cell *matCellDef="let item">{{ item.id_pedido }}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="acciones">
+          <mat-header-cell *matHeaderCellDef class="actions-header">Acciones</mat-header-cell>
+          <mat-cell *matCellDef="let item" class="actions-cell">
+            <div class="actions-container">
+              <button mat-mini-fab class="action-btn edit-btn" (click)="openEditDialog('detalle', item)" matTooltip="Editar">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-mini-fab class="action-btn report-btn" (click)="openAddDialog('reporte')" matTooltip="Reportar Problema">
+                <mat-icon>report_problem</mat-icon>
+              </button>
+              <button mat-mini-fab class="action-btn delete-btn" (click)="deleteItem('detalle', item)" matTooltip="Eliminar">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="detallesColumns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: detallesColumns;"></mat-row>
+      </mat-table>
+
+      <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+    </div>
+  </div>
+
+  <!-- ================= MÓDULO DE REPORTES A PROVEEDORES ================= -->
+  <div class="module-content" *ngIf="activeModule === 'reportes'">
+    <div class="module-header">
+      <h2 class="module-title">
+        <mat-icon>report_problem</mat-icon>
+        Gestión de Reportes a Proveedores
+      </h2>
+      <button mat-raised-button class="add-btn" (click)="openAddDialog('reporte')">
+        <mat-icon>add</mat-icon>
+        Crear Reporte
+      </button>
+    </div>
+
+    <div class="search-container">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Buscar reportes...</mat-label>
+        <input matInput (keyup)="applyFilter($event, reportesDataSource)" placeholder="Razón o ID detalle">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+    </div>
+
+    <div class="table-container">
+      <mat-table [dataSource]="reportesDataSource" class="data-table">
+        <ng-container matColumnDef="id_devolucion">
+          <mat-header-cell *matHeaderCellDef>ID</mat-header-cell>
+          <mat-cell *matCellDef="let item"><span class="id-badge">{{ item.id_devolucion }}</span></mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="razon">
+          <mat-header-cell *matHeaderCellDef>Razón</mat-header-cell>
+          <mat-cell *matCellDef="let item">{{ item.razon }}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="es_devolucion">
+          <mat-header-cell *matHeaderCellDef>Tipo</mat-header-cell>
+          <mat-cell *matCellDef="let item">
+            <span class="report-type" [ngClass]="item.es_devolucion ? 'return' : 'complaint'">
+              {{ item.es_devolucion ? 'Devolución' : 'Queja' }}
+            </span>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="fecha_devolucion">
+          <mat-header-cell *matHeaderCellDef>Fecha</mat-header-cell>
+          <mat-cell *matCellDef="let item">{{ item.fecha_devolucion | date:'dd/MM/yyyy' }}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="id_detalle">
+          <mat-header-cell *matHeaderCellDef>ID Detalle</mat-header-cell>
+          <mat-cell *matCellDef="let item">{{ item.id_detalle }}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="acciones">
+          <mat-header-cell *matHeaderCellDef class="actions-header">Acciones</mat-header-cell>
+          <mat-cell *matCellDef="let item" class="actions-cell">
+            <div class="actions-container">
+              <button mat-mini-fab class="action-btn view-btn" (click)="openEditDialog('reporte', item)" matTooltip="Ver">
+                <mat-icon>visibility</mat-icon>
+              </button>
+              <button mat-mini-fab class="action-btn edit-btn" (click)="openEditDialog('reporte', item)" matTooltip="Editar">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-mini-fab class="action-btn delete-btn" (click)="deleteItem('reporte', item)" matTooltip="Eliminar">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="reportesColumns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: reportesColumns;"></mat-row>
+      </mat-table>
+
+      <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+    </div>
+  </div>
+
+  <!-- ================= MÓDULO DE RECETAS ================= -->
+  <div class="module-content" *ngIf="activeModule === 'recetas'">
+    <div class="module-header">
+      <h2 class="module-title">
+        <mat-icon>restaurant</mat-icon>
+        Gestión de Recetas
+      </h2>
+      <button mat-raised-button class="add-btn" (click)="openAddDialog('receta')">
+        <mat-icon>add</mat-icon>
+        Agregar Receta
+      </button>
+    </div>
+
+    <div class="search-container">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Buscar recetas...</mat-label>
+        <input matInput (keyup)="applyFilter($event, recetasDataSource)" placeholder="Nombre o descripción">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+    </div>
+
+    <div class="table-container">
+      <mat-table [dataSource]="recetasDataSource" class="data-table">
+        <ng-container matColumnDef="id_receta">
+          <mat-header-cell *matHeaderCellDef>ID</mat-header-cell>
+          <mat-cell *matCellDef="let item"><span class="id-badge">{{ item.id_receta }}</span></mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="nombre">
+          <mat-header-cell *matHeaderCellDef>Nombre</mat-header-cell>
+          <mat-cell *matCellDef="let item">{{ item.nombre }}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="descripcion">
+          <mat-header-cell *matHeaderCellDef>Descripción</mat-header-cell>
+          <mat-cell *matCellDef="let item">{{ item.descripcion }}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="cantidad_insumo">
+          <mat-header-cell *matHeaderCellDef>Cantidad Insumo</mat-header-cell>
+          <mat-cell *matCellDef="let item">
+            <span class="quantity">{{ item.cantidad_insumo }}g</span>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="id_insumo">
+          <mat-header-cell *matHeaderCellDef>ID Insumo</mat-header-cell>
+          <mat-cell *matCellDef="let item">{{ item.id_insumo }}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="id_producto">
+          <mat-header-cell *matHeaderCellDef>ID Producto</mat-header-cell>
+          <mat-cell *matCellDef="let item">{{ item.id_producto }}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="acciones">
+          <mat-header-cell *matHeaderCellDef class="actions-header">Acciones</mat-header-cell>
+          <mat-cell *matCellDef="let item" class="actions-cell">
+            <div class="actions-container">
+              <button mat-mini-fab class="action-btn view-btn" (click)="openEditDialog('receta', item)" matTooltip="Ver Receta">
+                <mat-icon>visibility</mat-icon>
+              </button>
+              <button mat-mini-fab class="action-btn edit-btn" (click)="openEditDialog('receta', item)" matTooltip="Editar">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-mini-fab class="action-btn delete-btn" (click)="deleteItem('receta', item)" matTooltip="Eliminar">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="recetasColumns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: recetasColumns;"></mat-row>
+      </mat-table>
+
+      <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+    </div>
+  </div>
+
+  <!-- ================= MÓDULO DE INSUMOS ================= -->
+  <div class="module-content" *ngIf="activeModule === 'insumos'">
+    <div class="module-header">
+      <h2 class="module-title">
+        <mat-icon>spa</mat-icon>
+        Gestión de Insumos
+      </h2>
+      <button mat-raised-button class="add-btn" (click)="openAddDialog('insumo')">
+        <mat-icon>add</mat-icon>
+        Agregar Insumo
+      </button>
+    </div>
+
+    <div class="search-container">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Buscar insumos...</mat-label>
+        <input matInput (keyup)="applyFilter($event, insumosDataSource)" placeholder="Nombre o descripción">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+    </div>
+
+    <div class="table-container">
+      <mat-table [dataSource]="insumosDataSource" class="data-table">
+        <ng-container matColumnDef="id_insumo">
+          <mat-header-cell *matHeaderCellDef>ID</mat-header-cell>
+          <mat-cell *matCellDef="let item"><span class="id-badge">{{ item.id_insumo }}</span></mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="nombre">
+          <mat-header-cell *matHeaderCellDef>Nombre</mat-header-cell>
+          <mat-cell *matCellDef="let item">{{ item.nombre }}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="descripcion">
+          <mat-header-cell *matHeaderCellDef>Descripción</mat-header-cell>
+          <mat-cell *matCellDef="let item">{{ item.descripcion }}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="costo_unitario">
+          <mat-header-cell *matHeaderCellDef>Costo Unitario</mat-header-cell>
+          <mat-cell *matCellDef="let item">
+            <span class="price">${{ item.costo_unitario | number:'1.0-0' }}</span>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="cantidad_actual">
+          <mat-header-cell *matHeaderCellDef>Stock Actual</mat-header-cell>
+          <mat-cell *matCellDef="let item">
+            <span class="quantity" [ngClass]="{'low-stock': item.cantidad_actual < 20}">
+              {{ item.cantidad_actual }}
+            </span>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="acciones">
+          <mat-header-cell *matHeaderCellDef class="actions-header">Acciones</mat-header-cell>
+          <mat-cell *matCellDef="let item" class="actions-cell">
+            <div class="actions-container">
+              <button mat-mini-fab class="action-btn edit-btn" (click)="openEditDialog('insumo', item)" matTooltip="Editar">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-mini-fab class="action-btn delete-btn" (click)="deleteItem('insumo', item)" matTooltip="Eliminar">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="insumosColumns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: insumosColumns;"></mat-row>
+      </mat-table>
+
+      <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+    </div>
+  </div>
+
+  <!-- ================= MÓDULO DE PRODUCTOS ================= -->
+  <div class="module-content" *ngIf="activeModule === 'productos'">
+    <div class="module-header">
+      <h2 class="module-title">
+        <mat-icon>cake</mat-icon>
+        Gestión de Productos
+      </h2>
+      <button mat-raised-button class="add-btn" (click)="openAddDialog('producto')">
+        <mat-icon>add</mat-icon>
+        Agregar Producto
+      </button>
+    </div>
+
+    <div class="search-container">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Buscar productos...</mat-label>
+        <input matInput (keyup)="applyFilter($event, productosDataSource)" placeholder="Nombre, descripción o categoría">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+    </div>
+
+    <div class="table-container">
+      <mat-table [dataSource]="productosDataSource" class="data-table">
+        <ng-container matColumnDef="id_producto">
+          <mat-header-cell *matHeaderCellDef>ID</mat-header-cell>
+          <mat-cell *matCellDef="let item"><span class="id-badge">{{ item.id_producto }}</span></mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="nombre">
+          <mat-header-cell *matHeaderCellDef>Nombre</mat-header-cell>
+          <mat-cell *matCellDef="let item">{{ item.nombre }}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="descripcion">
+          <mat-header-cell *matHeaderCellDef>Descripción</mat-header-cell>
+          <mat-cell *matCellDef="let item">{{ item.descripcion }}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="costo_unitario">
+          <mat-header-cell *matHeaderCellDef>Costo Unitario</mat-header-cell>
+          <mat-cell *matCellDef="let item">
+            <span class="price">${{ item.costo_unitario | number:'1.0-0' }}</span>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="fecha_vencimiento">
+          <mat-header-cell *matHeaderCellDef>Fecha Vencimiento</mat-header-cell>
+          <mat-cell *matCellDef="let item">{{ item.fecha_vencimiento | date:'dd/MM/yyyy' }}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="categoria">
+          <mat-header-cell *matHeaderCellDef>Categoría</mat-header-cell>
+          <mat-cell *matCellDef="let item">
+            <span class="category-badge">{{ item.categoria }}</span>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="acciones">
+          <mat-header-cell *matHeaderCellDef class="actions-header">Acciones</mat-header-cell>
+          <mat-cell *matCellDef="let item" class="actions-cell">
+            <div class="actions-container">
+              <button mat-mini-fab class="action-btn view-btn" (click)="openEditDialog('producto', item)" matTooltip="Ver Producto">
+                <mat-icon>visibility</mat-icon>
+              </button>
+              <button mat-mini-fab class="action-btn edit-btn" (click)="openEditDialog('producto', item)" matTooltip="Editar">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-mini-fab class="action-btn delete-btn" (click)="deleteItem('producto', item)" matTooltip="Eliminar">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="productosColumns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: productosColumns;"></mat-row>
+      </mat-table>
+
+      <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+    </div>
+  </div>
+
+</div>

@@ -9,3 +9,20 @@
 <footer class="app-footer">
   <app-footer></app-footer>
 </footer>
+
+<!-- Navegación opcional -->
+<nav class="app-nav">
+  <h1>OldBaker - Sistema de Gestión</h1>
+  <div class="nav-links">
+    <a routerLink="/admin/proveedores">Proveedores</a>
+      <a routerLink="/admin" class="nav-link admin-link">
+      <mat-icon>admin_panel_settings</mat-icon>
+     Panel Administrador
+       </a>
+    <!-- Más enlaces cuando agregues otros módulos -->
+  </div>
+</nav>
+
+<main class="app-content">
+  <router-outlet></router-outlet>
+</main>

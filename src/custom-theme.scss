@@ -1,0 +1,255 @@
+// ---- IMPORTS ----
+@use '@angular/material' as mat;
+
+// ---- CORE ----
+@include mat.core();
+
+// ---- TEMA BÁSICO CON COLORES PERSONALIZADOS ----
+html {
+  // Variables CSS personalizadas para tu color vino tinto
+  --mat-sys-primary: #e51e30;
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: #fce4e6;
+  --mat-sys-on-primary-container: #7d0a14;
+  
+  --mat-sys-secondary: #d01a2b;
+  --mat-sys-on-secondary: #ffffff;
+  --mat-sys-secondary-container: #f8bcc1;
+  --mat-sys-on-secondary-container: #7d0a14;
+  
+  --mat-sys-tertiary: #b91624;
+  --mat-sys-on-tertiary: #ffffff;
+  
+  --mat-sys-error: #ba1a1a;
+  --mat-sys-on-error: #ffffff;
+  
+  --mat-sys-surface: #fefbff;
+  --mat-sys-on-surface: #1c1b1f;
+  --mat-sys-surface-variant: #f4f4f4;
+  --mat-sys-on-surface-variant: #49454f;
+  
+  --mat-sys-outline: #79747e;
+  --mat-sys-outline-variant: #cac4d0;
+  
+  // Aplicar tema por defecto
+  @include mat.all-component-themes(());
+}
+
+// ESTILOS DE TU ADMIN - COPIADOS DIRECTAMENTE
+/* Variables CSS para paleta vino tinto */
+:root {
+  --primary-wine: #722F37;
+  --primary-wine-dark: #5d252a;
+  --primary-wine-light: #8a3a42;
+  --accent-wine: #a8434d;
+  --secondary-gray: #f5f5f5;
+  --light-gray: #fafafa;
+  --text-dark: #333;
+  --text-light: #666;
+  --white: #ffffff;
+  --success: #4caf50;
+  --danger: #f44336;
+  --warning: #ff9800;
+  --info: #2196f3;
+  --border-light: #e0e0e0;
+}
+
+/* Contenedor principal del admin */
+.admin-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  padding: 0;
+}
+
+/* Header principal */
+.main-header {
+  background: linear-gradient(135deg, var(--primary-wine) 0%, var(--primary-wine-dark) 100%);
+  color: var(--white);
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(114, 47, 55, 0.3);
+}
+
+// ---- ESTILOS BASE ----
+body {
+  font-family: 'Roboto', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+}
+
+// ---- CLASES PERSONALIZADAS ----
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.title-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.main-title {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--white);
+}
+
+.title-icon {
+  font-size: 2.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  margin: 0;
+  opacity: 0.9;
+  color: var(--white);
+}
+
+.admin-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.75rem 1.5rem;
+  border-radius: 25px;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+/* Dashboard container */
+.dashboard-container {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.section-title {
+  text-align: center;
+  color: var(--primary-wine);
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 3rem;
+}
+
+/* Grid de módulos */
+.modules-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+/* Tarjetas de módulos */
+.module-card {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border: 2px solid transparent;
+  background: var(--white);
+  padding: 1.5rem;
+  min-height: 180px;
+}
+
+.module-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(114, 47, 55, 0.2);
+  border-color: var(--primary-wine);
+}
+
+.module-card mat-card-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.module-icon {
+  font-size: 2.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  color: var(--primary-wine);
+}
+
+.module-card mat-card-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin: 0;
+}
+
+.module-card mat-card-content {
+  padding: 0;
+}
+
+.module-card p {
+  color: var(--text-light);
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.card-stats {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.stat-number {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary-wine);
+}
+
+.stat-label {
+  color: var(--text-light);
+  font-size: 0.9rem;
+}
+
+/* Resto de estilos básicos */
+body {
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+}
+
+.oldbaker-primary {
+  background-color: #e51e30 !important;
+  color: white !important;
+}
+
+.oldbaker-primary-text {
+  color: #e51e30 !important;
+}
+
+.oldbaker-secondary {
+  background-color: #d01a2b !important;
+  color: white !important;
+}
+
+// ---- OVERRIDE DE COMPONENTES ESPECÍFICOS ----
+.mat-mdc-button.mat-primary {
+  --mdc-filled-button-container-color: #e51e30;
+  --mdc-filled-button-label-text-color: #ffffff;
+}
+
+.mat-mdc-fab.mat-primary {
+  --mdc-fab-container-color: #e51e30;
+  --mat-fab-foreground-color: #ffffff;
+}
+
+.mat-mdc-raised-button.mat-primary {
+  --mdc-filled-button-container-color: #e51e30;
+  --mdc-filled-button-label-text-color: #ffffff;
+}
