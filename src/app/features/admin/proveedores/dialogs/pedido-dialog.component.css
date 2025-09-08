@@ -1,0 +1,90 @@
+.dialog-content {
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 0;
+}
+
+.dialog-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #2c3e50;
+  margin-bottom: 1rem;
+}
+
+.info-card, .detalles-card {
+  margin-bottom: 1rem;
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.half-width {
+  flex: 1;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.quantity-field {
+  width: 120px;
+}
+
+.quantity-input {
+  width: 80px;
+}
+
+.add-insumo-section {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.detalles-table {
+  margin-top: 1rem;
+}
+
+.detalles-data-table {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.total-section {
+  margin-top: 1rem;
+  text-align: right;
+}
+
+.total-card {
+  display: inline-block;
+  padding: 1rem;
+  background: #e8f5e8;
+  border: 2px solid #4caf50;
+}
+
+.total-card h3 {
+  margin: 0;
+  color: #2e7d32;
+}
+
+.dialog-actions {
+  padding: 1rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+mat-card-header {
+  margin-bottom: 1rem;
+}
+
+mat-card-title {
+  font-size: 1.1rem;
+  font-weight: 500;
+}

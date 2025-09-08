@@ -1,31 +1,30 @@
-<header>
-  <app-header></app-header>
+<!-- Header principal -->
+<header class="app-header">
+  <nav class="app-nav">
+    <h1>OldBaker - Sistema de Gestión</h1>
+    <div class="nav-links">
+      <a routerLink="/login" routerLinkActive="active">Login</a>
+      <a routerLink="/admin" routerLinkActive="active" class="nav-link admin-link">
+        <mat-icon>admin_panel_settings</mat-icon>
+        Panel Administrador
+      </a>
+      <a routerLink="/admin/proveedores" routerLinkActive="active">Proveedores</a>
+      <a routerLink="/auxiliar" routerLinkActive="active">Auxiliar</a>
+    </div>
+  </nav>
 </header>
 
-<!-- notificaciones globales -->
-<app-notification></app-notification>
+<!-- Notificaciones globales (temporal) -->
+<div class="notification-area">
+  <!-- Aquí irán las notificaciones cuando las crees -->
+</div>
 
+<!-- Contenido principal -->
 <main class="app-main">
   <router-outlet></router-outlet>
 </main>
 
+<!-- Footer -->
 <footer class="app-footer">
-  <app-footer></app-footer>
+  <p>&copy; 2024 OldBaker - Sistema de Gestión. Todos los derechos reservados.</p>
 </footer>
-
-<!-- Navegación opcional -->
-<nav class="app-nav">
-  <h1>OldBaker - Sistema de Gestión</h1>
-  <div class="nav-links">
-    <a routerLink="/admin/proveedores">Proveedores</a>
-      <a routerLink="/admin" class="nav-link admin-link">
-      <mat-icon>admin_panel_settings</mat-icon>
-     Panel Administrador
-       </a>
-    <!-- Más enlaces cuando agregues otros módulos -->
-  </div>
-</nav>
-
-<main class="app-content">
-  <router-outlet></router-outlet>
-</main>
