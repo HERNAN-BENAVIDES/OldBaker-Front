@@ -13,7 +13,7 @@ export class AuthService {
   public currentUser$ = this.currentUserSubj.asObservable();
   public isAuthenticated$ = this.currentUser$.pipe(map(u => !!u));
 
-  constructor(private http: HttpClient) {
+  constructor(private https: HttpClient) {
     // Inicializar estado desde localStorage si existe
     try {
       const raw = localStorage.getItem('auth_user');
@@ -27,16 +27,16 @@ export class AuthService {
   }
 
   register(payload: { nombre: string; email: string; password: string }): Observable<any> {
-    return this.http.post(`${this.baseUrl}/auth/register`, payload);
+    return this.https.post(`${this.baseUrl}/auth/register`, payload);
   }
 
   // Cambiado para aceptar el payload { idUsuario: string; codigo: string }
   verifyCode(param: { idUsuario: string; codigo: string }): Observable<any> {
-    return this.http.post(`${this.baseUrl}/auth/verify`, param);
+    return this.https.post(`${this.baseUrl}/auth/verify`, param);
   }
 
   login(payload: { email: string; password: string }): Observable<any> {
-    return this.http.post(`${this.baseUrl}/auth/login`, payload);
+    return this.https.post(`${this.baseUrl}/auth/login`, payload);
   }
 
   setSession(data: any) {
@@ -121,7 +121,7 @@ export class AuthService {
     const jwt = raw.replace(/^Bearer\s+/i, '');
     const headers = new HttpHeaders({ Authorization: `Bearer ${jwt}` });
     const body = { email: payload.email, token: jwt };
-    return this.http.post(`${this.baseUrl}/user/logout`, body, { headers });  }
+    return this.https.post(`${this.baseUrl}/user/logout`, body, { headers });  }
 
   // Obtener token sincronamente (puede incluir prefijo 'Bearer ')
   getToken(): string | null {
@@ -145,14 +145,14 @@ export class AuthService {
   // Solicita recuperación de contraseña
   requestPasswordReset(email: string): Observable<any> {
     // Enviar el email como texto plano, no como JSON
-    return this.http.post(`${this.baseUrl}/auth/forgot`, email, {
+    return this.https.post(`${this.baseUrl}/auth/forgot`, email, {
       headers: new HttpHeaders({ 'Content-Type': 'text/plain' })
     });
   }
 
   // Verificar código de restablecimiento: enviar código como texto plano
   verifyResetCode(code: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}/auth/reset/verify`, code, {
+    return this.https.post(`${this.baseUrl}/auth/reset/verify`, code, {
       headers: new HttpHeaders({ 'Content-Type': 'text/plain' })
     });
   }
@@ -160,6 +160,6 @@ export class AuthService {
   // Ejecutar el restablecimiento de contraseña. Ahora envía { email, newPassword } según solicitud
   resetPassword(email: string, newPassword: string): Observable<any> {
     const body = { email, newPassword };
-    return this.http.post(`${this.baseUrl}/auth/reset`, body);
+    return this.https.post(`${this.baseUrl}/auth/reset`, body);
   }
 }
