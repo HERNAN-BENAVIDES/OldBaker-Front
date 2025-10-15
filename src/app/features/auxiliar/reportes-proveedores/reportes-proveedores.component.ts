@@ -3,26 +3,39 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-interface ReporteProveedor {
+interface Reporte {
   id: number;
   pedidoId: number;
   proveedor: string;
-  tipoProblema: 'incompleto' | 'vencido' | 'defectuoso' | 'retraso' | 'otro';
+  tipo: 'incompleto' | 'vencido' | 'defectuoso' | 'otro';
+  estado: 'pendiente' | 'en_revision' | 'resuelto' | 'rechazado';
+  prioridad: 'alta' | 'media' | 'baja';
   descripcion: string;
   fechaReporte: string;
-  estado: 'abierto' | 'en_proceso' | 'resuelto' | 'cerrado';
-  prioridad: 'baja' | 'media' | 'alta' | 'critica';
-  observacionesProveedor?: string;
-  fechaResolucion?: string;
+  fechaRespuesta?: string;
+  respuestaProveedor?: string;
+  evidencias?: string[];
+  reportadoPor: string;
+  seguimientos?: Seguimiento[];
 }
 
-interface FormularioReporte {
-  id?: number;
-  pedidoId: number | null;
+interface Seguimiento {
+  id: number;
+  fecha: string;
+  usuario: string;
+  comentario: string;
+  tipo: 'comentario' | 'cambio_estado';
+  estadoAnterior?: string;
+  estadoNuevo?: string;
+}
+
+interface NuevoReporte {
+  pedidoId: number;
   proveedor: string;
-  tipoProblema: string;
-  prioridad: string;
+  tipo: 'incompleto' | 'vencido' | 'defectuoso' | 'otro';
+  prioridad: 'alta' | 'media' | 'baja';
   descripcion: string;
+  evidencias: string[];
 }
 
 @Component({
@@ -35,165 +48,207 @@ interface FormularioReporte {
         <button class="back-btn" (click)="goBack()">← Volver</button>
         <h1>⚠️ Reportes a Proveedores</h1>
         <div class="header-actions">
-          <button class="btn-primary" (click)="abrirFormularioReporte()">+ Nuevo Reporte</button>
+          <button class="btn-new-report" (click)="abrirModalNuevoReporte()">
+            <span>📝</span>
+            <span>Nuevo Reporte</span>
+          </button>
         </div>
       </header>
 
       <main class="main-content">
-        <!-- Estadísticas de reportes -->
-        <div class="stats-section">
-          <div class="stat-card abierto">
-            <div class="stat-icon">🔴</div>
-            <div class="stat-info">
-              <span class="stat-number">{{ getCountByStatus('abierto') }}</span>
-              <span class="stat-label">Abiertos</span>
-            </div>
+        <!-- Estadísticas -->
+        <div class="stats-grid">
+          <div class="stat-card pendiente">
+            <h3>Pendientes</h3>
+            <span class="stat-number">{{ getCountByStatus('pendiente') }}</span>
           </div>
-          <div class="stat-card en_proceso">
-            <div class="stat-icon">🟡</div>
-            <div class="stat-info">
-              <span class="stat-number">{{ getCountByStatus('en_proceso') }}</span>
-              <span class="stat-label">En Proceso</span>
-            </div>
+          <div class="stat-card en_revision">
+            <h3>En Revisión</h3>
+            <span class="stat-number">{{ getCountByStatus('en_revision') }}</span>
           </div>
           <div class="stat-card resuelto">
-            <div class="stat-icon">🟢</div>
-            <div class="stat-info">
-              <span class="stat-number">{{ getCountByStatus('resuelto') }}</span>
-              <span class="stat-label">Resueltos</span>
-            </div>
+            <h3>Resueltos</h3>
+            <span class="stat-number">{{ getCountByStatus('resuelto') }}</span>
           </div>
-          <div class="stat-card critica">
-            <div class="stat-icon">🚨</div>
-            <div class="stat-info">
-              <span class="stat-number">{{ getCountByPriority('critica') }}</span>
-              <span class="stat-label">Críticos</span>
-            </div>
+          <div class="stat-card rechazado">
+            <h3>Rechazados</h3>
+            <span class="stat-number">{{ getCountByStatus('rechazado') }}</span>
           </div>
         </div>
 
         <!-- Filtros -->
-        <div class="filters-section">
-          <select [value]="filtroEstado()" (change)="onFiltroEstadoChange($event)" class="filter-select">
-            <option value="todos">Todos los estados</option>
-            <option value="abierto">Abiertos</option>
-            <option value="en_proceso">En Proceso</option>
-            <option value="resuelto">Resueltos</option>
-            <option value="cerrado">Cerrados</option>
-          </select>
-          
-          <select [value]="filtroPrioridad()" (change)="onFiltroPrioridadChange($event)" class="filter-select">
-            <option value="todas">Todas las prioridades</option>
-            <option value="critica">Crítica</option>
-            <option value="alta">Alta</option>
-            <option value="media">Media</option>
-            <option value="baja">Baja</option>
-          </select>
-
-          <select [value]="filtroTipo()" (change)="onFiltroTipoChange($event)" class="filter-select">
-            <option value="todos">Todos los tipos</option>
-            <option value="incompleto">Pedidos Incompletos</option>
-            <option value="vencido">Productos Vencidos</option>
-            <option value="defectuoso">Productos Defectuosos</option>
-            <option value="retraso">Retrasos de Entrega</option>
-            <option value="otro">Otros</option>
-          </select>
+        <div class="filter-section">
+          <div class="filter-grid">
+            <div class="filter-group">
+              <label>Estado</label>
+              <select [value]="filtroEstado()" (change)="onFiltroEstadoChange($event)" class="filter-select">
+                <option value="todos">Todos</option>
+                <option value="pendiente">Pendientes</option>
+                <option value="en_revision">En Revisión</option>
+                <option value="resuelto">Resueltos</option>
+                <option value="rechazado">Rechazados</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label>Tipo de Problema</label>
+              <select [value]="filtroTipo()" (change)="onFiltroTipoChange($event)" class="filter-select">
+                <option value="todos">Todos</option>
+                <option value="incompleto">Incompleto</option>
+                <option value="vencido">Vencido</option>
+                <option value="defectuoso">Defectuoso</option>
+                <option value="otro">Otro</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label>Proveedor</label>
+              <input 
+                type="text" 
+                [value]="busquedaProveedor()"
+                (input)="onBusquedaChange($event)"
+                placeholder="Buscar proveedor..."
+                class="filter-input">
+            </div>
+          </div>
         </div>
 
         <!-- Lista de reportes -->
         <div class="reportes-container">
-          <div *ngFor="let reporte of reportesFiltrados()" class="reporte-card">
-            <div class="card-header">
-              <div class="reporte-info">
-                <h3>Reporte #{{ reporte.id }}</h3>
-                <p><strong>Pedido:</strong> #{{ reporte.pedidoId }} - {{ reporte.proveedor }}</p>
-                <p><strong>Fecha:</strong> {{ formatDate(reporte.fechaReporte) }}</p>
-              </div>
-              <div class="reporte-badges">
-                <span class="status-badge" [ngClass]="reporte.estado">
-                  {{ getStatusText(reporte.estado) }}
-                </span>
-                <span class="priority-badge" [ngClass]="reporte.prioridad">
-                  {{ getPriorityText(reporte.prioridad) }}
-                </span>
-              </div>
-            </div>
+          <div class="reportes-header">
+            <h2>Reportes ({{ reportesFiltrados().length }})</h2>
+          </div>
 
-            <div class="card-body">
-              <div class="problema-info">
-                <h4>{{ getTipoProblemaText(reporte.tipoProblema) }}</h4>
-                <p class="descripcion">{{ reporte.descripcion }}</p>
+          <div class="reportes-list" *ngIf="reportesFiltrados().length > 0">
+            <div *ngFor="let reporte of reportesFiltrados()" class="reporte-card">
+              <div class="reporte-header">
+                <div class="reporte-id">
+                  <h3>Reporte #{{ reporte.id }}</h3>
+                  <span class="tipo-badge" [ngClass]="reporte.tipo">
+                    {{ getTipoText(reporte.tipo) }}
+                  </span>
+                  <span class="status-badge" [ngClass]="reporte.estado">
+                    {{ getEstadoText(reporte.estado) }}
+                  </span>
+                </div>
+                <div class="reporte-date">
+                  <p><strong>Reportado:</strong> {{ formatDate(reporte.fechaReporte) }}</p>
+                  <div class="priority-indicator" [ngClass]="reporte.prioridad">
+                    {{ reporte.prioridad === 'alta' ? '🔴' : reporte.prioridad === 'media' ? '🟡' : '🟢' }}
+                    Prioridad {{ reporte.prioridad }}
+                  </div>
+                </div>
               </div>
 
-              <div class="reporte-details" *ngIf="reporteExpandido() === reporte.id">
-                <div class="timeline">
-                  <div class="timeline-item created">
-                    <div class="timeline-icon">📝</div>
-                    <div class="timeline-content">
-                      <strong>Reporte Creado</strong>
-                      <span>{{ formatDate(reporte.fechaReporte) }}</span>
-                    </div>
+              <div class="reporte-body">
+                <div class="reporte-info">
+                  <div class="info-item">
+                    <span class="info-label">Pedido:</span>
+                    <span class="info-value">#{{ reporte.pedidoId }}</span>
                   </div>
-                  
-                  <div class="timeline-item" *ngIf="reporte.estado !== 'abierto'">
-                    <div class="timeline-icon">👀</div>
-                    <div class="timeline-content">
-                      <strong>En Proceso</strong>
-                      <span>Proveedor notificado</span>
-                    </div>
+                  <div class="info-item">
+                    <span class="info-label">Proveedor:</span>
+                    <span class="info-value">{{ reporte.proveedor }}</span>
                   </div>
-                  
-                  <div class="timeline-item resolved" *ngIf="reporte.fechaResolucion">
-                    <div class="timeline-icon">✅</div>
-                    <div class="timeline-content">
-                      <strong>Resuelto</strong>
-                      <span>{{ formatDate(reporte.fechaResolucion) }}</span>
+                  <div class="info-item">
+                    <span class="info-label">Reportado por:</span>
+                    <span class="info-value">{{ reporte.reportadoPor }}</span>
+                  </div>
+                </div>
+
+                <div class="descripcion-section">
+                  <h4>📋 Descripción del Problema</h4>
+                  <p>{{ reporte.descripcion }}</p>
+                </div>
+
+                <div class="evidencia-section" *ngIf="reporte.evidencias && reporte.evidencias.length > 0">
+                  <h5>📎 Evidencias Adjuntas</h5>
+                  <div class="evidencia-list">
+                    <span *ngFor="let evidencia of reporte.evidencias" class="evidencia-item">
+                      {{ evidencia }}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="respuesta-section" *ngIf="reporte.respuestaProveedor">
+                  <h5>💬 Respuesta del Proveedor ({{ formatDate(reporte.fechaRespuesta!) }})</h5>
+                  <p>{{ reporte.respuestaProveedor }}</p>
+                </div>
+              </div>
+
+              <div class="reporte-actions" *ngIf="reporte.estado !== 'resuelto' && reporte.estado !== 'rechazado'">
+                <button class="btn-primary" (click)="verDetalleReporte(reporte.id)">
+                  {{ reporteExpandido() === reporte.id ? '👁️ Ocultar Detalles' : '👁️ Ver Detalles' }}
+                </button>
+                <button class="btn-success" (click)="marcarResuelto(reporte)" *ngIf="reporte.estado === 'en_revision'">
+                  ✓ Marcar Resuelto
+                </button>
+                <button class="btn-secondary" (click)="agregarSeguimiento(reporte)">
+                  💬 Agregar Seguimiento
+                </button>
+                <button class="btn-danger" (click)="cancelarReporte(reporte)">
+                  ✗ Cancelar Reporte
+                </button>
+              </div>
+
+              <!-- Detalles expandidos -->
+              <div class="detalles-expandidos" *ngIf="reporteExpandido() === reporte.id">
+                <div class="detalle-item">
+                  <span class="detalle-label">📅 Fecha de creación:</span>
+                  <span class="detalle-value">{{ formatDate(reporte.fechaReporte) }} </span>
+                </div>
+                <div class="detalle-item" *ngIf="reporte.fechaRespuesta">
+                  <span class="detalle-label">📅 Fecha de respuesta:</span>
+                  <span class="detalle-value">{{ formatDate(reporte.fechaRespuesta) }}</span>
+                </div>
+                <div class="detalle-item">
+                  <span class="detalle-label">🏢 Proveedor:</span>
+                  <span class="detalle-value">{{ reporte.proveedor }}</span>
+                </div>
+                <div class="detalle-item">
+                  <span class="detalle-label">📦 Pedido relacionado:</span>
+                  <span class="detalle-value">#{{ reporte.pedidoId }}</span>
+                </div>
+                <div class="detalle-item">
+                  <span class="detalle-label">👤 Reportado por:</span>
+                  <span class="detalle-value">{{ reporte.reportadoPor }}</span>
+                </div>
+                <div class="detalle-item">
+                  <span class="detalle-label">⚠️ Tipo de problema:</span>
+                  <span class="detalle-value">{{ getTipoText(reporte.tipo) }}</span>
+                </div>
+                <div class="detalle-item">
+                  <span class="detalle-label">📊 Estado actual:</span>
+                  <span class="detalle-value">{{ getEstadoText(reporte.estado) }}</span>
+                </div>
+                <div class="detalle-item">
+                  <span class="detalle-label">🔥 Prioridad:</span>
+                  <span class="detalle-value">{{ reporte.prioridad.toUpperCase() }}</span>
+                </div>
+
+                <!-- Historial de Seguimientos -->
+                <div class="seguimientos-section" *ngIf="reporte.seguimientos && reporte.seguimientos.length > 0">
+                  <h4>📋 Historial de Seguimientos ({{ reporte.seguimientos.length }})</h4>
+                  <div class="seguimientos-list">
+                    <div *ngFor="let seguimiento of reporte.seguimientos" 
+                         class="seguimiento-item"
+                         [ngClass]="seguimiento.tipo">
+                      <div class="seguimiento-header">
+                        <span class="seguimiento-fecha">{{ formatDate(seguimiento.fecha) }}</span>
+                        <span class="seguimiento-usuario">{{ seguimiento.usuario }}</span>
+                      </div>
+                      <div class="seguimiento-contenido">
+                        <span *ngIf="seguimiento.tipo === 'cambio_estado'" class="seguimiento-icono">🔄</span>
+                        <span *ngIf="seguimiento.tipo === 'comentario'" class="seguimiento-icono">💬</span>
+                        <p>{{ seguimiento.comentario }}</p>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                <div class="observaciones-proveedor" *ngIf="reporte.observacionesProveedor">
-                  <h5>📋 Respuesta del Proveedor:</h5>
-                  <p>{{ reporte.observacionesProveedor }}</p>
-                </div>
-
-                <div class="acciones-reporte" *ngIf="reporte.estado !== 'cerrado'">
-                  <button 
-                    class="btn-warning" 
-                    (click)="marcarEnProceso(reporte)"
-                    *ngIf="reporte.estado === 'abierto'">
-                    Marcar en Proceso
-                  </button>
-                  
-                  <button 
-                    class="btn-success" 
-                    (click)="marcarResuelto(reporte)"
-                    *ngIf="reporte.estado === 'en_proceso'">
-                    Marcar como Resuelto
-                  </button>
-                  
-                  <button 
-                    class="btn-secondary" 
-                    (click)="cerrarReporte(reporte)"
-                    *ngIf="reporte.estado === 'resuelto'">
-                    Cerrar Reporte
-                  </button>
-
-                  <button 
-                    class="btn-primary" 
-                    (click)="editarReporte(reporte)">
-                    Editar
-                  </button>
+                <!-- Mensaje si no hay seguimientos -->
+                <div class="sin-seguimientos" *ngIf="!reporte.seguimientos || reporte.seguimientos.length === 0">
+                  <p>📝 No hay seguimientos registrados para este reporte</p>
                 </div>
               </div>
-            </div>
-
-            <div class="card-footer">
-              <button 
-                class="btn-link" 
-                (click)="toggleReporte(reporte.id)">
-                {{ reporteExpandido() === reporte.id ? '↑ Ocultar' : '↓ Ver más' }}
-              </button>
             </div>
           </div>
 
@@ -207,134 +262,240 @@ interface FormularioReporte {
         </div>
       </main>
 
-      <!-- Modal para nuevo reporte -->
-      <div class="modal-overlay" *ngIf="mostrarFormulario()">
-        <div class="modal">
-          <h3>{{ modoEdicion() ? 'Editar Reporte' : 'Nuevo Reporte a Proveedor' }}</h3>
+      <!-- Modal Nuevo Reporte -->
+      <div class="modal-overlay" *ngIf="mostrarModalNuevo()" (click)="cerrarModal()">
+        <div class="modal" (click)="$event.stopPropagation()">
+          <h3>📝 Nuevo Reporte a Proveedor</h3>
           
-          <form (ngSubmit)="guardarReporte()" #reporteForm="ngForm">
-            <div class="form-group">
-              <label>Pedido ID:</label>
-              <input 
-                type="number" 
-                [value]="formularioReporte().pedidoId || ''"
-                (input)="updateFormField('pedidoId', $event)"
-                name="pedidoId" 
-                required 
-                class="form-input">
-            </div>
+          <div class="form-group">
+            <label>Número de Pedido *</label>
+            <input 
+              type="number" 
+              [(ngModel)]="nuevoReporte.pedidoId"
+              placeholder="Ej: 1001"
+              required>
+            <small>Ingrese el número del pedido relacionado</small>
+          </div>
 
-            <div class="form-group">
-              <label>Proveedor:</label>
-              <input 
-                type="text" 
-                [value]="formularioReporte().proveedor"
-                (input)="updateFormField('proveedor', $event)"
-                name="proveedor" 
-                required 
-                class="form-input">
-            </div>
+          <div class="form-group">
+            <label>Proveedor *</label>
+            <input 
+              type="text" 
+              [(ngModel)]="nuevoReporte.proveedor"
+              placeholder="Nombre del proveedor"
+              required>
+          </div>
 
-            <div class="form-group">
-              <label>Tipo de Problema:</label>
-              <select 
-                [value]="formularioReporte().tipoProblema"
-                (change)="updateFormField('tipoProblema', $event)"
-                name="tipoProblema" 
-                required 
-                class="form-select">
-                <option value="">Seleccionar...</option>
-                <option value="incompleto">Pedido Incompleto</option>
-                <option value="vencido">Productos Vencidos</option>
-                <option value="defectuoso">Productos Defectuosos</option>
-                <option value="retraso">Retraso de Entrega</option>
-                <option value="otro">Otro</option>
-              </select>
-            </div>
+          <div class="form-group">
+            <label>Tipo de Problema *</label>
+            <select [(ngModel)]="nuevoReporte.tipo" required>
+              <option value="incompleto">Pedido Incompleto</option>
+              <option value="vencido">Productos Vencidos</option>
+              <option value="defectuoso">Productos Defectuosos</option>
+              <option value="otro">Otro Problema</option>
+            </select>
+          </div>
 
-            <div class="form-group">
-              <label>Prioridad:</label>
-              <select 
-                [value]="formularioReporte().prioridad"
-                (change)="updateFormField('prioridad', $event)"
-                name="prioridad" 
-                required 
-                class="form-select">
-                <option value="">Seleccionar...</option>
-                <option value="baja">Baja</option>
-                <option value="media">Media</option>
-                <option value="alta">Alta</option>
-                <option value="critica">Crítica</option>
-              </select>
-            </div>
+          <div class="form-group">
+            <label>Prioridad *</label>
+            <select [(ngModel)]="nuevoReporte.prioridad" required>
+              <option value="alta">Alta - Requiere atención inmediata</option>
+              <option value="media">Media - Atención en 24-48 horas</option>
+              <option value="baja">Baja - No es urgente</option>
+            </select>
+          </div>
 
-            <div class="form-group">
-              <label>Descripción del Problema:</label>
-              <textarea 
-                [value]="formularioReporte().descripcion"
-                (input)="updateFormField('descripcion', $event)"
-                name="descripcion" 
-                required 
-                rows="4" 
-                class="form-textarea"
-                placeholder="Describe detalladamente el problema encontrado..."></textarea>
-            </div>
+          <div class="form-group">
+            <label>Descripción del Problema *</label>
+            <textarea 
+              [(ngModel)]="nuevoReporte.descripcion"
+              placeholder="Describa detalladamente el problema encontrado..."
+              rows="5"
+              required></textarea>
+            <small>Sea específico: cantidades, productos afectados, etc.</small>
+          </div>
 
-            <div class="modal-actions">
-              <button type="button" class="btn-secondary" (click)="cerrarFormulario()">
-                Cancelar
-              </button>
-              <button type="submit" class="btn-primary">
-                {{ modoEdicion() ? 'Actualizar' : 'Crear' }} Reporte
-              </button>
-            </div>
-          </form>
+          <div class="modal-actions">
+            <button class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
+            <button class="btn-primary" (click)="crearReporte()">Crear Reporte</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Seguimiento -->
+      <div class="modal-overlay" *ngIf="mostrarModalSeguimiento()" (click)="cerrarModalSeguimiento()">
+        <div class="modal" (click)="$event.stopPropagation()">
+          <h3>💬 Agregar Seguimiento</h3>
+          
+          <div class="form-group">
+            <label>Reporte #{{ reporteSeleccionado()?.id }}</label>
+            <p style="color: #666; margin: 0.5rem 0;">{{ reporteSeleccionado()?.proveedor }}</p>
+          </div>
+
+          <div class="form-group">
+            <label>Comentario de Seguimiento *</label>
+            <textarea 
+              [(ngModel)]="textoSeguimiento"
+              placeholder="Agregue información adicional o actualización del estado..."
+              rows="4"
+              required></textarea>
+          </div>
+
+          <div class="modal-actions">
+            <button class="btn-secondary" (click)="cerrarModalSeguimiento()">Cancelar</button>
+            <button class="btn-primary" (click)="guardarSeguimiento()">Guardar Seguimiento</button>
+          </div>
         </div>
       </div>
     </div>
   `,
-  styleUrls: ['./reportes-proveedores.component.css']
+  styleUrl: './reportes-proveedores.component.css'
 })
 export class ReportesProveedoresComponent implements OnInit {
   
-  readonly reportes = signal<ReporteProveedor[]>([]);
-  readonly reportesFiltrados = signal<ReporteProveedor[]>([]);
+  readonly reportes = signal<Reporte[]>([]);
+  readonly reportesFiltrados = signal<Reporte[]>([]);
   readonly filtroEstado = signal<string>('todos');
-  readonly filtroPrioridad = signal<string>('todas');
   readonly filtroTipo = signal<string>('todos');
+  readonly busquedaProveedor = signal<string>('');
+  readonly mostrarModalNuevo = signal<boolean>(false);
+  readonly mostrarModalSeguimiento = signal<boolean>(false);
+  readonly reporteSeleccionado = signal<Reporte | null>(null);
   readonly reporteExpandido = signal<number | null>(null);
-  readonly mostrarFormulario = signal<boolean>(false);
-  readonly modoEdicion = signal<boolean>(false);
-  readonly formularioReporte = signal<FormularioReporte>({
-    pedidoId: null,
-    proveedor: '',
-    tipoProblema: '',
-    prioridad: 'media',
-    descripcion: ''
-  });
 
-  constructor(private router: Router, private route: ActivatedRoute) {}
+  nuevoReporte: NuevoReporte = {
+    pedidoId: 0,
+    proveedor: '',
+    tipo: 'incompleto',
+    prioridad: 'media',
+    descripcion: '',
+    evidencias: []
+  };
+
+  textoSeguimiento: string = '';
+
+  constructor(
+    private router: Router,
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit(): void {
     this.loadReportes();
     
-    // Verificar si viene de otro módulo con un pedido específico
+    // Si viene desde pedidos-insumos con un pedido específico
     this.route.queryParams.subscribe(params => {
       if (params['pedido']) {
-        this.precargarReporte(params['pedido']);
+        this.nuevoReporte.pedidoId = parseInt(params['pedido']);
+        this.abrirModalNuevoReporte();
       }
     });
+  }
+
+  private loadReportes(): void {
+    const reportesData: Reporte[] = [
+      {
+        id: 2001,
+        pedidoId: 1001,
+        proveedor: 'Molinos La Rosa',
+        tipo: 'incompleto',
+        estado: 'en_revision',
+        prioridad: 'alta',
+        descripcion: 'Faltaron 3 sacos de harina de trigo en la entrega. Se recibieron solo 7 de los 10 solicitados. El proveedor debe confirmar fecha de entrega del faltante.',
+        fechaReporte: '2024-01-18',
+        evidencias: ['Foto_entrega.jpg', 'Remision_firmada.pdf'],
+        reportadoPor: 'Juan Pérez - Auxiliar',
+        seguimientos: [
+          {
+            id: 1,
+            fecha: '2024-01-19',
+            usuario: 'Juan Pérez',
+            comentario: 'Se contactó al proveedor. Confirma envío del faltante para el 22/01',
+            tipo: 'comentario'
+          }
+        ]
+      },
+      {
+        id: 2002,
+        pedidoId: 1004,
+        proveedor: 'Ingredientes Premium',
+        tipo: 'vencido',
+        estado: 'resuelto',
+        prioridad: 'alta',
+        descripcion: 'Se recibieron 5 unidades de levadura con fecha de vencimiento próxima (vencen en 3 días). No cumple con el requisito mínimo de 30 días de vigencia.',
+        fechaReporte: '2024-01-14',
+        fechaRespuesta: '2024-01-16',
+        respuestaProveedor: 'Se realizó el cambio de producto. Las nuevas unidades fueron entregadas el 16/01 con vencimiento vigente hasta 06/2024. Se adjunta nota crédito.',
+        evidencias: ['Levadura_vencida.jpg'],
+        reportadoPor: 'María González - Auxiliar',
+        seguimientos: [
+          {
+            id: 1,
+            fecha: '2024-01-15',
+            usuario: 'María González',
+            comentario: 'Proveedor acepta el reclamo y programa cambio',
+            tipo: 'comentario'
+          },
+          {
+            id: 2,
+            fecha: '2024-01-16',
+            usuario: 'Sistema',
+            comentario: 'Estado cambiado de En Revisión a Resuelto',
+            tipo: 'cambio_estado',
+            estadoAnterior: 'en_revision',
+            estadoNuevo: 'resuelto'
+          }
+        ]
+      },
+      {
+        id: 2003,
+        pedidoId: 1005,
+        proveedor: 'Especias y Condimentos S.A.',
+        tipo: 'defectuoso',
+        estado: 'pendiente',
+        prioridad: 'media',
+        descripcion: 'Dos frascos de vainilla llegaron con el sello de seguridad roto. No se pueden aceptar por temas de inocuidad alimentaria.',
+        fechaReporte: '2024-01-17',
+        evidencias: ['Sello_roto_1.jpg', 'Sello_roto_2.jpg'],
+        reportadoPor: 'Carlos Ramírez - Auxiliar',
+        seguimientos: []
+      },
+      {
+        id: 2004,
+        pedidoId: 1002,
+        proveedor: 'Lácteos del Valle',
+        tipo: 'otro',
+        estado: 'rechazado',
+        prioridad: 'baja',
+        descripcion: 'El empaque de la mantequilla presenta abolladuras menores pero el producto está en buen estado.',
+        fechaReporte: '2024-01-15',
+        fechaRespuesta: '2024-01-16',
+        respuestaProveedor: 'Las abolladuras son cosméticas y no afectan la calidad del producto. El empaque cumple con los estándares. No procede reclamo.',
+        reportadoPor: 'Ana López - Auxiliar',
+        seguimientos: []
+      },
+      {
+        id: 2005,
+        pedidoId: 1003,
+        proveedor: 'Distribuidora Central',
+        tipo: 'incompleto',
+        estado: 'resuelto',
+        prioridad: 'media',
+        descripcion: 'Faltó 1 caja de sal refinada (12 unidades). Se recibieron 49 unidades en lugar de 50.',
+        fechaReporte: '2024-01-13',
+        fechaRespuesta: '2024-01-14',
+        respuestaProveedor: 'Caja faltante entregada el 14/01. Se incluye nota crédito por el inconveniente y 5% de descuento en próximo pedido.',
+        reportadoPor: 'Luis Martínez - Auxiliar',
+        seguimientos: []
+      }
+    ];
+    
+    this.reportes.set(reportesData);
+    this.filtrarReportes();
   }
 
   onFiltroEstadoChange(event: Event): void {
     const target = event.target as HTMLSelectElement;
     this.filtroEstado.set(target.value);
-    this.filtrarReportes();
-  }
-
-  onFiltroPrioridadChange(event: Event): void {
-    const target = event.target as HTMLSelectElement;
-    this.filtroPrioridad.set(target.value);
     this.filtrarReportes();
   }
 
@@ -344,79 +505,34 @@ export class ReportesProveedoresComponent implements OnInit {
     this.filtrarReportes();
   }
 
-  updateFormField(field: string, event: Event): void {
-    const target = event.target as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
-    const currentForm = this.formularioReporte();
-    
-    let value: any = target.value;
-    if (field === 'pedidoId') {
-      value = target.value ? parseInt(target.value) : null;
-    }
-    
-    this.formularioReporte.set({
-      ...currentForm,
-      [field]: value
-    });
-  }
-
-  private loadReportes(): void {
-    // Simulación de datos
-    const reportesData: ReporteProveedor[] = [
-      {
-        id: 2001,
-        pedidoId: 1001,
-        proveedor: 'Molinos La Rosa',
-        tipoProblema: 'incompleto',
-        descripcion: 'Faltaron 3 sacos de harina de trigo de 50kg. Se recibieron solo 7 de los 10 pedidos.',
-        fechaReporte: '2024-01-18',
-        estado: 'en_proceso',
-        prioridad: 'alta',
-        observacionesProveedor: 'Confirmar la entrega de los sacos faltantes mañana en la mañana.'
-      },
-      {
-        id: 2002,
-        pedidoId: 1003,
-        proveedor: 'Lácteos del Valle',
-        tipoProblema: 'vencido',
-        descripcion: 'Se encontraron 5 paquetes de mantequilla con fecha de vencimiento para el día siguiente. No cumple con nuestros estándares de calidad.',
-        fechaReporte: '2024-01-17',
-        estado: 'resuelto',
-        prioridad: 'critica',
-        fechaResolucion: '2024-01-19',
-        observacionesProveedor: 'Se realizó el cambio de productos y se implementaron nuevos controles de calidad.'
-      }
-    ];
-    
-    this.reportes.set(reportesData);
+  onBusquedaChange(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    this.busquedaProveedor.set(target.value);
     this.filtrarReportes();
-  }
-
-  private precargarReporte(pedidoId: string): void {
-    this.formularioReporte.set({
-      pedidoId: parseInt(pedidoId),
-      proveedor: '',
-      tipoProblema: '',
-      prioridad: 'media',
-      descripcion: ''
-    });
-    this.abrirFormularioReporte();
   }
 
   filtrarReportes(): void {
     let reportes = this.reportes();
-
+    
+    // Filtrar por estado
     if (this.filtroEstado() !== 'todos') {
       reportes = reportes.filter(r => r.estado === this.filtroEstado());
     }
-
-    if (this.filtroPrioridad() !== 'todas') {
-      reportes = reportes.filter(r => r.prioridad === this.filtroPrioridad());
-    }
-
+    
+    // Filtrar por tipo
     if (this.filtroTipo() !== 'todos') {
-      reportes = reportes.filter(r => r.tipoProblema === this.filtroTipo());
+      reportes = reportes.filter(r => r.tipo === this.filtroTipo());
     }
-
+    
+    // Filtrar por proveedor
+    if (this.busquedaProveedor()) {
+      const busqueda = this.busquedaProveedor().toLowerCase();
+      reportes = reportes.filter(r => 
+        r.proveedor.toLowerCase().includes(busqueda) ||
+        r.id.toString().includes(busqueda)
+      );
+    }
+    
     this.reportesFiltrados.set(reportes);
   }
 
@@ -424,39 +540,24 @@ export class ReportesProveedoresComponent implements OnInit {
     return this.reportes().filter(r => r.estado === estado).length;
   }
 
-  getCountByPriority(prioridad: string): number {
-    return this.reportes().filter(r => r.prioridad === prioridad).length;
-  }
-
-  getStatusText(estado: string): string {
-    const estados: Record<string, string> = {
-      abierto: 'Abierto',
-      en_proceso: 'En Proceso',
-      resuelto: 'Resuelto',
-      cerrado: 'Cerrado'
-    };
-    return estados[estado] || estado;
-  }
-
-  getPriorityText(prioridad: string): string {
-    const prioridades: Record<string, string> = {
-      baja: 'Baja',
-      media: 'Media',
-      alta: 'Alta',
-      critica: 'Crítica'
-    };
-    return prioridades[prioridad] || prioridad;
-  }
-
-  getTipoProblemaText(tipo: string): string {
+  getTipoText(tipo: string): string {
     const tipos: Record<string, string> = {
-      incompleto: '📦 Pedido Incompleto',
-      vencido: '⏰ Productos Vencidos',
-      defectuoso: '❌ Productos Defectuosos',
-      retraso: '🕐 Retraso de Entrega',
-      otro: '❓ Otro Problema'
+      incompleto: 'Incompleto',
+      vencido: 'Vencido',
+      defectuoso: 'Defectuoso',
+      otro: 'Otro'
     };
     return tipos[tipo] || tipo;
+  }
+
+  getEstadoText(estado: string): string {
+    const estados: Record<string, string> = {
+      pendiente: 'Pendiente',
+      en_revision: 'En Revisión',
+      resuelto: 'Resuelto',
+      rechazado: 'Rechazado'
+    };
+    return estados[estado] || estado;
   }
 
   formatDate(dateString: string): string {
@@ -468,7 +569,144 @@ export class ReportesProveedoresComponent implements OnInit {
     });
   }
 
-  toggleReporte(reporteId: number): void {
+  abrirModalNuevoReporte(): void {
+    this.mostrarModalNuevo.set(true);
+  }
+
+  cerrarModal(): void {
+    this.mostrarModalNuevo.set(false);
+    this.resetNuevoReporte();
+  }
+
+  crearReporte(): void {
+    // Validar campos requeridos
+    if (!this.nuevoReporte.pedidoId || !this.nuevoReporte.proveedor || !this.nuevoReporte.descripcion) {
+      this.showNotification('Por favor complete todos los campos obligatorios', 'error');
+      return;
+    }
+
+    if (this.nuevoReporte.descripcion.length < 20) {
+      this.showNotification('La descripción debe tener al menos 20 caracteres', 'error');
+      return;
+    }
+
+    // Crear nuevo reporte
+    const nuevoReporte: Reporte = {
+      id: Math.max(...this.reportes().map(r => r.id)) + 1,
+      pedidoId: this.nuevoReporte.pedidoId,
+      proveedor: this.nuevoReporte.proveedor,
+      tipo: this.nuevoReporte.tipo,
+      estado: 'pendiente',
+      prioridad: this.nuevoReporte.prioridad,
+      descripcion: this.nuevoReporte.descripcion,
+      fechaReporte: new Date().toISOString().split('T')[0],
+      evidencias: this.nuevoReporte.evidencias,
+      reportadoPor: 'Usuario Actual - Auxiliar',
+      seguimientos: []
+    };
+
+    // Agregar al listado
+    const reportesActualizados = [...this.reportes(), nuevoReporte];
+    this.reportes.set(reportesActualizados);
+    this.filtrarReportes();
+
+    this.showNotification(`Reporte #${nuevoReporte.id} creado exitosamente`, 'success');
+    this.cerrarModal();
+  }
+
+  resetNuevoReporte(): void {
+    this.nuevoReporte = {
+      pedidoId: 0,
+      proveedor: '',
+      tipo: 'incompleto',
+      prioridad: 'media',
+      descripcion: '',
+      evidencias: []
+    };
+  }
+
+  agregarSeguimiento(reporte: Reporte): void {
+    this.reporteSeleccionado.set(reporte);
+    this.textoSeguimiento = '';
+    this.mostrarModalSeguimiento.set(true);
+  }
+
+  cerrarModalSeguimiento(): void {
+    this.mostrarModalSeguimiento.set(false);
+    this.reporteSeleccionado.set(null);
+    this.textoSeguimiento = '';
+  }
+
+  guardarSeguimiento(): void {
+    if (!this.textoSeguimiento || this.textoSeguimiento.trim().length < 10) {
+      this.showNotification('El comentario debe tener al menos 10 caracteres', 'error');
+      return;
+    }
+
+    const reporte = this.reporteSeleccionado();
+    if (reporte) {
+      // Inicializar array de seguimientos si no existe
+      if (!reporte.seguimientos) {
+        reporte.seguimientos = [];
+      }
+
+      const estadoAnterior = reporte.estado;
+      
+      // Cambiar estado a en_revision si está pendiente
+      if (reporte.estado === 'pendiente') {
+        reporte.estado = 'en_revision';
+      }
+
+      // Crear nuevo seguimiento
+      const nuevoSeguimiento: Seguimiento = {
+        id: reporte.seguimientos.length + 1,
+        fecha: new Date().toISOString().split('T')[0],
+        usuario: 'Usuario Actual - Auxiliar',
+        comentario: this.textoSeguimiento.trim(),
+        tipo: 'comentario'
+      };
+
+      // Agregar seguimiento del cambio de estado si cambió
+      if (estadoAnterior !== reporte.estado) {
+        const seguimientoEstado: Seguimiento = {
+          id: reporte.seguimientos.length + 2,
+          fecha: new Date().toISOString().split('T')[0],
+          usuario: 'Sistema',
+          comentario: `Estado cambiado de ${this.getEstadoText(estadoAnterior)} a ${this.getEstadoText(reporte.estado)}`,
+          tipo: 'cambio_estado',
+          estadoAnterior: estadoAnterior,
+          estadoNuevo: reporte.estado
+        };
+        reporte.seguimientos.push(seguimientoEstado);
+      }
+
+      reporte.seguimientos.push(nuevoSeguimiento);
+      
+      this.showNotification(`Seguimiento agregado al reporte #${reporte.id}`, 'success');
+      this.cerrarModalSeguimiento();
+      this.filtrarReportes();
+    }
+  }
+
+  marcarResuelto(reporte: Reporte): void {
+    if (confirm(`¿Confirma que el reporte #${reporte.id} ha sido resuelto satisfactoriamente?`)) {
+      reporte.estado = 'resuelto';
+      reporte.fechaRespuesta = new Date().toISOString().split('T')[0];
+      this.showNotification(`Reporte #${reporte.id} marcado como resuelto`, 'success');
+      this.filtrarReportes();
+    }
+  }
+
+  cancelarReporte(reporte: Reporte): void {
+    if (confirm(`¿Está seguro de cancelar el reporte #${reporte.id}? Esta acción no se puede deshacer.`)) {
+      reporte.estado = 'rechazado';
+      this.showNotification(`Reporte #${reporte.id} cancelado`, 'warning');
+      this.filtrarReportes();
+    }
+  }
+
+  verDetalleReporte(reporteId: number): void {
+    // Expandir/colapsar detalles del reporte
     if (this.reporteExpandido() === reporteId) {
       this.reporteExpandido.set(null);
     } else {
@@ -476,118 +714,20 @@ export class ReportesProveedoresComponent implements OnInit {
     }
   }
 
-  abrirFormularioReporte(): void {
-    this.modoEdicion.set(false);
-    this.formularioReporte.set({
-      pedidoId: null,
-      proveedor: '',
-      tipoProblema: '',
-      prioridad: 'media',
-      descripcion: ''
-    });
-    this.mostrarFormulario.set(true);
-  }
-
-  editarReporte(reporte: ReporteProveedor): void {
-    this.modoEdicion.set(true);
-    this.formularioReporte.set({
-      id: reporte.id,
-      pedidoId: reporte.pedidoId,
-      proveedor: reporte.proveedor,
-      tipoProblema: reporte.tipoProblema,
-      prioridad: reporte.prioridad,
-      descripcion: reporte.descripcion
-    });
-    this.mostrarFormulario.set(true);
-  }
-
-  cerrarFormulario(): void {
-    this.mostrarFormulario.set(false);
-    this.modoEdicion.set(false);
-    this.formularioReporte.set({
-      pedidoId: null,
-      proveedor: '',
-      tipoProblema: '',
-      prioridad: 'media',
-      descripcion: ''
-    });
-  }
-
-  guardarReporte(): void {
-    const formulario = this.formularioReporte();
-    
-    // Validar que pedidoId no sea null
-    if (!formulario.pedidoId) {
-      this.showNotification('El ID del pedido es requerido', 'error');
-      return;
-    }
-    
-    if (this.modoEdicion()) {
-      // Actualizar reporte existente
-      const reportes = this.reportes().map(r => 
-        r.id === formulario.id ? { 
-          ...r, 
-          pedidoId: formulario.pedidoId!,
-          proveedor: formulario.proveedor,
-          tipoProblema: formulario.tipoProblema as ReporteProveedor['tipoProblema'],
-          prioridad: formulario.prioridad as ReporteProveedor['prioridad'],
-          descripcion: formulario.descripcion
-        } : r
-      );
-      this.reportes.set(reportes);
-      this.showNotification('Reporte actualizado correctamente', 'success');
-    } else {
-      // Crear nuevo reporte
-      const nuevoReporte: ReporteProveedor = {
-        id: Date.now(),
-        pedidoId: formulario.pedidoId,
-        proveedor: formulario.proveedor,
-        tipoProblema: formulario.tipoProblema as ReporteProveedor['tipoProblema'],
-        descripcion: formulario.descripcion,
-        fechaReporte: new Date().toISOString().split('T')[0],
-        estado: 'abierto',
-        prioridad: formulario.prioridad as ReporteProveedor['prioridad']
-      };
-      
-      this.reportes.set([...this.reportes(), nuevoReporte]);
-      this.showNotification('Reporte creado correctamente', 'success');
-    }
-    
-    this.filtrarReportes();
-    this.cerrarFormulario();
-  }
-
-  marcarEnProceso(reporte: ReporteProveedor): void {
-    reporte.estado = 'en_proceso';
-    this.showNotification(`Reporte #${reporte.id} marcado como en proceso`, 'success');
-    this.filtrarReportes();
-  }
-
-  marcarResuelto(reporte: ReporteProveedor): void {
-    reporte.estado = 'resuelto';
-    reporte.fechaResolucion = new Date().toISOString().split('T')[0];
-    this.showNotification(`Reporte #${reporte.id} marcado como resuelto`, 'success');
-    this.filtrarReportes();
-  }
-
-  cerrarReporte(reporte: ReporteProveedor): void {
-    reporte.estado = 'cerrado';
-    this.showNotification(`Reporte #${reporte.id} cerrado`, 'success');
-    this.filtrarReportes();
-  }
-
   limpiarFiltros(): void {
     this.filtroEstado.set('todos');
-    this.filtroPrioridad.set('todas');
     this.filtroTipo.set('todos');
+    this.busquedaProveedor.set('');
     this.filtrarReportes();
+    this.showNotification('Filtros limpiados', 'info');
   }
 
   goBack(): void {
     this.router.navigate(['/auxiliar']);
   }
 
-  private showNotification(message: string, type: 'success' | 'error' | 'warning'): void {
+  private showNotification(message: string, type: 'success' | 'error' | 'warning' | 'info'): void {
     console.log(`${type.toUpperCase()}: ${message}`);
+    alert(message);
   }
 }
