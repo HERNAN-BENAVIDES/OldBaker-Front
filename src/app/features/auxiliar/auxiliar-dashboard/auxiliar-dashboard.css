@@ -2,17 +2,16 @@
 :host {
   display: block;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(180deg, #f5f7fa 0%, #e8ecf1 100%);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   color: #333;
 }
 
 /* Header */
 .header {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
+  background: #2c4a9e;
   padding: 1.5rem 2rem;
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .header-content {
@@ -37,22 +36,20 @@
 .logo h1 {
   font-size: 1.8rem;
   font-weight: 700;
-  background: linear-gradient(45deg, #667eea, #764ba2);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: white;
+  margin: 0;
 }
 
 .user-info {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: #667eea;
-  color: white;
+  background: white;
+  color: #2c4a9e;
   padding: 0.75rem 1.25rem;
   border-radius: 50px;
-  font-weight: 500;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .user-icon {
@@ -62,7 +59,7 @@
 .subtitle {
   text-align: center;
   margin-top: 0.75rem;
-  color: #666;
+  color: rgba(255, 255, 255, 0.9);
   font-size: 1rem;
 }
 
@@ -77,8 +74,8 @@
   text-align: center;
   margin-bottom: 2.5rem;
   font-size: 2rem;
-  color: white;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  color: #2c4a9e;
+  font-weight: 700;
 }
 
 /* Grid de módulos */
@@ -90,15 +87,15 @@
 }
 
 .module-card {
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 16px;
+  background: white;
+  border-radius: 12px;
   padding: 2rem;
   display: flex;
   align-items: center;
   gap: 1.5rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   border: 2px solid transparent;
   position: relative;
   overflow: hidden;
@@ -111,7 +108,7 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(45deg, #667eea, #764ba2);
+  background: #2c4a9e;
   transform: scaleX(0);
   transition: transform 0.3s ease;
 }
@@ -122,13 +119,13 @@
 
 .module-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
-  border-color: #667eea;
+  box-shadow: 0 8px 20px rgba(44, 74, 158, 0.15);
+  border-color: #2c4a9e;
 }
 
 .module-icon {
   font-size: 2.5rem;
-  background: linear-gradient(45deg, #667eea, #764ba2);
+  background: #2c4a9e;
   padding: 1rem;
   border-radius: 12px;
   display: flex;
@@ -136,7 +133,7 @@
   justify-content: center;
   min-width: 70px;
   min-height: 70px;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 12px rgba(44, 74, 158, 0.2);
 }
 
 .module-content {
@@ -146,7 +143,7 @@
 .module-content h3 {
   font-size: 1.4rem;
   margin-bottom: 0.75rem;
-  color: #333;
+  color: #2c4a9e;
   font-weight: 600;
 }
 
@@ -165,7 +162,7 @@
 .stat-number {
   font-size: 1.8rem;
   font-weight: 700;
-  color: #667eea;
+  color: #2c4a9e;
 }
 
 .stat-label {
@@ -175,7 +172,7 @@
 
 .module-arrow {
   font-size: 1.5rem;
-  color: #667eea;
+  color: #2c4a9e;
   font-weight: bold;
   transition: transform 0.3s ease;
 }
@@ -186,18 +183,19 @@
 
 /* Panel de estado */
 .status-panel {
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 16px;
+  background: white;
+  border-radius: 12px;
   padding: 2rem;
   margin-bottom: 2rem;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .status-panel h3 {
   text-align: center;
   margin-bottom: 1.5rem;
   font-size: 1.5rem;
-  color: #333;
+  color: #2c4a9e;
+  font-weight: 600;
 }
 
 .status-grid {
@@ -220,22 +218,27 @@
 }
 
 .status-item.success {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
   color: white;
 }
 
 .status-item.warning {
-  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
   color: white;
 }
 
 .status-item.danger {
-  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
   color: white;
 }
 
 .status-icon {
   font-size: 1.8rem;
+}
+
+.status-info {
+  display: flex;
+  flex-direction: column;
 }
 
 .status-number {
@@ -245,22 +248,23 @@
 
 .status-label {
   font-size: 0.9rem;
-  opacity: 0.9;
+  opacity: 0.95;
 }
 
 /* Acciones rápidas */
 .quick-actions {
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 16px;
+  background: white;
+  border-radius: 12px;
   padding: 2rem;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .quick-actions h3 {
   text-align: center;
   margin-bottom: 1.5rem;
   font-size: 1.5rem;
-  color: #333;
+  color: #2c4a9e;
+  font-weight: 600;
 }
 
 .action-buttons {
@@ -276,32 +280,32 @@
   gap: 0.5rem;
   padding: 0.875rem 1.5rem;
   border: none;
-  border-radius: 12px;
+  border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   font-size: 1rem;
 }
 
 .action-btn.primary {
-  background: linear-gradient(45deg, #667eea, #764ba2);
+  background: #2c4a9e;
   color: white;
 }
 
 .action-btn.secondary {
-  background: linear-gradient(45deg, #fa709a, #fee140);
-  color: white;
+  background: #ffc107;
+  color: #333;
 }
 
 .action-btn.tertiary {
-  background: linear-gradient(45deg, #4facfe, #00f2fe);
+  background: #28a745;
   color: white;
 }
 
 .action-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .action-btn:disabled {
@@ -321,18 +325,18 @@
 }
 
 .refresh-btn {
-  background: linear-gradient(45deg, #28a745, #20c997);
+  background: #28a745;
   min-width: 200px;
 }
 
-/* Loading Overlay mejorado */
+/* Loading Overlay */
 .loading-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.95);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -344,7 +348,7 @@
 .loading-text {
   margin-top: 1rem;
   font-size: 1.1rem;
-  color: #667eea;
+  color: #2c4a9e;
   font-weight: 500;
 }
 
@@ -352,7 +356,7 @@
   width: 50px;
   height: 50px;
   border: 5px solid #f3f3f3;
-  border-top: 5px solid #667eea;
+  border-top: 5px solid #2c4a9e;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -362,7 +366,7 @@
   100% { transform: rotate(360deg); }
 }
 
-/* Notifications mejoradas */
+/* Notifications */
 .notification {
   position: fixed;
   top: 20px;
@@ -372,12 +376,13 @@
   color: white;
   font-weight: 500;
   z-index: 10001;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   display: flex;
   align-items: center;
   gap: 0.75rem;
   min-width: 300px;
   max-width: 400px;
+  animation: slideIn 0.3s ease;
 }
 
 .notification-icon {
@@ -410,29 +415,29 @@
 }
 
 .notification.success {
-  background: linear-gradient(45deg, #4CAF50, #45a049);
+  background: #28a745;
 }
 
 .notification.error {
-  background: linear-gradient(45deg, #f44336, #da190b);
+  background: #dc3545;
 }
 
 .notification.info {
-  background: linear-gradient(45deg, #667eea, #764ba2);
+  background: #2c4a9e;
 }
 
 .notification.warning {
-  background: linear-gradient(45deg, #ff9800, #f57c00);
+  background: #ffc107;
+  color: #333;
 }
 
 /* Footer */
 .footer {
-  background: rgba(255, 255, 255, 0.95);
+  background: white;
   text-align: center;
   padding: 1.5rem;
   margin-top: 3rem;
-  backdrop-filter: blur(10px);
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  border-top: 1px solid #e8ecf1;
 }
 
 .footer-content p {
@@ -443,7 +448,7 @@
 
 .footer-content p:first-child {
   font-weight: 600;
-  color: #333;
+  color: #2c4a9e;
 }
 
 @keyframes slideIn {

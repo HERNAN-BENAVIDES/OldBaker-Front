@@ -8,7 +8,7 @@ interface PedidoDetalle {
   proveedor: string;
   fechaPedido: string;
   fechaEntrega: string;
-  estado: 'pendiente' | 'recibido' | 'verificado' | 'aprobado' | 'rechazado';
+  estado: 'pendiente' | 'recibido' | 'verificado' | 'incompleto' | 'aprobado' | 'rechazado';
   items: ItemPedido[];
   total: number;
 }
@@ -39,6 +39,8 @@ interface ItemPedido {
             <option value="pendiente">Pendientes</option>
             <option value="recibido">Recibidos</option>
             <option value="verificado">Verificados</option>
+            <option value="incompleto">Incompletos</option>
+            <option value="aprobado">Aprobados</option>
           </select>
         </div>
       </header>
@@ -57,6 +59,10 @@ interface ItemPedido {
             <h3>Verificados</h3>
             <span class="stat-number">{{ getCountByStatus('verificado') }}</span>
           </div>
+          <div class="stat-card incompleto">
+            <h3>Incompletos</h3>
+            <span class="stat-number">{{ getCountByStatus('incompleto') }}</span>
+          </div>
         </div>
 
         <div class="pedidos-list">
@@ -70,12 +76,19 @@ interface ItemPedido {
               </div>
               <div class="pedido-status">
                 <span class="status-badge" [ngClass]="pedido.estado">{{ getStatusText(pedido.estado) }}</span>
-                <span class="total">\${{ pedido.total | number:'1.2-2' }}</span>
+                <div class="total">\${{ pedido.total | number:'1.2-2' }}</div>
               </div>
             </div>
 
             <div class="items-section" *ngIf="pedidoExpandido() === pedido.id">
               <h4>Detalles del Pedido:</h4>
+              
+              <!-- Mensaje de ayuda -->
+              <div class="alert-message info" *ngIf="pedido.estado === 'recibido'">
+                <span>ℹ️</span>
+                <span>Complete la información de cada ítem para verificar el pedido</span>
+              </div>
+
               <div class="items-table">
                 <div class="item-header">
                   <span>Insumo</span>
@@ -84,6 +97,7 @@ interface ItemPedido {
                   <span>Precio Unit.</span>
                   <span>Vencimiento</span>
                   <span>Estado</span>
+                  <span>Observaciones</span>
                   <span>Acciones</span>
                 </div>
                 
@@ -93,36 +107,74 @@ interface ItemPedido {
                   <input 
                     type="number" 
                     [value]="item.cantidadRecibida"
-                    (input)="updateCantidadRecibida(item, $event)"
-                    [disabled]="pedido.estado === 'aprobado'"
-                    class="cantidad-input">
-                  <span>\${{ item.precioUnitario }}</span>
-                  <span [ngClass]="{'vencido': isVencido(item.fechaVencimiento)}">
-                    {{ item.fechaVencimiento || 'N/A' }}
-                  </span>
+                    (input)="updateCantidadRecibida(pedido, item, $event)"
+                    [disabled]="pedido.estado === 'aprobado' || pedido.estado === 'rechazado'"
+                    class="cantidad-input"
+                    min="0"
+                    [max]="item.cantidadPedida">
+                  <span>\${{ item.precioUnitario | number:'1.2-2' }}</span>
+                  <input 
+                    type="date"
+                    [value]="item.fechaVencimiento || ''"
+                    (input)="updateFechaVencimiento(item, $event)"
+                    [disabled]="pedido.estado === 'aprobado' || pedido.estado === 'rechazado'"
+                    class="fecha-input"
+                    [ngClass]="{'vencido': isVencido(item.fechaVencimiento)}">
                   <select 
                     [value]="item.estado"
-                    (change)="updateEstadoItem(item, $event)"
-                    [disabled]="pedido.estado === 'aprobado'" 
+                    (change)="updateEstadoItem(pedido, item, $event)"
+                    [disabled]="pedido.estado === 'aprobado' || pedido.estado === 'rechazado'" 
                     class="estado-select">
                     <option value="completo">Completo</option>
                     <option value="incompleto">Incompleto</option>
                     <option value="vencido">Vencido</option>
                     <option value="defectuoso">Defectuoso</option>
                   </select>
+                  <div>
+                    <span class="observacion-badge" *ngIf="item.observaciones" (click)="verObservacion(item)">
+                      📝 Ver nota
+                    </span>
+                    <span *ngIf="!item.observaciones && item.estado !== 'completo'" 
+                          style="color: #999; font-size: 0.8rem;">Sin nota</span>
+                    <div class="observacion-text" *ngIf="mostrarObservacion() === item.id && item.observaciones">
+                      {{ item.observaciones }}
+                    </div>
+                  </div>
                   <button 
                     class="btn-secondary" 
                     (click)="abrirObservaciones(item)"
-                    *ngIf="item.estado !== 'completo'">
-                    Observar
+                    [disabled]="pedido.estado === 'aprobado' || pedido.estado === 'rechazado'">
+                    {{ item.observaciones ? 'Editar' : 'Agregar' }}
                   </button>
                 </div>
               </div>
 
-              <div class="verification-actions" *ngIf="pedido.estado !== 'aprobado'">
-                <button class="btn-success" (click)="aprobarPedido(pedido)">✓ Aprobar como Pagable</button>
-                <button class="btn-warning" (click)="marcarIncompleto(pedido)">⚠️ Marcar Incompleto</button>
-                <button class="btn-danger" (click)="rechazarPedido(pedido)">✗ Rechazar Pedido</button>
+              <!-- Información de validación -->
+              <div class="alert-message warning" *ngIf="!puedeAprobar(pedido) && pedido.estado !== 'aprobado'">
+                <span>⚠️</span>
+                <span>{{ getMensajeValidacion(pedido) }}</span>
+              </div>
+
+              <div class="verification-actions" *ngIf="pedido.estado !== 'aprobado' && pedido.estado !== 'rechazado'">
+                <button 
+                  class="btn-success" 
+                  (click)="aprobarPedido(pedido)"
+                  [disabled]="!puedeAprobar(pedido)">
+                  <span class="btn-icon">✓</span>
+                  Aprobar como Pagable
+                </button>
+                <button 
+                  class="btn-warning" 
+                  (click)="marcarIncompleto(pedido)">
+                  <span class="btn-icon">⚠️</span>
+                  Marcar Incompleto
+                </button>
+                <button 
+                  class="btn-danger" 
+                  (click)="rechazarPedido(pedido)">
+                  <span class="btn-icon">✗</span>
+                  Rechazar Pedido
+                </button>
               </div>
             </div>
 
@@ -138,17 +190,20 @@ interface ItemPedido {
       </main>
 
       <!-- Modal de Observaciones -->
-      <div class="modal-overlay" *ngIf="modalObservaciones()">
-        <div class="modal">
-          <h3>Observaciones</h3>
+      <div class="modal-overlay" *ngIf="modalObservaciones()" (click)="cerrarModalClick($event)">
+        <div class="modal" (click)="$event.stopPropagation()">
+          <h3>📝 Observaciones del Ítem</h3>
+          <p style="color: #666; margin-bottom: 1rem;">
+            <strong>{{ itemSeleccionado?.insumo }}</strong>
+          </p>
           <textarea 
             [value]="observacionTemp()"
             (input)="updateObservacion($event)"
-            placeholder="Describe el problema o observación..."
-            rows="4"></textarea>
+            placeholder="Describe el problema o situación específica de este ítem..."
+            rows="5"></textarea>
           <div class="modal-actions">
             <button class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
-            <button class="btn-primary" (click)="guardarObservacion()">Guardar</button>
+            <button class="btn-primary" (click)="guardarObservacion()">Guardar Observación</button>
           </div>
         </div>
       </div>
@@ -164,8 +219,9 @@ export class DetallesPedidosComponent implements OnInit {
   readonly pedidoExpandido = signal<number | null>(null);
   readonly modalObservaciones = signal<boolean>(false);
   readonly observacionTemp = signal<string>('');
+  readonly mostrarObservacion = signal<number | null>(null);
   
-  private itemSeleccionado: ItemPedido | null = null;
+  itemSeleccionado: ItemPedido | null = null;
 
   constructor(private router: Router) {}
 
@@ -184,18 +240,43 @@ export class DetallesPedidosComponent implements OnInit {
     this.observacionTemp.set(target.value);
   }
 
-  updateCantidadRecibida(item: ItemPedido, event: Event): void {
+  updateCantidadRecibida(pedido: PedidoDetalle, item: ItemPedido, event: Event): void {
     const target = event.target as HTMLInputElement;
-    item.cantidadRecibida = parseInt(target.value) || 0;
+    const cantidad = parseInt(target.value) || 0;
+    item.cantidadRecibida = Math.min(cantidad, item.cantidadPedida);
+    
+    // Actualizar estado automáticamente si la cantidad es diferente
+    if (item.cantidadRecibida < item.cantidadPedida && item.estado === 'completo') {
+      item.estado = 'incompleto';
+    } else if (item.cantidadRecibida === item.cantidadPedida && item.estado === 'incompleto') {
+      item.estado = 'completo';
+    }
+    
+    this.actualizarTotalPedido(pedido);
   }
 
-  updateEstadoItem(item: ItemPedido, event: Event): void {
+  updateFechaVencimiento(item: ItemPedido, event: Event): void {
+    const target = event.target as HTMLInputElement;
+    item.fechaVencimiento = target.value;
+    
+    // Si la fecha está vencida, actualizar estado automáticamente
+    if (this.isVencido(item.fechaVencimiento)) {
+      item.estado = 'vencido';
+    }
+  }
+
+  updateEstadoItem(pedido: PedidoDetalle, item: ItemPedido, event: Event): void {
     const target = event.target as HTMLSelectElement;
     item.estado = target.value as 'completo' | 'incompleto' | 'vencido' | 'defectuoso';
   }
 
+  private actualizarTotalPedido(pedido: PedidoDetalle): void {
+    pedido.total = pedido.items.reduce((total, item) => {
+      return total + (item.cantidadRecibida * item.precioUnitario);
+    }, 0);
+  }
+
   private loadPedidos(): void {
-    // Simulación de datos - en producción vendría del backend
     const pedidosData: PedidoDetalle[] = [
       {
         id: 1001,
@@ -220,8 +301,9 @@ export class DetallesPedidosComponent implements OnInit {
             cantidadPedida: 15,
             cantidadRecibida: 12,
             precioUnitario: 35.00,
-            fechaVencimiento: '2025-12-01',
-            estado: 'incompleto'
+            fechaVencimiento: '',
+            estado: 'incompleto',
+            observaciones: 'Faltaron 3 bultos en la entrega'
           }
         ]
       },
@@ -239,8 +321,75 @@ export class DetallesPedidosComponent implements OnInit {
             cantidadPedida: 8,
             cantidadRecibida: 0,
             precioUnitario: 55.00,
-            fechaVencimiento: '2024-02-20',
+            fechaVencimiento: '',
             estado: 'completo'
+          },
+          {
+            id: 4,
+            insumo: 'Leche Entera (1L)',
+            cantidadPedida: 20,
+            cantidadRecibida: 0,
+            precioUnitario: 15.50,
+            fechaVencimiento: '',
+            estado: 'completo'
+          }
+        ]
+      },
+      {
+        id: 1003,
+        proveedor: 'Distribuidora Central',
+        fechaPedido: '2024-01-17',
+        fechaEntrega: '2024-01-20',
+        estado: 'verificado',
+        total: 2340.00,
+        items: [
+          {
+            id: 5,
+            insumo: 'Levadura Fresca (500g)',
+            cantidadPedida: 30,
+            cantidadRecibida: 30,
+            precioUnitario: 12.00,
+            fechaVencimiento: '2024-02-15',
+            estado: 'completo'
+          },
+          {
+            id: 6,
+            insumo: 'Sal Refinada (1kg)',
+            cantidadPedida: 50,
+            cantidadRecibida: 50,
+            precioUnitario: 8.00,
+            fechaVencimiento: '2026-01-01',
+            estado: 'completo'
+          }
+        ]
+      },
+      {
+        id: 1004,
+        proveedor: 'Ingredientes Premium',
+        fechaPedido: '2024-01-14',
+        fechaEntrega: '2024-01-17',
+        estado: 'incompleto',
+        total: 1890.00,
+        items: [
+          {
+            id: 7,
+            insumo: 'Chocolate en Polvo (2kg)',
+            cantidadPedida: 20,
+            cantidadRecibida: 15,
+            precioUnitario: 45.00,
+            fechaVencimiento: '2025-03-01',
+            estado: 'incompleto',
+            observaciones: 'Llegaron solo 15 unidades. El proveedor confirmó el envío del faltante.'
+          },
+          {
+            id: 8,
+            insumo: 'Vainilla Líquida (250ml)',
+            cantidadPedida: 10,
+            cantidadRecibida: 8,
+            precioUnitario: 28.00,
+            fechaVencimiento: '2024-12-01',
+            estado: 'incompleto',
+            observaciones: 'Dos botellas llegaron con el sello roto'
           }
         ]
       }
@@ -270,6 +419,7 @@ export class DetallesPedidosComponent implements OnInit {
       pendiente: 'Pendiente',
       recibido: 'Recibido',
       verificado: 'Verificado',
+      incompleto: 'Incompleto',
       aprobado: 'Aprobado',
       rechazado: 'Rechazado'
     };
@@ -286,31 +436,121 @@ export class DetallesPedidosComponent implements OnInit {
 
   isVencido(fecha?: string): boolean {
     if (!fecha) return false;
-    return new Date(fecha) < new Date();
+    const fechaVencimiento = new Date(fecha);
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    return fechaVencimiento < hoy;
+  }
+
+  puedeAprobar(pedido: PedidoDetalle): boolean {
+    return pedido.items.every(item => {
+      const cantidadCorrecta = item.cantidadRecibida === item.cantidadPedida;
+      const estadoCorrecto = item.estado === 'completo';
+      const tieneFechaVencimiento = item.fechaVencimiento !== undefined && item.fechaVencimiento !== '';
+      const noEstaVencido = !this.isVencido(item.fechaVencimiento);
+      
+      return cantidadCorrecta && estadoCorrecto && tieneFechaVencimiento && noEstaVencido;
+    });
+  }
+
+  getMensajeValidacion(pedido: PedidoDetalle): string {
+    const itemsIncompletos = pedido.items.filter(i => i.cantidadRecibida < i.cantidadPedida);
+    const itemsSinFecha = pedido.items.filter(i => !i.fechaVencimiento || i.fechaVencimiento === '');
+    const itemsVencidos = pedido.items.filter(i => this.isVencido(i.fechaVencimiento));
+    const itemsProblematicos = pedido.items.filter(i => i.estado !== 'completo');
+    
+    const mensajes: string[] = [];
+    
+    if (itemsIncompletos.length > 0) {
+      mensajes.push(`${itemsIncompletos.length} ítem(s) con cantidad incompleta`);
+    }
+    if (itemsSinFecha.length > 0) {
+      mensajes.push(`${itemsSinFecha.length} ítem(s) sin fecha de vencimiento`);
+    }
+    if (itemsVencidos.length > 0) {
+      mensajes.push(`${itemsVencidos.length} ítem(s) vencido(s)`);
+    }
+    if (itemsProblematicos.length > 0) {
+      mensajes.push(`${itemsProblematicos.length} ítem(s) con problemas`);
+    }
+    
+    if (mensajes.length === 0) {
+      return 'Complete todos los campos para aprobar el pedido';
+    }
+    
+    return 'Problemas detectados: ' + mensajes.join(', ');
   }
 
   aprobarPedido(pedido: PedidoDetalle): void {
-    // Verificar que todos los items estén completos
-    const todosCompletos = pedido.items.every(item => 
-      item.cantidadRecibida >= item.cantidadPedida && item.estado === 'completo'
-    );
-
-    if (todosCompletos) {
-      pedido.estado = 'aprobado';
-      this.showNotification('Pedido aprobado como pagable', 'success');
-    } else {
-      this.showNotification('No se puede aprobar: hay items incompletos o con problemas', 'error');
+    console.log('=== APROBAR PEDIDO ===');
+    console.log('Pedido antes:', pedido);
+    console.log('Estado antes:', pedido.estado);
+    console.log('¿Puede aprobar?', this.puedeAprobar(pedido));
+    
+    if (!this.puedeAprobar(pedido)) {
+      console.log('No se puede aprobar - Mensaje:', this.getMensajeValidacion(pedido));
+      this.showNotification(this.getMensajeValidacion(pedido), 'error');
+      return;
     }
+    
+    // Actualizar el array principal de pedidos
+    const pedidosActualizados = this.pedidos().map(p => {
+      if (p.id === pedido.id) {
+        return { ...p, estado: 'aprobado' as const };
+      }
+      return p;
+    });
+    
+    console.log('Pedidos actualizados:', pedidosActualizados);
+    
+    // Actualizar el signal principal
+    this.pedidos.set(pedidosActualizados);
+    
+    // Refiltrar para actualizar la vista
+    this.filtrarPedidos();
+    
+    console.log('Estado después de actualizar:', this.pedidos().find(p => p.id === pedido.id)?.estado);
+    console.log('=== FIN APROBAR ===');
+    
+    this.showNotification(`Pedido #${pedido.id} aprobado como pagable exitosamente`, 'success');
   }
 
   marcarIncompleto(pedido: PedidoDetalle): void {
-    pedido.estado = 'verificado';
-    this.showNotification('Pedido marcado como incompleto', 'warning');
+    const tieneProblemas = pedido.items.some(item => 
+      item.estado !== 'completo' || 
+      item.cantidadRecibida < item.cantidadPedida
+    );
+    
+    if (!tieneProblemas) {
+      this.showNotification('Debe marcar al menos un ítem con problemas para registrar el pedido como incompleto', 'warning');
+      return;
+    }
+    
+    pedido.estado = 'incompleto';
+    
+    // Forzar actualización de los signals
+    const pedidosActualizados = this.pedidos().map(p => 
+      p.id === pedido.id ? { ...p, estado: 'incompleto' as const } : p
+    );
+    this.pedidos.set(pedidosActualizados);
+    this.filtrarPedidos();
+    
+    this.showNotification(`Pedido #${pedido.id} marcado como incompleto`, 'warning');
   }
 
   rechazarPedido(pedido: PedidoDetalle): void {
-    pedido.estado = 'rechazado';
-    this.showNotification('Pedido rechazado', 'error');
+    if (confirm(`¿Está seguro de rechazar completamente el pedido #${pedido.id}?`)) {
+      pedido.estado = 'rechazado';
+      
+      // Forzar actualización de los signals
+      const pedidosActualizados = this.pedidos().map(p => 
+        p.id === pedido.id ? { ...p, estado: 'rechazado' as const } : p
+      );
+      this.pedidos.set(pedidosActualizados);
+      this.filtrarPedidos();
+      
+      this.showNotification(`Pedido #${pedido.id} rechazado`, 'error');
+    }
   }
 
   abrirObservaciones(item: ItemPedido): void {
@@ -319,16 +559,35 @@ export class DetallesPedidosComponent implements OnInit {
     this.modalObservaciones.set(true);
   }
 
+  verObservacion(item: ItemPedido): void {
+    if (this.mostrarObservacion() === item.id) {
+      this.mostrarObservacion.set(null);
+    } else {
+      this.mostrarObservacion.set(item.id);
+    }
+  }
+
   cerrarModal(): void {
     this.modalObservaciones.set(false);
     this.itemSeleccionado = null;
     this.observacionTemp.set('');
   }
 
+  cerrarModalClick(event: MouseEvent): void {
+    this.cerrarModal();
+  }
+
   guardarObservacion(): void {
     if (this.itemSeleccionado) {
-      this.itemSeleccionado.observaciones = this.observacionTemp();
-      this.showNotification('Observación guardada', 'success');
+      const observacion = this.observacionTemp().trim();
+      
+      if (observacion === '') {
+        this.showNotification('Por favor ingrese una observación', 'warning');
+        return;
+      }
+      
+      this.itemSeleccionado.observaciones = observacion;
+      this.showNotification('Observación guardada exitosamente', 'success');
     }
     this.cerrarModal();
   }
@@ -339,5 +598,6 @@ export class DetallesPedidosComponent implements OnInit {
 
   private showNotification(message: string, type: 'success' | 'error' | 'warning'): void {
     console.log(`${type.toUpperCase()}: ${message}`);
+    alert(`${type.toUpperCase()}: ${message}`);
   }
 }

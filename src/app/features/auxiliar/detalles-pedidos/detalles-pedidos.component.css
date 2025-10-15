@@ -1,16 +1,15 @@
 /* Container principal */
 .container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(180deg, #f5f7fa 0%, #e8ecf1 100%);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 /* Header */
 .header {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
+  background: #2c4a9e;
   padding: 1.5rem 2rem;
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -19,24 +18,24 @@
 }
 
 .back-btn {
-  background: #667eea;
-  color: white;
+  background: white;
+  color: #2c4a9e;
   border: none;
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
   cursor: pointer;
-  font-weight: 500;
+  font-weight: 600;
   transition: all 0.3s ease;
 }
 
 .back-btn:hover {
-  background: #5a6fd8;
+  background: #f0f0f0;
   transform: translateY(-1px);
 }
 
 .header h1 {
   font-size: 1.8rem;
-  color: #333;
+  color: white;
   margin: 0;
   flex-grow: 1;
   text-align: center;
@@ -49,11 +48,13 @@
 
 .filter-select {
   padding: 0.5rem 1rem;
-  border: 2px solid #ddd;
+  border: 2px solid white;
   border-radius: 8px;
   background: white;
+  color: #2c4a9e;
   cursor: pointer;
   font-size: 0.9rem;
+  font-weight: 500;
 }
 
 /* Main content */
@@ -75,7 +76,7 @@
   background: white;
   padding: 1.5rem;
   border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -91,27 +92,32 @@
 }
 
 .stat-card.pendiente::before {
-  background: linear-gradient(45deg, #ff9800, #f57c00);
+  background: #ffc107;
 }
 
 .stat-card.recibido::before {
-  background: linear-gradient(45deg, #2196f3, #1976d2);
+  background: #2c4a9e;
 }
 
 .stat-card.verificado::before {
-  background: linear-gradient(45deg, #4caf50, #388e3c);
+  background: #28a745;
+}
+
+.stat-card.incompleto::before {
+  background: #ff9800;
 }
 
 .stat-card h3 {
   color: #666;
   font-size: 1rem;
   margin-bottom: 0.5rem;
+  font-weight: 600;
 }
 
 .stat-number {
   font-size: 2rem;
   font-weight: 700;
-  color: #333;
+  color: #2c4a9e;
 }
 
 /* Pedidos list */
@@ -124,14 +130,14 @@
 .pedido-card {
   background: white;
   border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   overflow: hidden;
   transition: all 0.3s ease;
 }
 
 .pedido-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 15px rgba(44, 74, 158, 0.15);
 }
 
 .pedido-header {
@@ -139,12 +145,13 @@
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .pedido-info h3 {
-  color: #333;
+  color: #2c4a9e;
   margin-bottom: 0.5rem;
+  font-weight: 700;
 }
 
 .pedido-info p {
@@ -173,13 +180,18 @@
 }
 
 .status-badge.recibido {
-  background: #d1ecf1;
-  color: #0c5460;
+  background: #d1e7ff;
+  color: #004085;
 }
 
 .status-badge.verificado {
   background: #d4edda;
   color: #155724;
+}
+
+.status-badge.incompleto {
+  background: #ffe5b4;
+  color: #8b4513;
 }
 
 .status-badge.aprobado {
@@ -195,7 +207,7 @@
 .total {
   font-size: 1.2rem;
   font-weight: 700;
-  color: #667eea;
+  color: #2c4a9e;
 }
 
 /* Items section */
@@ -206,22 +218,23 @@
 
 .items-section h4 {
   margin-bottom: 1rem;
-  color: #333;
+  color: #2c4a9e;
+  font-weight: 600;
 }
 
 .items-table {
   background: white;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .item-header {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr 1.2fr 1.2fr 1fr;
+  grid-template-columns: 2fr 0.8fr 0.8fr 1fr 1.2fr 1.2fr 1fr 1fr;
   gap: 1rem;
   padding: 1rem;
-  background: #667eea;
+  background: #2c4a9e;
   color: white;
   font-weight: 600;
   font-size: 0.9rem;
@@ -229,10 +242,10 @@
 
 .item-row {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr 1.2fr 1.2fr 1fr;
+  grid-template-columns: 2fr 0.8fr 0.8fr 1fr 1.2fr 1.2fr 1fr 1fr;
   gap: 1rem;
   padding: 1rem;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #f0f0f0;
   align-items: center;
 }
 
@@ -245,11 +258,17 @@
   color: #333;
 }
 
-.cantidad-input {
+.cantidad-input,
+.fecha-input {
   padding: 0.5rem;
   border: 1px solid #ddd;
   border-radius: 4px;
-  max-width: 80px;
+  max-width: 100px;
+  font-size: 0.9rem;
+}
+
+.fecha-input {
+  max-width: 130px;
 }
 
 .estado-select {
@@ -258,11 +277,37 @@
   border-radius: 4px;
   background: white;
   cursor: pointer;
+  font-size: 0.85rem;
 }
 
 .vencido {
   color: #dc3545 !important;
   font-weight: 600;
+}
+
+.observacion-badge {
+  background: #e7f3ff;
+  color: #004085;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.observacion-badge:hover {
+  background: #cce5ff;
+}
+
+.observacion-text {
+  font-size: 0.8rem;
+  color: #666;
+  font-style: italic;
+  margin-top: 0.25rem;
+  padding: 0.5rem;
+  background: #f8f9fa;
+  border-radius: 4px;
+  border-left: 3px solid #2c4a9e;
 }
 
 /* Botones */
@@ -271,18 +316,18 @@
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  font-weight: 500;
+  font-weight: 600;
   transition: all 0.3s ease;
   margin: 0.25rem;
 }
 
 .btn-primary {
-  background: #667eea;
+  background: #2c4a9e;
   color: white;
 }
 
 .btn-primary:hover {
-  background: #5a6fd8;
+  background: #1e3a7a;
   transform: translateY(-1px);
 }
 
@@ -293,6 +338,10 @@
   padding: 0.5rem 1rem;
 }
 
+.btn-secondary:hover {
+  background: #5a6268;
+}
+
 .btn-success {
   background: #28a745;
   color: white;
@@ -300,7 +349,7 @@
 
 .btn-warning {
   background: #ffc107;
-  color: #212529;
+  color: #333;
 }
 
 .btn-danger {
@@ -320,6 +369,10 @@
   background: #c82333;
 }
 
+.btn-icon {
+  margin-right: 0.5rem;
+}
+
 /* Verification actions */
 .verification-actions {
   display: flex;
@@ -329,6 +382,7 @@
   padding: 1rem;
   background: white;
   border-radius: 8px;
+  flex-wrap: wrap;
 }
 
 /* Pedido actions */
@@ -350,6 +404,16 @@
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .modal {
@@ -359,21 +423,40 @@
   width: 90%;
   max-width: 500px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .modal h3 {
   margin-bottom: 1rem;
-  color: #333;
+  color: #2c4a9e;
+  font-weight: 700;
 }
 
 .modal textarea {
   width: 100%;
   padding: 1rem;
-  border: 1px solid #ddd;
+  border: 2px solid #ddd;
   border-radius: 8px;
   resize: vertical;
   font-family: inherit;
   margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.modal textarea:focus {
+  outline: none;
+  border-color: #2c4a9e;
 }
 
 .modal-actions {
@@ -382,11 +465,33 @@
   gap: 1rem;
 }
 
+/* Alert message */
+.alert-message {
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.alert-message.warning {
+  background: #fff3cd;
+  color: #856404;
+  border-left: 4px solid #ffc107;
+}
+
+.alert-message.info {
+  background: #d1e7ff;
+  color: #004085;
+  border-left: 4px solid #2c4a9e;
+}
+
 /* Responsive */
 @media (max-width: 1200px) {
   .item-header,
   .item-row {
-    grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr;
+    grid-template-columns: 1.5fr 0.7fr 0.7fr 0.9fr 1fr 1fr 0.8fr 0.8fr;
     font-size: 0.8rem;
   }
 }
@@ -400,6 +505,7 @@
   .header h1 {
     order: 1;
     margin-bottom: 1rem;
+    font-size: 1.5rem;
   }
   
   .back-btn {
@@ -425,10 +531,30 @@
   .item-row {
     grid-template-columns: 1fr;
     gap: 0.5rem;
-    text-align: center;
+    text-align: left;
+  }
+  
+  .item-header span {
+    display: none;
+  }
+  
+  .item-row > * {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .item-row > *::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #666;
   }
   
   .verification-actions {
     flex-direction: column;
+  }
+  
+  .verification-actions button {
+    width: 100%;
   }
 }
