@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
 import { AuthService } from '../../services/auth.service';
 import { NotificationService } from '../../../../shared/notification/notification.service';
@@ -35,7 +35,7 @@ interface AuthResponse {
   styleUrls: ['./login.css']
 })
 
-export class Login {
+export class Login implements OnInit {
   private readonly baseUrl = `${environment.apiUrl}/oauth2/authorization/google`;
   loginForm: FormGroup;
   hidePassword = true;
@@ -45,12 +45,22 @@ export class Login {
   constructor(
     private fb: FormBuilder,
     private router: Router,
+    private route: ActivatedRoute,
     private authService: AuthService,
     private notifications: NotificationService
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required]]
+    });
+  }
+
+  ngOnInit() {
+    // Verificar si llegamos aquí por sesión expirada
+    this.route.queryParams.subscribe(params => {
+      if (params['sessionExpired'] === 'true') {
+        this.notifications.showError('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
+      }
     });
   }
 

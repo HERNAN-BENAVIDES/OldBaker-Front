@@ -1,0 +1,48 @@
+<div class="accessibility-floating-container">
+  <!-- Botón flotante principal con ícono de accesibilidad -->
+  <button
+    class="accessibility-fab"
+    (click)="toggleMenu()"
+    [class.open]="isOpen"
+    [attr.aria-expanded]="isOpen"
+    aria-label="Opciones de accesibilidad"
+    title="Accesibilidad">
+    <lucide-icon [img]="Accessibility" class="fab-icon"></lucide-icon>
+  </button>
+
+  <!-- Menú desplegable con 3 botones -->
+  <div class="accessibility-menu-simple" *ngIf="isOpen">
+    <!-- Botón de Contraste con ícono Sol/Luna -->
+    <button
+      class="action-btn contrast-action-btn"
+      (click)="toggleContrast()"
+      [class.active]="highContrast"
+      [attr.aria-pressed]="highContrast"
+      [title]="highContrast ? 'Desactivar alto contraste' : 'Activar alto contraste'">
+      <lucide-icon [img]="highContrast ? Moon : Sun" class="btn-icon"></lucide-icon>
+    </button>
+
+    <!-- Botón Aumentar Fuente con ícono Plus y etiqueta A+ -->
+    <button
+      class="action-btn increase-btn"
+      (click)="increaseFontSize()"
+      [disabled]="!canIncrease()"
+      title="Aumentar tamaño de fuente">
+      <lucide-icon [img]="Plus" class="btn-icon"></lucide-icon>
+      <span class="btn-label">A+</span>
+    </button>
+
+    <!-- Botón Disminuir Fuente con ícono Minus y etiqueta A- -->
+    <button
+      class="action-btn decrease-btn"
+      (click)="decreaseFontSize()"
+      [disabled]="!canDecrease()"
+      title="Disminuir tamaño de fuente">
+      <lucide-icon [img]="Minus" class="btn-icon"></lucide-icon>
+      <span class="btn-label">A-</span>
+    </button>
+  </div>
+
+  <!-- Overlay para cerrar al hacer clic fuera -->
+  <div class="accessibility-overlay" *ngIf="isOpen" (click)="toggleMenu()"></div>
+</div>

@@ -14,16 +14,114 @@ export class AuthService {
   public isAuthenticated$ = this.currentUser$.pipe(map(u => !!u));
 
   constructor(private http: HttpClient) {
-    // Inicializar estado desde localStorage si existe
+    // Inicializar estado desde localStorage si existe y el token es válido
+    this.initializeAuthState();
+  }
+
+  /**
+   * Inicializa el estado de autenticación verificando la validez del token
+   */
+  private initializeAuthState(): void {
     try {
+      const token = localStorage.getItem('auth_token');
       const raw = localStorage.getItem('auth_user');
-      if (raw) {
-        const user = JSON.parse(raw);
-        this.currentUserSubj.next(user);
+
+      if (token && raw) {
+        // Verificar si el token está vencido
+        if (this.isTokenExpired(token)) {
+          console.warn('[AuthService] Token expirado. Limpiando sesión...');
+          this.clearLocalAuth();
+        } else {
+          // Token válido, restaurar usuario
+          const user = JSON.parse(raw);
+          this.currentUserSubj.next(user);
+        }
       }
     } catch (e) {
-      // ignore
+      console.error('[AuthService] Error al inicializar estado de autenticación:', e);
+      this.clearLocalAuth();
     }
+  }
+
+  /**
+   * Decodifica un JWT sin verificar la firma
+   * @param token JWT token (puede incluir el prefijo 'Bearer ')
+   * @returns Payload decodificado o null si hay error
+   */
+  private decodeToken(token: string): any {
+    try {
+      // Remover prefijo 'Bearer ' si existe
+      const jwt = token.replace(/^Bearer\s+/i, '').trim();
+
+      // Un JWT tiene 3 partes separadas por puntos: header.payload.signature
+      const parts = jwt.split('.');
+      if (parts.length !== 3) {
+        console.warn('[AuthService] Token JWT inválido');
+        return null;
+      }
+
+      // Decodificar el payload (segunda parte)
+      const payload = parts[1];
+      const decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
+      return JSON.parse(decoded);
+    } catch (e) {
+      console.error('[AuthService] Error al decodificar token:', e);
+      return null;
+    }
+  }
+
+  /**
+   * Verifica si un token JWT está vencido
+   * @param token JWT token
+   * @returns true si está vencido, false si aún es válido
+   */
+  private isTokenExpired(token: string): boolean {
+    const payload = this.decodeToken(token);
+    if (!payload || !payload.exp) {
+      // Si no tiene exp, consideramos que está vencido por seguridad
+      return true;
+    }
+
+    // exp está en segundos, Date.now() en milisegundos
+    const expirationDate = payload.exp * 1000;
+    const now = Date.now();
+
+    // Agregar un margen de 60 segundos para evitar problemas de sincronización
+    const isExpired = now >= (expirationDate - 60000);
+
+    if (isExpired) {
+      console.warn('[AuthService] Token vencido. Exp:', new Date(expirationDate), 'Now:', new Date(now));
+    }
+
+    return isExpired;
+  }
+
+  /**
+   * Verifica si el token actual es válido
+   * @returns true si el token existe y no está vencido
+   */
+  public isTokenValid(): boolean {
+    const token = this.getToken();
+    if (!token) return false;
+    return !this.isTokenExpired(token);
+  }
+
+  /**
+   * Obtiene el tiempo restante del token en milisegundos
+   * @returns Tiempo restante o 0 si está vencido o no existe
+   */
+  public getTokenTimeRemaining(): number {
+    const token = this.getToken();
+    if (!token) return 0;
+
+    const payload = this.decodeToken(token);
+    if (!payload || !payload.exp) return 0;
+
+    const expirationDate = payload.exp * 1000;
+    const now = Date.now();
+    const remaining = expirationDate - now;
+
+    return remaining > 0 ? remaining : 0;
   }
 
   register(payload: { nombre: string; email: string; password: string }): Observable<any> {

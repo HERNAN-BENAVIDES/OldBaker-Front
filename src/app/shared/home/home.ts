@@ -1,12 +1,35 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { Header } from '../header/header';
+import { Footer } from '../footer/footer';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterModule],
-  templateUrl: './home.html',
+  imports: [CommonModule, RouterModule, Header, Footer],
+  template: `
+    <app-header></app-header>
+    <section class="home-hero">
+      <h2 class="products-title">Nuestros productos</h2>
+      <div class="products-bg">
+        <div class="products-grid">
+          <article class="product" *ngFor="let p of products">
+            <div class="product-image">
+              <img [src]="p.image" [alt]="p.name" (error)="onImageError($event)" />
+            </div>
+            <div class="product-body">
+              <h3 class="product-name">{{ p.name }}</h3>
+              <p class="product-desc">{{ p.description }}</p>
+              <span class="price">{{ p.price | currency:'COP':'symbol':'1.0-0' }}</span>
+              <button class="btn small">Agregar</button>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+    <app-footer></app-footer>
+  `,
   styleUrls: ['./home.css']
 })
 export class Home {

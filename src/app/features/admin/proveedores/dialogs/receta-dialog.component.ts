@@ -48,7 +48,7 @@ interface DialogData {
             El nombre es requerido
           </mat-error>
         </mat-form-field>
-        
+
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Descripción</mat-label>
           <textarea matInput formControlName="descripcion" rows="3" required></textarea>
@@ -56,7 +56,7 @@ interface DialogData {
             La descripción es requerida
           </mat-error>
         </mat-form-field>
-        
+
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Producto</mat-label>
           <mat-select formControlName="id_producto" required>
@@ -69,7 +69,7 @@ interface DialogData {
             Debe seleccionar un producto
           </mat-error>
         </mat-form-field>
-        
+
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Insumo</mat-label>
           <mat-select formControlName="id_insumo" required>
@@ -82,7 +82,7 @@ interface DialogData {
             Debe seleccionar un insumo
           </mat-error>
         </mat-form-field>
-        
+
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Cantidad de Insumo (gramos)</mat-label>
           <input matInput type="number" formControlName="cantidad_insumo" required min="1">
@@ -94,12 +94,12 @@ interface DialogData {
           </mat-error>
         </mat-form-field>
       </form>
-      
+
       <!-- Debug info (remover en producción) -->
       <div class="debug-info" style="margin-top: 1rem; padding: 0.5rem; background: #f5f5f5; border-radius: 4px; font-size: 12px;">
         <strong>Debug:</strong><br>
-        Productos disponibles: {{ productos?.length || 0 }}<br>
-        Insumos disponibles: {{ insumos?.length || 0 }}
+        Productos disponibles: {{ productos.length || 0 }}<br>
+        Insumos disponibles: {{ insumos.length || 0 }}
       </div>
     </mat-dialog-content>
     <mat-dialog-actions align="end">
@@ -110,12 +110,12 @@ interface DialogData {
     </mat-dialog-actions>
   `,
   styles: [`
-    .full-width { 
-      width: 100%; 
-      margin-bottom: 1rem; 
+    .full-width {
+      width: 100%;
+      margin-bottom: 1rem;
     }
-    .dialog-title { 
-      margin-bottom: 1rem; 
+    .dialog-title {
+      margin-bottom: 1rem;
       color: #2c3e50;
     }
     .debug-info {
@@ -151,7 +151,7 @@ export class RecetaDialogComponent implements OnInit {
     // Asignar los datos recibidos
     this.productos = this.data.productos || [];
     this.insumos = this.data.insumos || [];
-    
+
     console.log('Productos recibidos:', this.productos);
     console.log('Insumos recibidos:', this.insumos);
   }

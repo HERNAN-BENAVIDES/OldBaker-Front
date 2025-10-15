@@ -6,7 +6,8 @@ import {
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { tokenExpirationInterceptor } from './core/interceptors/token-expiration.interceptor';
 
 import { routes } from './app.routes';
 
@@ -16,6 +17,6 @@ export const appConfig: ApplicationConfig = {
     provideAnimations(),
     provideBrowserGlobalErrorListeners(),
     provideZoneChangeDetection({ eventCoalescing: true }),
-    importProvidersFrom(HttpClientModule)
+    provideHttpClient(withInterceptors([tokenExpirationInterceptor]))
   ]
 };

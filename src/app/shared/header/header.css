@@ -14,6 +14,8 @@
   left: 0;
   top: 0;
   z-index: 10;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .app-header .brand {
@@ -185,6 +187,24 @@
 .avatar-btn:focus .avatar {
   transition: box-shadow 160ms ease, transform 160ms ease;
   transform: scale(0.98);
+}
+
+/* Estilos para el panel de accesibilidad */
+.accessibility-wrapper {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .accessibility-wrapper {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    margin-top: 0.5rem;
+  }
 }
 
 /* Responsive: en pantallas pequeñas apilar botones */

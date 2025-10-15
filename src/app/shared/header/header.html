@@ -1,5 +1,6 @@
 <header class="app-header">
   <a routerLink="/" class="brand" aria-label="Ir al inicio">OldBaker</a>
+
   <nav class="actions">
     <!-- mostrar botones de login/registro sólo si no está autenticado -->
     <ng-container *ngIf="(isAuthenticated$ | async) === false; else logged">

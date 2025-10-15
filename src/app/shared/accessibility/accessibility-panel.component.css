@@ -1,0 +1,327 @@
+.a11y-panel {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  flex-wrap: wrap;
+}
+
+.a11y-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.a11y-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #333;
+  margin: 0;
+}
+
+.size-controls {
+  display: flex;
+  gap: 4px;
+}
+
+.a11y-btn {
+  padding: 8px 12px;
+  border: 2px solid #ddd;
+  background: white;
+  cursor: pointer;
+  border-radius: 6px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.a11y-btn:hover {
+  background: #f5f5f5;
+  border-color: #999;
+}
+
+.a11y-btn:focus {
+  outline: 2px solid #005fcc;
+  outline-offset: 2px;
+}
+
+.a11y-btn.active {
+  background: #005fcc;
+  color: white;
+  border-color: #005fcc;
+}
+
+.contrast-icon {
+  font-size: 1.2rem;
+}
+
+.contrast-btn {
+  padding: 8px 16px;
+}
+
+.reset-btn {
+  padding: 8px 16px;
+  background: #f0f0f0;
+}
+
+.reset-btn:hover {
+  background: #e0e0e0;
+}
+
+.a11y-divider {
+  width: 1px;
+  height: 30px;
+  background: #ddd;
+}
+
+/* Contenedor flotante */
+.accessibility-floating-container {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 9999;
+}
+
+/* Botón flotante principal (FAB) */
+.accessibility-fab {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  z-index: 10001;
+}
+
+.accessibility-fab:hover {
+  transform: scale(1.1);
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.5);
+}
+
+.accessibility-fab:active {
+  transform: scale(0.95);
+}
+
+.accessibility-fab.open {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+.accessibility-fab .fab-icon {
+  width: 28px;
+  height: 28px;
+  transition: transform 0.3s ease;
+  stroke-width: 2.5;
+}
+
+.accessibility-fab.open .fab-icon {
+  transform: rotate(180deg);
+}
+
+/* Menú simplificado con 3 botones VERTICALES */
+.accessibility-menu-simple {
+  position: absolute;
+  bottom: 75px;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 10000;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Botones de acción */
+.action-btn {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 2px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+.action-btn .btn-icon {
+  width: 24px;
+  height: 24px;
+  stroke-width: 2.5;
+  transition: all 0.2s ease;
+}
+
+.action-btn .btn-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-top: -2px;
+}
+
+.action-btn:hover {
+  transform: translateX(-10px) scale(1.1);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+
+.action-btn:hover .btn-icon {
+  transform: scale(1.1);
+}
+
+.action-btn:active {
+  transform: translateX(-5px) scale(1.05);
+}
+
+.action-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.action-btn:disabled .btn-icon {
+  transform: none !important;
+}
+
+/* Botón de Contraste */
+.contrast-action-btn {
+  background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%);
+  color: #333;
+}
+
+.contrast-action-btn.active {
+  background: linear-gradient(135deg, #1a1a1a 0%, #3a3a3a 100%);
+  color: white;
+}
+
+.contrast-action-btn .btn-icon {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.contrast-action-btn.active .btn-icon {
+  filter: drop-shadow(0 2px 4px rgba(255, 255, 255, 0.3));
+}
+
+/* Botón Disminuir Fuente */
+.decrease-btn {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+  color: white;
+}
+
+.decrease-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #ff5252 0%, #e63946 100%);
+}
+
+.decrease-btn .btn-icon {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+/* Botón Aumentar Fuente */
+.increase-btn {
+  background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%);
+  color: white;
+}
+
+.increase-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #40c057 0%, #2f9e44 100%);
+}
+
+.increase-btn .btn-icon {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+/* Overlay para cerrar al hacer clic fuera */
+.accessibility-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: transparent;
+  z-index: 9998;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .accessibility-floating-container {
+    bottom: 16px;
+    left: 16px;
+  }
+
+  .accessibility-fab {
+    width: 52px;
+    height: 52px;
+  }
+
+  .accessibility-fab .fab-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .action-btn {
+    width: 52px;
+    height: 52px;
+  }
+
+  .action-btn .btn-icon {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+/* Estilos para alto contraste */
+.a11y-high-contrast .accessibility-fab {
+  background: #000 !important;
+  border: 3px solid #fff !important;
+}
+
+.a11y-high-contrast .action-btn {
+  border: 3px solid #fff !important;
+}
+
+.a11y-high-contrast .contrast-action-btn {
+  background: #fff !important;
+  color: #000 !important;
+}
+
+.a11y-high-contrast .contrast-action-btn .btn-icon {
+  filter: none !important;
+}
+
+.a11y-high-contrast .decrease-btn {
+  background: #000 !important;
+  color: #fff !important;
+}
+
+.a11y-high-contrast .increase-btn {
+  background: #000 !important;
+  color: #fff !important;
+}
+
+.a11y-high-contrast .btn-icon {
+  filter: none !important;
+}

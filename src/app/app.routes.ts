@@ -1,6 +1,13 @@
 import { Routes } from '@angular/router';
 
 export const routes: Routes = [
+  // Ruta principal - Home
+  {
+    path: '',
+    loadComponent: () => import('./shared/home/home')
+      .then(m => m.Home)
+  },
+
   // Rutas de autenticación - CORREGIDAS
   {
     path: 'login',
@@ -12,7 +19,7 @@ export const routes: Routes = [
     loadComponent: () => import('./features/auth/components/register/register')
       .then(m => m.Register)
   },
-  
+
   // Rutas de administrador
   {
     path: 'admin',
@@ -29,7 +36,7 @@ export const routes: Routes = [
     redirectTo: 'admin',
     pathMatch: 'full'
   },
-  
+
   // Rutas de auxiliar
   {
     path: 'auxiliar',
@@ -51,15 +58,10 @@ export const routes: Routes = [
     loadComponent: () => import('./features/auxiliar/reportes-proveedores/reportes-proveedores.component')
       .then(c => c.ReportesProveedoresComponent)
   },
-  
-  // Rutas por defecto
-  {
-    path: '',
-    pathMatch: 'full',
-    redirectTo: '/login'
-  },
+
+  // Ruta por defecto para rutas no encontradas
   {
     path: '**',
-    redirectTo: '/login'
+    redirectTo: ''
   }
 ];

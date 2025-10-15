@@ -4,11 +4,12 @@ import { CommonModule } from '@angular/common';
 import { Observable, Subscription } from 'rxjs';
 import { AuthService } from '../../features/auth/services/auth.service';
 import { NotificationService } from '../notification/notification.service';
+import { AccessibilityPanelComponent } from '../accessibility/accessibility-panel.component';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, AccessibilityPanelComponent],
   templateUrl: './header.html',
   styleUrls: ['./header.css']
 })

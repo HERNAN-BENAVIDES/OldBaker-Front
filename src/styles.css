@@ -2,7 +2,90 @@
 
 /*@import 'custom-theme.scss';
 
-/*@import 'admin-component.scss'; 
+/*@import 'admin-component.scss';
+
+/* ========================================
+   ACCESIBILIDAD - Variables y Tamaños
+   ======================================== */
+:root {
+  --base-font-size: 16px;
+  --a11y-focus: #005fcc;
+}
+
+/* Clases de tamaño de fuente aplicadas al html */
+html.a11y-font-size-extra-small {
+  --base-font-size: 12px;
+}
+
+html.a11y-font-size-small {
+  --base-font-size: 14px;
+}
+
+html.a11y-font-size-medium {
+  --base-font-size: 16px;
+}
+
+html.a11y-font-size-large {
+  --base-font-size: 20px;
+}
+
+/* Aplicar el tamaño base */
+html {
+  font-size: var(--base-font-size);
+}
+
+/* ========================================
+   ACCESIBILIDAD - Alto Contraste
+   ======================================== */
+html.a11y-high-contrast,
+html.a11y-high-contrast body {
+  background: #000 !important;
+  color: #fff !important;
+}
+
+html.a11y-high-contrast a {
+  color: #0ff !important;
+  text-decoration: underline !important;
+}
+
+html.a11y-high-contrast button {
+  background: #111 !important;
+  color: #fff !important;
+  border: 2px solid #fff !important;
+}
+
+html.a11y-high-contrast input,
+html.a11y-high-contrast textarea,
+html.a11y-high-contrast select {
+  background: #000 !important;
+  color: #fff !important;
+  border: 2px solid #fff !important;
+}
+
+html.a11y-high-contrast .mat-mdc-card,
+html.a11y-high-contrast .card {
+  background: #111 !important;
+  color: #fff !important;
+  border: 2px solid #fff !important;
+}
+
+html.a11y-high-contrast .mat-mdc-button,
+html.a11y-high-contrast .mat-mdc-raised-button {
+  background: #000 !important;
+  color: #fff !important;
+  border: 2px solid #fff !important;
+}
+
+html.a11y-high-contrast table {
+  border: 2px solid #fff !important;
+}
+
+html.a11y-high-contrast th,
+html.a11y-high-contrast td {
+  border: 1px solid #fff !important;
+  color: #fff !important;
+}
+
 /* Reset global margins y box-sizing para que el header pueda ocupar todo el ancho */
 html, body, app-root {
   margin: 0;
