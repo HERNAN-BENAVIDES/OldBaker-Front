@@ -3,16 +3,18 @@ import { RouterOutlet } from '@angular/router';
 import { Router } from '@angular/router';
 import { AccessibilityService } from './shared/accessibility/accessibility.service';
 import { AccessibilityPanelComponent } from './shared/accessibility/accessibility-panel.component';
+import { ShoppingCartComponent } from './shared/shopping-cart/shopping-cart.component';
 import { AuthService } from './features/auth/services/auth.service';
 import { interval, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, AccessibilityPanelComponent],
+  imports: [RouterOutlet, AccessibilityPanelComponent, ShoppingCartComponent],
   template: `
     <router-outlet></router-outlet>
     <app-accessibility-panel></app-accessibility-panel>
+    <app-shopping-cart></app-shopping-cart>
   `
 })
 export class AppComponent implements OnInit, OnDestroy {

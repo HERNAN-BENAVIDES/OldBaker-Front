@@ -1,8 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Header } from '../header/header';
 import { Footer } from '../footer/footer';
+import { ShoppingCartService } from '../shopping-cart/shopping-cart.service';
+import { ProductosService, Producto } from '../../services/productos.service';
 
 @Component({
   selector: 'app-home',
@@ -12,17 +14,32 @@ import { Footer } from '../footer/footer';
     <app-header></app-header>
     <section class="home-hero">
       <h2 class="products-title">Nuestros productos</h2>
-      <div class="products-bg">
+
+      <!-- Indicador de carga -->
+      <div *ngIf="loading" class="loading-container">
+        <div class="spinner"></div>
+        <p>Cargando productos...</p>
+      </div>
+
+      <!-- Mensaje de error -->
+      <div *ngIf="error" class="error-container">
+        <p>{{ error }}</p>
+        <button class="btn-retry" (click)="loadProducts()">Reintentar</button>
+      </div>
+
+      <!-- Lista de productos -->
+      <div class="products-bg" *ngIf="!loading && !error">
         <div class="products-grid">
           <article class="product" *ngFor="let p of products">
             <div class="product-image">
-              <img [src]="p.image" [alt]="p.name" (error)="onImageError($event)" />
+              <img [src]="p.image" [alt]="p.nombre" (error)="onImageError($event)" />
             </div>
             <div class="product-body">
-              <h3 class="product-name">{{ p.name }}</h3>
-              <p class="product-desc">{{ p.description }}</p>
+              <h3 class="product-name">{{ p.nombre }}</h3>
+              <p class="product-desc">{{ p.descripcion }}</p>
+              <span class="category">{{ p.categoriaNombre }}</span>
               <span class="price">{{ p.price | currency:'COP':'symbol':'1.0-0' }}</span>
-              <button class="btn small">Agregar</button>
+              <button class="btn small" (click)="addToCart(p)">Agregar</button>
             </div>
           </article>
         </div>
@@ -32,25 +49,66 @@ import { Footer } from '../footer/footer';
   `,
   styleUrls: ['./home.css']
 })
-export class Home {
-  // Lista de ejemplo con 10 productos de panadería
-  products = [
-    { id: 1, name: 'Pan de masa madre', description: 'Pan crujiente por fuera y esponjoso por dentro.', price: 4800, image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRaYVIHjnhL9jbfze-zBwptyRbDu_49IrxpPA&s' },
-    { id: 2, name: 'Baguette clásica', description: 'Baguette francesa recién horneada.', price: 2200, image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT7lqlhO7l4XsKhqzPuv3wXVV6TYSAOrrXYvw&s' },
-    { id: 3, name: 'Croissant mantequilla', description: 'Hojaldrado y hojaldrado, con mantequilla natural.', price: 3500, image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTDErtm8lw1Se54oRVLopzjS8FJaJXafFf0AQ&s' },
-    { id: 4, name: 'Pan integral', description: 'Pan saludable con harina integral y semillas.', price: 4200, image: 'https://i.ytimg.com/vi/JyfZNeU6jYc/maxresdefault.jpg' },
-    { id: 5, name: 'Churros', description: 'Churros recién fritos, perfectos con chocolate.', price: 1800, image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTMmatyqZovCKIc1sHWqs_OWBp_H7xbp1Gfxw&s' },
-    { id: 6, name: 'Medialuna', description: 'Medialuna dulce con un glaseado ligero.', price: 1400, image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQmEuqXgluFVoY1dSTvOfB-N4p01LJHGmoeYQ&s' },
-    { id: 7, name: 'Pan de queso', description: 'Delicioso pan relleno de queso fundido.', price: 2600, image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT_iNDGne36JsXZiMRHHXMckDkChXc-1T78Iw&s' },
-    { id: 8, name: 'Tortas individuales', description: 'Tortas pequeñas con crema y frutas.', price: 6800, image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRTEV42alpfIkcv9xz2xBCoQUheKWxaKbgBQg&s' },
-    { id: 9, name: 'Brownie', description: 'Brownie chocolatoso, con nueces opcionales.', price: 3000, image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQWl7RzquqQtLOBuIIfp5NTfgHw-WqTSiNBOg&s' },
-    { id: 10, name: 'Pan de chocolate', description: 'Pan relleno de trozos de chocolate.', price: 3200, image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSDGxXUfHBSJIJ0HhXGezGo16995ugpcD85Dw&s' }
-  ];
+export class Home implements OnInit {
+  products: any[] = [];
+  loading = true;
+  error: string | null = null;
+
+  constructor(
+    private cartService: ShoppingCartService,
+    private productosService: ProductosService
+  ) {}
+
+  ngOnInit() {
+    this.loadProducts();
+  }
+
+  loadProducts() {
+    this.loading = true;
+    this.error = null;
+
+    this.productosService.getProductos().subscribe({
+      next: (productos: Producto[]) => {
+        // Mapear productos de la API usando la URL del backend
+        this.products = productos.map(p => ({
+          id: p.idProducto,
+          nombre: p.nombre,
+          descripcion: p.descripcion,
+          price: p.costoUnitario,
+          categoriaNombre: p.categoriaNombre,
+          fechaVencimiento: p.fechaVencimiento,
+          image: p.url // Usar la URL que viene del backend
+        }));
+        this.loading = false;
+        console.log('Productos cargados exitosamente:', this.products);
+      },
+      error: (err) => {
+        this.loading = false;
+        console.error('Error al cargar productos:', err);
+
+        // Verificar si es un problema de CORS o certificado SSL
+        if (err.status === 0) {
+          this.error = 'No se pudo conectar con el servidor. Verifica que el backend esté ejecutándose en https://localhost:8443';
+        } else {
+          this.error = `Error al cargar los productos (${err.status}): ${err.message}`;
+        }
+      }
+    });
+  }
+
+  addToCart(product: any) {
+    this.cartService.addItem({
+      id: product.id,
+      name: product.nombre,
+      price: product.price,
+      image: product.image
+    });
+  }
 
   onImageError(event: Event) {
     const img = event.target as HTMLImageElement;
     if (img) {
-      img.src = '/assets/placeholder.png';
+      img.src = 'https://via.placeholder.com/300x200?text=Producto';
     }
   }
 }
