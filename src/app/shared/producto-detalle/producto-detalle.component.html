@@ -80,7 +80,7 @@
             <div class="receta-item" *ngFor="let item of producto.receta">
               <div class="receta-item-header">
                 <span class="insumo-nombre">{{ item.insumoNombre }}</span>
-                <span class="insumo-cantidad">{{ item.cantidadInsumo }}g</span>
+                <span class="insumo-cantidad">{{ item.cantidadInsumo }} {{ formatUnidadMedida(item.unidadMedida) }}</span>
               </div>
               <div class="receta-item-bar">
                 <div class="receta-item-progress" [style.width]="(item.cantidadInsumo / getMaxCantidad()) * 100 + '%'"></div>

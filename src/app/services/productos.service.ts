@@ -17,6 +17,7 @@ export interface RecetaItem {
   idReceta: number;
   insumoNombre: string;
   cantidadInsumo: number;
+  unidadMedida: string;
 }
 
 export interface ProductoDetalle {

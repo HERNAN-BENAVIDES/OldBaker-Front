@@ -130,4 +130,15 @@ export class ProductoDetalleComponent implements OnInit {
     }
     return Math.max(...this.producto.receta.map(item => item.cantidadInsumo));
   }
+
+  formatUnidadMedida(unidad: string): string {
+    const unidades: { [key: string]: string } = {
+      'KILOGRAMOS': 'kg',
+      'GRAMOS': 'g',
+      'LITROS': 'L',
+      'MILILITROS': 'ml',
+      'UNIDADES': 'ud'
+    };
+    return unidades[unidad] || unidad.toLowerCase();
+  }
 }
