@@ -1,17 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
-import { Header } from '../header/header';
-import { Footer } from '../footer/footer';
 import { ShoppingCartService } from '../shopping-cart/shopping-cart.service';
 import { ProductosService, Producto } from '../../services/productos.service';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterModule, Header, Footer],
+  imports: [CommonModule, RouterModule],
   template: `
-    <app-header></app-header>
     <section class="home-hero">
       <h2 class="products-title">Nuestros productos</h2>
 
@@ -45,7 +42,6 @@ import { ProductosService, Producto } from '../../services/productos.service';
         </div>
       </div>
     </section>
-    <app-footer></app-footer>
   `,
   styleUrls: ['./home.css']
 })

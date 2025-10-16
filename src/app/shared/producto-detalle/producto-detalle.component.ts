@@ -2,14 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ProductosService, ProductoDetalle } from '../../services/productos.service';
-import { Header } from '../header/header';
-import { Footer } from '../footer/footer';
 import { ShoppingCartService } from '../shopping-cart/shopping-cart.service';
 
 @Component({
   selector: 'app-producto-detalle',
   standalone: true,
-  imports: [CommonModule, RouterModule, Header, Footer],
+  imports: [CommonModule, RouterModule],
   templateUrl: './producto-detalle.component.html',
   styleUrls: ['./producto-detalle.component.css']
 })

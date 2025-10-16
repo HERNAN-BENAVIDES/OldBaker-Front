@@ -160,6 +160,7 @@
   }
 }
 
+/* Unificar apariencia de elementos del dropdown (anchors y buttons) */
 .dropdown-item {
   width: 100%;
   text-align: left;
@@ -167,10 +168,29 @@
   background: transparent;
   border: none;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 600 !important;
+  font-size: 0.95rem; /* tamaño uniforme */
+  line-height: 1.2;
   color: inherit;
   transition: background 140ms ease, color 140ms ease, transform 140ms ease;
   border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  font-family: inherit;
+}
+
+/* Forzar que los botones usen la misma tipografía y tamaño que los enlaces */
+.dropdown-item[type="button"] {
+  font: inherit;
+}
+
+.dropdown-item svg {
+  flex-shrink: 0;
+  color: #64748b;
+  width: 18px; /* tamaño consistente */
+  height: 18px;
 }
 
 .dropdown-item:hover {
@@ -178,8 +198,17 @@
   transform: translateY(-1px);
 }
 
+.dropdown-item:hover svg {
+  color: #2563eb;
+}
+
 .dropdown-item:active {
   transform: translateY(0);
+}
+
+/* Separador visual entre opciones del menú */
+.dropdown-item + .dropdown-item {
+  margin-top: 0.2rem;
 }
 
 /* pequeño pulso al abrir para el avatar */

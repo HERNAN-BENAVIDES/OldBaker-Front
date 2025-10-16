@@ -69,6 +69,18 @@ export const routes: Routes = [
       .then(c => c.ReportesProveedoresComponent)
   },
 
+  // Ruta de pedidos del usuario
+  {
+    path: 'mis-pedidos',
+    loadComponent: () => import('./features/mis-pedidos/mis-pedidos.component')
+      .then(m => m.MisPedidosComponent)
+  },
+  {
+    path: 'mi-perfil',
+    loadComponent: () => import('./features/perfil/perfil.component')
+      .then(m => m.PerfilComponent)
+  },
+
   // Ruta por defecto para rutas no encontradas
   {
     path: '**',

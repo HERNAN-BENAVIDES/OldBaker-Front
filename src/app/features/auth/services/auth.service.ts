@@ -257,6 +257,51 @@ export class AuthService {
     this.currentUserSubj.next(null);
   }
 
+  /**
+   * Actualiza el perfil del usuario en el backend y actualiza el estado local
+   * Espera un payload parcial con las propiedades a actualizar (por ejemplo { nombre, direccion })
+   */
+  updateProfile(payload: any): Observable<any> {
+    // Intenta usar el token en Authorization si existe
+    const token = this.getToken();
+    const headers = token ? new HttpHeaders({ Authorization: `Bearer ${token.replace(/^Bearer\s+/i, '')}` }) : undefined;
+    return this.http.patch(`${this.baseUrl}/user/profile`, payload, headers ? { headers } : undefined).pipe(map((res: any) => {
+      // si el backend devuelve el usuario actualizado en res.data.usuario o res.usuario
+      const updated = (res && (res.data?.usuario || res.usuario)) || res;
+      if (updated) {
+        try { localStorage.setItem('auth_user', JSON.stringify(updated)); } catch (e) {}
+        this.currentUserSubj.next(updated);
+      }
+      return res;
+    }));
+  }
+
+  /**
+   * Desactiva (o elimina) la cuenta del usuario. Endpoint propuesto: POST /user/deactivate
+   */
+  deactivateAccount(): Observable<any> {
+    const token = this.getToken();
+    const headers = token ? new HttpHeaders({ Authorization: `Bearer ${token.replace(/^Bearer\s+/i, '')}` }) : undefined;
+    return this.http.post(`${this.baseUrl}/user/deactivate`, {}, headers ? { headers } : undefined).pipe(map((res: any) => {
+      // después de una desactivación exitosa limpiamos el local
+      try { localStorage.removeItem('auth_user'); } catch (e) {}
+      try { localStorage.removeItem('auth_token'); } catch (e) {}
+      try { localStorage.removeItem('refresh_token'); } catch (e) {}
+      this.currentUserSubj.next(null);
+      return res;
+    }));
+  }
+
+  /**
+   * Obtiene la dirección del usuario desde el backend
+   * @param idUsuario ID del usuario
+   */
+  getDireccionUsuario(idUsuario: number): Observable<any> {
+    const token = this.getToken();
+    const headers = token ? new HttpHeaders({ Authorization: `Bearer ${token.replace(/^Bearer\s+/i, '')}` }) : undefined;
+    return this.http.get(`${this.baseUrl}/user/direccion?idUsuario=${idUsuario}`, headers ? { headers } : undefined);
+  }
+
   // Solicita recuperación de contraseña
   requestPasswordReset(email: string): Observable<any> {
     // Enviar el email como texto plano, no como JSON

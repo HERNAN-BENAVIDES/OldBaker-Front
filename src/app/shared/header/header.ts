@@ -44,6 +44,10 @@ export class Header implements OnInit, OnDestroy {
     this.showMenu = !this.showMenu;
   }
 
+  closeMenu() {
+    this.showMenu = false;
+  }
+
   logoutMenu() {
     this.showMenu = false;
     this.logout();

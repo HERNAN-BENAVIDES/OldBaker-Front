@@ -5,17 +5,34 @@ import { AccessibilityService } from './shared/accessibility/accessibility.servi
 import { AccessibilityPanelComponent } from './shared/accessibility/accessibility-panel.component';
 import { ShoppingCartComponent } from './shared/shopping-cart/shopping-cart.component';
 import { AuthService } from './features/auth/services/auth.service';
+import { Header } from './shared/header/header';
+import { Footer } from './shared/footer/footer';
 import { interval, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, AccessibilityPanelComponent, ShoppingCartComponent],
+  imports: [RouterOutlet, AccessibilityPanelComponent, ShoppingCartComponent, Header, Footer],
   template: `
-    <router-outlet></router-outlet>
+    <app-header></app-header>
+    <main class="main-content">
+      <router-outlet></router-outlet>
+    </main>
+    <app-footer></app-footer>
     <app-accessibility-panel></app-accessibility-panel>
     <app-shopping-cart></app-shopping-cart>
-  `
+  `,
+  styles: [`
+    :host {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    .main-content {
+      flex: 1;
+      width: 100%;
+    }
+  `]
 })
 export class AppComponent implements OnInit, OnDestroy {
   private tokenCheckSubscription?: Subscription;
