@@ -137,8 +137,20 @@ export class AuthService {
     return this.http.post(`${this.baseUrl}/auth/login`, payload);
   }
 
+  workerLogin(payload: { email: string; password: string }): Observable<any> {
+    return this.http.post(`${this.baseUrl}/auth/worker/login`, payload);
+  }
+
   setSession(data: any) {
-    // Actualiza el observable de usuario/logueo
+    // Almacenar el token de acceso y el tipo de token en localStorage
+    try {
+      localStorage.setItem('auth_token', `${data.tokenType} ${data.accessToken}`);
+      localStorage.setItem('refresh_token', data.refreshToken);
+    } catch (e) {
+      console.error('[AuthService] Error al guardar tokens en localStorage:', e);
+    }
+
+    // Actualizar el observable de usuario/logueo
     this.currentUserSubj.next(data.usuario);
   }
 
@@ -223,7 +235,12 @@ export class AuthService {
 
   // Obtener token sincronamente (puede incluir prefijo 'Bearer ')
   getToken(): string | null {
-    try { return localStorage.getItem('auth_token'); } catch (e) { return null; }
+    try {
+      return localStorage.getItem('auth_token');
+    } catch (e) {
+      console.error('[AuthService] Error al obtener el token de localStorage:', e);
+      return null;
+    }
   }
 
   // Obtener usuario actual sincronamente
@@ -259,5 +276,12 @@ export class AuthService {
   resetPassword(email: string, newPassword: string): Observable<any> {
     const body = { email, newPassword };
     return this.http.post(`${this.baseUrl}/auth/reset`, body);
+  }
+
+  /**
+   * Verifica si el usuario está autenticado
+   */
+  isLoggedIn(): boolean {
+    return !!this.currentUserSubj.value;
   }
 }

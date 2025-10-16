@@ -2,6 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ShoppingCartService, CartItem } from './shopping-cart.service';
 import { LucideAngularModule, ShoppingCart, X, Plus, Minus, Trash2 } from 'lucide-angular';
+import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { environment } from 'src/environments/environment';
+import { AuthService } from 'src/app/features/auth/services/auth.service';
 
 @Component({
   selector: 'app-shopping-cart',
@@ -23,7 +27,12 @@ export class ShoppingCartComponent implements OnInit {
   readonly Minus = Minus;
   readonly Trash2 = Trash2;
 
-  constructor(private cartService: ShoppingCartService) {}
+  constructor(
+    private cartService: ShoppingCartService,
+    private router: Router,
+    private http: HttpClient,
+    private authService: AuthService
+  ) {}
 
   ngOnInit() {
     this.cartService.cartItems$.subscribe(items => {
@@ -60,8 +69,53 @@ export class ShoppingCartComponent implements OnInit {
       alert('El carrito está vacío');
       return;
     }
-    alert('Función de checkout - Por implementar');
-    // Aquí implementarías la lógica de checkout
+
+    const isLoggedIn = this.authService.isLoggedIn(); // Método real del servicio AuthService
+
+    if (!isLoggedIn) {
+      this.isOpen = false; // Cerrar el carrito
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    const token = this.authService.getToken();
+
+    if (!token) {
+      console.error('Error: No se encontró un token de autenticación.');
+      alert('No se pudo procesar el pago porque no se encontró un token de autenticación.');
+      return;
+    }
+
+    console.log('Token de autenticación:', token); // Mostrar el token en consola
+
+    const payload = {
+      payerEmail: this.authService.getCurrentUser().email, // Obtener el email del usuario logueado
+      items: this.cartItems.map(item => ({
+        productId: item.id,
+        quantity: item.quantity
+      }))
+    };
+
+    const headers = {
+      headers: {
+        Authorization: token // Usar el token en el encabezado
+      }
+    };
+
+    this.http.post(`${environment.apiUrl}/api/orders/checkout`, payload, headers).subscribe(
+      (response: any) => {
+        if (response.initPoint) {
+          window.location.href = response.initPoint; // Redirigir al initPoint
+        }
+      },
+      error => {
+        if (error.error && error.error.error) {
+          alert(error.error.error); // Mostrar el mensaje de error
+        } else {
+          alert('Hubo un error al procesar el pedido');
+        }
+        console.error(error);
+      }
+    );
   }
 }
-

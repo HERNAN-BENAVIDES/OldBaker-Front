@@ -8,9 +8,25 @@ export interface Producto {
   nombre: string;
   descripcion: string;
   costoUnitario: number;
-  fechaVencimiento: string;
+  vidaUtilDias: string;
   categoriaNombre: string;
   url: string;
+}
+
+export interface RecetaItem {
+  idReceta: number;
+  insumoNombre: string;
+  cantidadInsumo: number;
+}
+
+export interface ProductoDetalle {
+  idProducto: number;
+  nombre: string;
+  descripcion: string;
+  costoUnitario: number;
+  vidaUtilDias: string;
+  categoriaNombre: string;
+  receta: RecetaItem[];
 }
 
 @Injectable({
@@ -23,5 +39,9 @@ export class ProductosService {
 
   getProductos(): Observable<Producto[]> {
     return this.http.get<Producto[]>(this.apiUrl);
+  }
+
+  getProductoById(id: number): Observable<ProductoDetalle> {
+    return this.http.get<ProductoDetalle>(`${this.apiUrl}/${id}`);
   }
 }

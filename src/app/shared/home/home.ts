@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { Header } from '../header/header';
 import { Footer } from '../footer/footer';
 import { ShoppingCartService } from '../shopping-cart/shopping-cart.service';
@@ -30,7 +30,7 @@ import { ProductosService, Producto } from '../../services/productos.service';
       <!-- Lista de productos -->
       <div class="products-bg" *ngIf="!loading && !error">
         <div class="products-grid">
-          <article class="product" *ngFor="let p of products">
+          <article class="product" *ngFor="let p of products" (click)="viewProductDetail(p.id)" style="cursor: pointer;">
             <div class="product-image">
               <img [src]="p.image" [alt]="p.nombre" (error)="onImageError($event)" />
             </div>
@@ -39,7 +39,7 @@ import { ProductosService, Producto } from '../../services/productos.service';
               <p class="product-desc">{{ p.descripcion }}</p>
               <span class="category">{{ p.categoriaNombre }}</span>
               <span class="price">{{ p.price | currency:'COP':'symbol':'1.0-0' }}</span>
-              <button class="btn small" (click)="addToCart(p)">Agregar</button>
+              <button class="btn small" (click)="addToCart(p); $event.stopPropagation()">Agregar</button>
             </div>
           </article>
         </div>
@@ -56,7 +56,8 @@ export class Home implements OnInit {
 
   constructor(
     private cartService: ShoppingCartService,
-    private productosService: ProductosService
+    private productosService: ProductosService,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -69,6 +70,9 @@ export class Home implements OnInit {
 
     this.productosService.getProductos().subscribe({
       next: (productos: Producto[]) => {
+        // Guardar productos originales en cache para acceso desde página de detalle
+        sessionStorage.setItem('productos_cache', JSON.stringify(productos));
+
         // Mapear productos de la API usando la URL del backend
         this.products = productos.map(p => ({
           id: p.idProducto,
@@ -76,7 +80,7 @@ export class Home implements OnInit {
           descripcion: p.descripcion,
           price: p.costoUnitario,
           categoriaNombre: p.categoriaNombre,
-          fechaVencimiento: p.fechaVencimiento,
+          vidaUtilDias: p.vidaUtilDias,
           image: p.url // Usar la URL que viene del backend
         }));
         this.loading = false;
@@ -110,5 +114,10 @@ export class Home implements OnInit {
     if (img) {
       img.src = 'https://via.placeholder.com/300x200?text=Producto';
     }
+  }
+
+  viewProductDetail(productId: number) {
+    // Navegar al detalle del producto
+    this.router.navigate(['/product-detail', productId]);
   }
 }

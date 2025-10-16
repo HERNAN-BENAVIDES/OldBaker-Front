@@ -7,12 +7,22 @@ export const routes: Routes = [
     loadComponent: () => import('./shared/home/home')
       .then(m => m.Home)
   },
+  {
+    path: 'product-detail/:id',
+    loadComponent: () => import('./shared/producto-detalle/producto-detalle.component')
+      .then(m => m.ProductoDetalleComponent)
+  },
 
   // Rutas de autenticación - CORREGIDAS
   {
     path: 'login',
     loadComponent: () => import('./features/auth/components/login/login')
       .then(m => m.Login)
+  },
+  {
+    path: 'auth/worker/login',
+    loadComponent: () => import('./features/auth/components/worker-login/worker-login')
+      .then(m => m.WorkerLoginComponent)
   },
   {
     path: 'register',

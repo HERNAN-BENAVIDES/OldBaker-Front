@@ -1,0 +1,100 @@
+<app-header></app-header>
+
+<section class="producto-detalle-page">
+  <!-- Indicador de carga -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Cargando producto...</p>
+  </div>
+
+  <!-- Mensaje de error -->
+  <div *ngIf="error" class="error-container">
+    <p>{{ error }}</p>
+    <button class="btn-back" (click)="goBack()">← Volver</button>
+  </div>
+
+  <!-- Detalle del producto -->
+  <div *ngIf="!loading && !error && producto" class="producto-container">
+    <button class="btn-back" (click)="goBack()">← Volver a productos</button>
+
+    <div class="producto-content">
+      <!-- Imagen del producto -->
+      <div class="producto-imagen">
+        <img [src]="productoUrl" [alt]="producto.nombre" (error)="onImageError($event)" />
+      </div>
+
+      <!-- Información del producto -->
+      <div class="producto-info">
+        <div class="categoria-badge">{{ producto.categoriaNombre }}</div>
+        <h1 class="producto-titulo">{{ producto.nombre }}</h1>
+        <p class="producto-descripcion">{{ producto.descripcion }}</p>
+
+        <div class="producto-meta">
+          <div class="meta-item">
+            <span class="meta-label">Precio:</span>
+            <span class="meta-value precio">{{ producto.costoUnitario | currency:'COP':'symbol':'1.0-0' }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Vida útil:</span>
+            <span class="meta-value">{{ producto.vidaUtilDias }} días</span>
+          </div>
+        </div>
+
+        <!-- Selector de cantidad -->
+        <div class="quantity-selector">
+          <label class="quantity-label">Cantidad:</label>
+          <div class="quantity-controls">
+            <button class="btn-quantity" (click)="decrementQuantity()" [disabled]="quantity <= 1" aria-label="Disminuir cantidad">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </button>
+            <span class="quantity-display">{{ quantity }}</span>
+            <button class="btn-quantity" (click)="incrementQuantity()" [disabled]="quantity >= 99" aria-label="Aumentar cantidad">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+          <div class="quantity-total">
+            <span class="total-label">Total:</span>
+            <span class="total-price">{{ producto.costoUnitario * quantity | currency:'COP':'symbol':'1.0-0' }}</span>
+          </div>
+        </div>
+
+        <button class="btn-agregar" (click)="addToCart()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z" fill="currentColor"/>
+          </svg>
+          Agregar al carrito
+        </button>
+
+        <!-- Receta -->
+        <div class="receta-section" *ngIf="producto.receta && producto.receta.length > 0">
+          <h2 class="receta-titulo">Ingredientes de la receta</h2>
+          <div class="receta-info">
+            <p class="receta-subtitle">Esta receta contiene {{ producto.receta.length }} ingredientes</p>
+          </div>
+
+          <div class="receta-lista">
+            <div class="receta-item" *ngFor="let item of producto.receta">
+              <div class="receta-item-header">
+                <span class="insumo-nombre">{{ item.insumoNombre }}</span>
+                <span class="insumo-cantidad">{{ item.cantidadInsumo }}g</span>
+              </div>
+              <div class="receta-item-bar">
+                <div class="receta-item-progress" [style.width]="(item.cantidadInsumo / getMaxCantidad()) * 100 + '%'"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="!producto.receta || producto.receta.length === 0" class="no-receta">
+          <p>No hay información de receta disponible para este producto.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<app-footer></app-footer>
