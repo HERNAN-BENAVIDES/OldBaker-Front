@@ -33,6 +33,7 @@ export class Register {
   private readonly baseUrl = `${environment.apiUrl}/oauth2/authorization/google`;
   registerForm: FormGroup;
   hidePassword = true;
+  hideConfirmPassword = true;
   isLoading = false;
   errorMessage: string | null = null;
   successMessage: string | null = null;
@@ -48,6 +49,8 @@ export class Register {
   }
 
   toggleShowPassword() { this.hidePassword = !this.hidePassword; }
+
+  toggleShowConfirmPassword() { this.hideConfirmPassword = !this.hideConfirmPassword; }
 
   signUpWithGoogle() {
     // Redirige al endpoint de autorización OAuth2 para iniciar flujo con Google

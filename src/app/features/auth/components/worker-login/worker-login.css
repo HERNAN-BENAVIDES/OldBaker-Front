@@ -70,6 +70,22 @@
   padding-right: 2.5rem;
 }
 
+/* Ocultar el botón nativo de mostrar/ocultar contraseña del navegador */
+.password-wrapper input::-ms-reveal,
+.password-wrapper input::-ms-clear {
+  display: none;
+}
+
+.password-wrapper input::-webkit-credentials-auto-fill-button,
+.password-wrapper input::-webkit-contacts-auto-fill-button {
+  visibility: hidden;
+  display: none !important;
+  pointer-events: none;
+  height: 0;
+  width: 0;
+  margin: 0;
+}
+
 .password-wrapper .show-toggle {
   position: absolute;
   right: 0.5rem;
@@ -86,16 +102,45 @@
   justify-content: center;
   cursor: pointer;
   transition: opacity 0.2s;
+  flex-shrink: 0;
+  z-index: 10;
 }
 
 .password-wrapper .show-toggle:hover {
   opacity: 0.7;
 }
 
-.password-wrapper .show-toggle svg {
-  width: 1.2rem;
-  height: 1.2rem;
+.password-wrapper .show-toggle span {
+  width: 20px;
+  height: 20px;
   display: block;
+  position: relative;
+}
+
+/* Ojo abierto */
+.eye-icon::before {
+  content: '👁️';
+  font-size: 18px;
+  display: block;
+}
+
+/* Ojo cerrado/tachado */
+.eye-slash-icon::before {
+  content: '👁️';
+  font-size: 18px;
+  display: block;
+  position: relative;
+}
+
+.eye-slash-icon::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 2px;
+  background: #64748b;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%) rotate(-45deg);
 }
 
 .error {
@@ -162,4 +207,3 @@
     font-size: 1.3rem;
   }
 }
-
