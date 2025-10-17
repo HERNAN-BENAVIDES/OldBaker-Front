@@ -96,20 +96,25 @@ export class WorkerLoginComponent implements OnInit {
         try {
           this.authService.saveAuthResponse(res);
 
+          // Mostrar notificación de éxito ANTES de navegar
+          this.notifications.showSuccess(res.mensaje || 'Inicio de sesión exitoso');
+
           // Redirigir según el rol del usuario
           const user = res.data?.usuario;
           const rol = user?.rol?.toUpperCase();
 
-          if (rol === 'ADMINISTRADOR' || rol === 'ADMIN') {
-            this.router.navigate(['/admin']);
-          } else if (rol === 'AUXILIAR') {
-            this.router.navigate(['/auxiliar']);
-          } else {
-            // Rol desconocido, redirigir a home
-            this.router.navigate(['/']);
-          }
+          // Navegar después de un pequeño delay para que se vea la notificación
+          setTimeout(() => {
+            if (rol === 'ADMINISTRADOR' || rol === 'ADMIN') {
+              this.router.navigate(['/admin']);
+            } else if (rol === 'AUXILIAR') {
+              this.router.navigate(['/auxiliar']);
+            } else {
+              // Rol desconocido, redirigir a home
+              this.router.navigate(['/']);
+            }
+          }, 300);
 
-          this.notifications.showSuccess(res.mensaje || 'Inicio de sesión exitoso');
           return;
         } catch (e) {
           this.notifications.showError('Error al procesar la respuesta de autenticación.');

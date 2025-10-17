@@ -7,12 +7,13 @@ import { ShoppingCartComponent } from './shared/shopping-cart/shopping-cart.comp
 import { AuthService } from './features/auth/services/auth.service';
 import { Header } from './shared/header/header';
 import { Footer } from './shared/footer/footer';
+import { NotificationComponent } from './shared/notification/notification';
 import { interval, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, AccessibilityPanelComponent, ShoppingCartComponent, Header, Footer],
+  imports: [RouterOutlet, AccessibilityPanelComponent, ShoppingCartComponent, Header, Footer, NotificationComponent],
   template: `
     <app-header></app-header>
     <main class="main-content">
@@ -21,6 +22,7 @@ import { interval, Subscription } from 'rxjs';
     <app-footer></app-footer>
     <app-accessibility-panel></app-accessibility-panel>
     <app-shopping-cart></app-shopping-cart>
+    <app-notification></app-notification>
   `,
   styles: [`
     :host {

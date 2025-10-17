@@ -98,22 +98,20 @@ export class Login implements OnInit {
         try {
           // llamar directamente al método del servicio (existe en AuthService)
           this.authService.saveAuthResponse(res);
-          // verificar guardado y loguear para depuración
-          try {
-            const token = localStorage.getItem('auth_token');
-            const refresh = localStorage.getItem('refresh_token');
-            const user = localStorage.getItem('auth_user');
-          } catch (e) {
-          }
-          this.router.navigate(['/']);
+
+          // Mostrar notificación de éxito ANTES de navegar
           this.notifications.showSuccess(res.mensaje || 'Inicio de sesión exitoso');
+
+          // Navegar después de un pequeño delay para que se vea la notificación
+          setTimeout(() => {
+            this.router.navigate(['/']);
+          }, 300);
+
           return;
         } catch (e) {
           this.notifications.showError('Error al procesar la respuesta de autenticación.');
           return;
         }
-
-
       },
       error: (err: any) => {
         this.isLoading = false;

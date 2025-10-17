@@ -1,20 +1,17 @@
 import { Component } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
-// Importar los componentes cuando los crees
-// import { NotificationComponent } from './shared/components/notification/notification.component';
-// import { FooterComponent } from './shared/components/footer/footer.component';
+import { NotificationComponent } from './shared/notification/notification';
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [
-    RouterOutlet, 
-    RouterLink, 
+    RouterOutlet,
+    RouterLink,
     RouterLinkActive,
-    MatIconModule
-    // NotificationComponent,
-    // FooterComponent
+    MatIconModule,
+    NotificationComponent
   ],
   templateUrl: './app.html',
   styleUrls: ['./app.css']

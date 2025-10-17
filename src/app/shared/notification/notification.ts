@@ -98,6 +98,16 @@ export class NotificationComponent implements OnInit, OnDestroy {
     this.clearTimer(id);
   }
 
+  confirmAction(id: number) {
+    this.notificationsService.confirm(id);
+    this.clearTimer(id);
+  }
+
+  cancelAction(id: number) {
+    this.notificationsService.cancel(id);
+    this.clearTimer(id);
+  }
+
   private startTimer(n: Notification) {
     const timeout = n.timeout ?? 4000;
     if (!timeout || timeout <= 0) { return; }

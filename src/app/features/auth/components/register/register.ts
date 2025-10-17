@@ -103,9 +103,11 @@ export class Register {
           console.warn('Error procesando respuesta de registro', e);
         }
 
-        // Navegar a /verify pasando el email como query param para mostrarlo en la vista
+        // Navegar a /verify pasando el email como query param después de un pequeño delay
         const emailToShow = usuario?.email ?? email;
-        this.router.navigate(['/verify'], { queryParams: { email: emailToShow } }).then(r => console.log('[Register] navigate /verify', r));
+        setTimeout(() => {
+          this.router.navigate(['/verify'], { queryParams: { email: emailToShow } }).then(r => console.log('[Register] navigate /verify', r));
+        }, 300);
       },
       error: (err) => {
         this.isLoading = false;

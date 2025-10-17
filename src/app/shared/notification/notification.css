@@ -1,182 +1,510 @@
-/* notification.css */
+/* notification.css - Diseño Enterprise Ultra Profesional */
 
-/* Overlay con fondo difuminado */
+/* Contenedor de notificaciones - Estilo Toast moderno */
+.sb-notifications-container {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 420px;
+  width: calc(100vw - 48px);
+  pointer-events: none;
+}
+
+/* Overlay para notificaciones de confirmación (modal center) */
 .sb-overlay {
   position: fixed;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(2, 6, 23, 0.45);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  z-index: 9999;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px) saturate(180%);
+  -webkit-backdrop-filter: blur(8px) saturate(180%);
+  z-index: 10000;
+  animation: fadeInOverlay 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: auto;
 }
 
-/* Modal principal con espacio para icono y overflow visible */
+@keyframes fadeInOverlay {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Toast notification - Diseño minimalista premium */
+.sb-toast {
+  position: relative;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 16px 20px;
+  min-height: 72px;
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.12),
+    0 10px 20px rgba(0, 0, 0, 0.08),
+    0 4px 8px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  pointer-events: auto;
+  transform-origin: top right;
+  animation: slideInRight 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sb-toast:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow:
+    0 24px 48px rgba(0, 0, 0, 0.15),
+    0 12px 24px rgba(0, 0, 0, 0.1),
+    0 6px 12px rgba(0, 0, 0, 0.06);
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%) scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Borde de acento según tipo - Colores alineados con la app */
+.sb-toast::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  border-radius: 16px 0 0 16px;
+}
+
+.sb-toast.success::before { background: linear-gradient(180deg, #10b981, #059669); }
+.sb-toast.error::before { background: linear-gradient(180deg, #ef4444, #dc2626); }
+.sb-toast.info::before { background: linear-gradient(180deg, #60a5fa, #7c3aed); }
+.sb-toast.confirm::before { background: linear-gradient(180deg, #f59e0b, #d97706); }
+
+/* Modal para confirmaciones - Diseño card premium */
 .sb-modal {
   position: relative;
-  width: 360px;
-  max-width: 92%;
-  background: #fff;
-  border-radius: 16px;
-  padding: 1.5rem 1rem 1rem;
-  box-shadow: 0 18px 40px rgba(2, 6, 23, 0.28);
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  animation: pop 220ms cubic-bezier(.2, .9, .3, 1);
-  max-height: 90vh;
-  overflow: visible;
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 32px;
+  width: 90%;
+  max-width: 440px;
+  box-shadow:
+    0 40px 80px rgba(0, 0, 0, 0.24),
+    0 20px 40px rgba(0, 0, 0, 0.16),
+    0 8px 16px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  animation: zoomIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  pointer-events: auto;
 }
 
-/* Animación pop */
-@keyframes pop {
-  0% { transform: scale(.96); opacity: 0; }
-  60% { transform: scale(1.02); opacity: 1; }
-  100% { transform: scale(1); }
+@keyframes zoomIn {
+  from {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
-/* Variantes según tipo de notificación */
-.sb-modal.success { border: 2px solid rgba(16, 185, 129, 0.08); }
-.sb-modal.error   { border: 2px solid rgba(239, 68, 68, 0.08); }
-.sb-modal.info    { border: 2px solid rgba(59, 130, 246, 0.08); }
-
-/* Contenido interno */
-.sb-modal-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.75rem;
-  width: 100%;
-}
-
-/* Ícono redimensionado y coloreado según tipo */
-.sb-modal-icon {
-  position: absolute;
-  top: -40px;        /* menos espacio para hacerlo más pequeño */
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80px;       /* tamaño reducido */
-  height: 80px;
-  border-radius: 50%;
-  background: #fff;
-  display: grid;
-  place-items: center;
-  box-shadow: 0 8px 28px rgba(2, 6, 23, 0.12);
-  z-index: 2;
-  overflow: visible;
-}
-
-/* Color de fondo según estado */
-.sb-modal-icon.success { background-color: #4caf50; }  /* verde éxito */
-.sb-modal-icon.error   { background-color: #e53935; }  /* rojo error */
-.sb-modal-icon.info    { background-color: #2196f3; }  /* azul info */
-
-/* SVG más pequeño dentro del círculo */
-.sb-modal-icon svg.icon-svg {
+/* Ícono minimalista con acento de color */
+.sb-icon {
   width: 40px;
   height: 40px;
-}
-
-/* Mejora de paths SVG */
-.check-path, .x-path {
-  stroke: #fff;
-  vector-effect: non-scaling-stroke;
-}
-
-/* Botón de cierre bien posicionado y visible */
-.sb-close {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background: rgba(255, 255, 255, 0.8);
-  border: none;
-  font-size: 20px;
-  line-height: 1;
-  color: rgba(15, 23, 42, 0.7);
-  cursor: pointer;
-  z-index: 3;
-  transition: color 0.2s ease;
-}
-.sb-close:hover {
-  color: rgba(15, 23, 42, 1);
-}
-
-/* Mensaje centrado con buen espaciado */
-.sb-modal-message {
-  font-size: 1rem;
-  color: #0f172a;
-  margin-top: 1.25rem;
-  padding: 0 0.5rem;
-}
-
-/* Botón "Aceptar" con interacciones */
-.sb-modal-actions {
-  margin-top: 1.5rem;
-}
-.sb-btn.accept {
-  background: linear-gradient(90deg, #7c3aed, #60a5fa);
-  color: #fff;
-  border: none;
-  padding: 0.7rem 1.2rem;
-  border-radius: 10px;
-  font-weight: 700;
-  cursor: pointer;
-  min-width: 140px;
-  transition: background-color 0.2s ease, transform 0.1s ease;
-}
-.sb-btn.accept:hover {
-  background-color: #6b31d8;
-  transform: translateY(-2px);
-}
-.sb-btn.accept:active {
-  transform: translateY(0);
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-/* Barra de progreso, si aplica */
-.progress {
-  width: 100%;
-  height: 6px;
-  background: rgba(15, 23, 42, 0.04);
-  border-radius: 6px;
+  min-width: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
   overflow: hidden;
-  margin-top: 1rem;
 }
-.progress .bar {
+
+.sb-icon::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.12;
+  border-radius: 12px;
+}
+
+.sb-icon.success { background: rgba(16, 185, 129, 0.1); }
+.sb-icon.success::before { background: linear-gradient(135deg, #10b981, #059669); }
+
+.sb-icon.error { background: rgba(239, 68, 68, 0.1); }
+.sb-icon.error::before { background: linear-gradient(135deg, #ef4444, #dc2626); }
+
+.sb-icon.info { background: rgba(96, 165, 250, 0.1); }
+.sb-icon.info::before { background: linear-gradient(135deg, #60a5fa, #7c3aed); }
+
+.sb-icon.confirm { background: rgba(245, 158, 11, 0.1); }
+.sb-icon.confirm::before { background: linear-gradient(135deg, #f59e0b, #d97706); }
+
+/* SVG íconos minimalistas */
+.sb-icon svg {
+  width: 20px;
+  height: 20px;
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+.sb-icon.success svg { stroke: #059669; }
+.sb-icon.error svg { stroke: #dc2626; }
+.sb-icon.info svg { stroke: #7c3aed; }
+.sb-icon.confirm svg { stroke: #d97706; }
+
+/* Contenido del toast */
+.sb-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.sb-message {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.sb-description {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.4;
+  color: #64748b;
+  margin: 0;
+}
+
+/* Botón de cerrar minimalista */
+.sb-close {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 18px;
+  line-height: 1;
+  padding: 0;
+}
+
+.sb-close:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: #0f172a;
+  transform: scale(1.1);
+}
+
+.sb-close:active {
+  transform: scale(0.95);
+}
+
+/* Modal - Ícono central grande */
+.sb-modal-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 24px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.sb-modal-icon::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.15;
+  border-radius: 20px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.15; }
+  50% { transform: scale(1.1); opacity: 0.25; }
+}
+
+.sb-modal-icon.success { background: rgba(16, 185, 129, 0.1); }
+.sb-modal-icon.success::before { background: #10b981; }
+
+.sb-modal-icon.error { background: rgba(239, 68, 68, 0.1); }
+.sb-modal-icon.error::before { background: #ef4444; }
+
+.sb-modal-icon.info { background: rgba(96, 165, 250, 0.1); }
+.sb-modal-icon.info::before { background: #60a5fa; }
+
+.sb-modal-icon.confirm { background: rgba(245, 158, 11, 0.1); }
+.sb-modal-icon.confirm::before { background: #f59e0b; }
+
+.sb-modal-icon svg {
+  width: 32px;
+  height: 32px;
+  position: relative;
+  z-index: 1;
+}
+
+.sb-modal-icon.success svg { stroke: #059669; }
+.sb-modal-icon.error svg { stroke: #dc2626; }
+.sb-modal-icon.info svg { stroke: #7c3aed; }
+.sb-modal-icon.confirm svg { stroke: #d97706; }
+
+/* Modal - Contenido */
+.sb-modal-content {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.sb-modal-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0 0 8px;
+  letter-spacing: -0.02em;
+}
+
+.sb-modal-message {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.6;
+  color: #64748b;
+  margin: 0;
+}
+
+/* Botones modernos - Colores alineados con la app */
+.sb-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.sb-btn {
+  height: 44px;
+  padding: 0 24px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+  letter-spacing: -0.01em;
+}
+
+.sb-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.2);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.sb-btn:hover::before {
+  opacity: 1;
+}
+
+.sb-btn:active {
+  transform: scale(0.97);
+}
+
+/* Botón primario - Usando los colores de la app (púrpura/azul) */
+.sb-btn-primary {
+  background: linear-gradient(90deg, #7c3aed 0%, #60a5fa 100%);
+  color: #ffffff;
+  box-shadow:
+    0 4px 12px rgba(124, 58, 237, 0.24),
+    0 2px 6px rgba(96, 165, 250, 0.16);
+}
+
+.sb-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 6px 16px rgba(124, 58, 237, 0.32),
+    0 3px 8px rgba(96, 165, 250, 0.24);
+}
+
+/* Botón de confirmación */
+.sb-btn-confirm {
+  background: linear-gradient(90deg, #7c3aed 0%, #60a5fa 100%);
+  color: #ffffff;
+  box-shadow:
+    0 4px 12px rgba(124, 58, 237, 0.24),
+    0 2px 6px rgba(96, 165, 250, 0.16);
+}
+
+.sb-btn-confirm:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 6px 16px rgba(124, 58, 237, 0.32),
+    0 3px 8px rgba(96, 165, 250, 0.24);
+}
+
+/* Botón secundario */
+.sb-btn-secondary {
+  background: #f8fafc;
+  color: #0f172a;
+  border: 1.5px solid #e2e8f0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.sb-btn-secondary:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+
+/* Barra de progreso minimalista */
+.sb-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 0 0 16px 16px;
+  overflow: hidden;
+}
+
+.sb-progress-bar {
   height: 100%;
-  width: 0;
-  transition: width 120ms linear;
-  background: linear-gradient(90deg, rgba(37, 99, 235, 0.95), rgba(16, 185, 129, 0.95));
+  transition: width 100ms linear;
+  border-radius: 0 0 16px 0;
 }
 
-/* Accesibilidad para reducir animaciones */
-@media (prefers-reduced-motion: reduce) {
-  .sb-btn.accept, .progress .bar {
-    transition: none;
-  }
-}
+.sb-toast.success .sb-progress-bar { background: linear-gradient(90deg, #10b981, #059669); }
+.sb-toast.error .sb-progress-bar { background: linear-gradient(90deg, #ef4444, #dc2626); }
+.sb-toast.info .sb-progress-bar { background: linear-gradient(90deg, #60a5fa, #7c3aed); }
+.sb-toast.confirm .sb-progress-bar { background: linear-gradient(90deg, #f59e0b, #d97706); }
 
-/* Ajustes responsivos */
-@media (max-width: 520px) {
+/* Modo oscuro */
+@media (prefers-color-scheme: dark) {
+  .sb-toast,
   .sb-modal {
-    width: 92%;
-    padding-top: 48px;
+    background: #1e293b;
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow:
+      0 20px 40px rgba(0, 0, 0, 0.4),
+      0 10px 20px rgba(0, 0, 0, 0.3),
+      0 4px 8px rgba(0, 0, 0, 0.2);
   }
-  .sb-modal-icon {
-    top: -32px;
-    width: 64px;
-    height: 64px;
+
+  .sb-message,
+  .sb-modal-title {
+    color: #f1f5f9;
   }
-  .sb-modal-icon svg.icon-svg {
-    width: 32px;
-    height: 32px;
+
+  .sb-description,
+  .sb-modal-message {
+    color: #94a3b8;
   }
-  .sb-btn.accept {
-    min-width: 120px;
-    padding: 0.6rem 1rem;
+
+  .sb-close {
+    color: #94a3b8;
+  }
+
+  .sb-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #f1f5f9;
+  }
+
+  .sb-btn-secondary {
+    background: #334155;
+    border-color: #475569;
+    color: #f1f5f9;
+  }
+
+  .sb-btn-secondary:hover {
+    background: #475569;
+    border-color: #64748b;
+  }
+}
+
+/* Accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+  .sb-toast,
+  .sb-modal,
+  .sb-btn,
+  .sb-icon::before,
+  .sb-modal-icon::before {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .sb-notifications-container {
+    top: 16px;
+    right: 16px;
+    left: 16px;
+    width: auto;
+    max-width: none;
+  }
+
+  .sb-toast {
+    padding: 14px 16px;
+    min-height: 64px;
+  }
+
+  .sb-icon {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+  }
+
+  .sb-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .sb-message {
+    font-size: 13px;
+  }
+
+  .sb-description {
+    font-size: 12px;
+  }
+
+  .sb-modal {
+    padding: 24px;
+    margin: 16px;
+  }
+
+  .sb-actions {
+    flex-direction: column;
+  }
+
+  .sb-btn {
+    width: 100%;
   }
 }

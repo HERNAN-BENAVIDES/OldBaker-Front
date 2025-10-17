@@ -133,7 +133,8 @@
 
 .actions{
   display:flex;
-  gap:0.5rem;
+  flex-direction: column;
+  gap:0.75rem;
   margin-top:1rem;
 }
 
@@ -143,12 +144,12 @@
   border: none;
   cursor: pointer;
   font-weight:600;
+  width: 100%;
 }
 
 .btn.primary{
   background: linear-gradient(90deg,#7c3aed,#60a5fa);
   color:#fff;
-  flex:1 1 auto;
 }
 
 .btn.ghost{
@@ -164,6 +165,7 @@
   display:flex;
   gap:0.6rem;
   align-items:center;
+  justify-content:center;
   color:#475569;
   font-size:0.95rem;
 }

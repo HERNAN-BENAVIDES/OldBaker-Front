@@ -29,6 +29,31 @@ export const routes: Routes = [
     loadComponent: () => import('./features/auth/components/register/register')
       .then(m => m.Register)
   },
+  {
+    path: 'verify',
+    loadComponent: () => import('./features/auth/components/verify/verify')
+      .then(m => m.Verify)
+  },
+  {
+    path: 'forgot-password',
+    loadComponent: () => import('./features/auth/components/forgot-password/forgot-password')
+      .then(m => m.ForgotPasswordComponent)
+  },
+  {
+    path: 'reset-password',
+    loadComponent: () => import('./features/auth/components/reset-password/reset-password')
+      .then(m => m.ResetPasswordComponent)
+  },
+  {
+    path: 'code-password',
+    loadComponent: () => import('./features/auth/components/code-password/code-password')
+      .then(m => m.CodePassword)
+  },
+  {
+    path: 'oauth-callback',
+    loadComponent: () => import('./features/auth/components/oauth-callback/oauth-callback')
+      .then(m => m.OauthCallback)
+  },
 
   // Rutas de administrador
   {

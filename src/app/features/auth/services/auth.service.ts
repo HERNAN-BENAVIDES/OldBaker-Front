@@ -277,12 +277,13 @@ export class AuthService {
   }
 
   /**
-   * Desactiva (o elimina) la cuenta del usuario. Endpoint propuesto: POST /user/deactivate
+   * Desactiva (o elimina) la cuenta del usuario. Endpoint: POST /user/{idUsuario}/deactivate
+   * @param idUsuario ID del usuario a desactivar
    */
-  deactivateAccount(): Observable<any> {
+  deactivateAccount(idUsuario: number): Observable<any> {
     const token = this.getToken();
     const headers = token ? new HttpHeaders({ Authorization: `Bearer ${token.replace(/^Bearer\s+/i, '')}` }) : undefined;
-    return this.http.post(`${this.baseUrl}/user/deactivate`, {}, headers ? { headers } : undefined).pipe(map((res: any) => {
+    return this.http.post(`${this.baseUrl}/user/${idUsuario}/deactivate`, {}, headers ? { headers } : undefined).pipe(map((res: any) => {
       // después de una desactivación exitosa limpiamos el local
       try { localStorage.removeItem('auth_user'); } catch (e) {}
       try { localStorage.removeItem('auth_token'); } catch (e) {}

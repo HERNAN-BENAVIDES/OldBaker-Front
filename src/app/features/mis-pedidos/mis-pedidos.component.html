@@ -1,0 +1,59 @@
+<section class="mis-pedidos-page">
+  <div class="container">
+    <button class="btn-back" (click)="goBack()">← Volver</button>
+    <h1 class="page-title">Mis Pedidos</h1>
+
+    <!-- Indicador de carga -->
+    <div *ngIf="loading" class="loading-container">
+      <div class="spinner"></div>
+      <p>Cargando pedidos...</p>
+    </div>
+
+    <!-- Mensaje de error -->
+    <div *ngIf="error" class="error-container">
+      <p>{{ error }}</p>
+    </div>
+
+    <!-- Lista de pedidos -->
+    <div *ngIf="!loading && !error && pedidos.length > 0" class="pedidos-lista">
+      <div class="pedido-card" *ngFor="let pedido of pedidos">
+        <div class="pedido-header">
+          <div class="pedido-info">
+            <h3 class="pedido-id">Pedido #{{ pedido.id }}</h3>
+            <p class="pedido-fecha">{{ formatearFecha(pedido.fecha) }}</p>
+          </div>
+          <span class="pedido-estado" [ngClass]="getEstadoClass(pedido.estado)">
+            {{ getEstadoTexto(pedido.estado) }}
+          </span>
+        </div>
+
+        <div class="pedido-productos">
+          <div class="producto-item" *ngFor="let producto of pedido.productos">
+            <div class="producto-info">
+              <span class="producto-nombre">{{ producto.nombre }}</span>
+              <span class="producto-cantidad">x{{ producto.cantidad }}</span>
+            </div>
+            <span class="producto-precio">{{ producto.precioUnitario * producto.cantidad | currency:'COP':'symbol':'1.0-0' }}</span>
+          </div>
+        </div>
+
+        <div class="pedido-footer">
+          <span class="pedido-total-label">Total:</span>
+          <span class="pedido-total">{{ pedido.total | currency:'COP':'symbol':'1.0-0' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mensaje cuando no hay pedidos -->
+    <div *ngIf="!loading && !error && pedidos.length === 0" class="empty-state">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <line x1="3" y1="6" x2="21" y2="6" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M16 10a4 4 0 0 1-8 0" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <h2>No tienes pedidos aún</h2>
+      <p>Cuando realices tu primera compra, aparecerá aquí</p>
+      <a routerLink="/" class="btn-primary">Ver productos</a>
+    </div>
+  </div>
+</section>

@@ -86,29 +86,28 @@ export class ShoppingCartComponent implements OnInit {
       return;
     }
 
-    console.log('Token de autenticación:', token); // Mostrar el token en consola
-
+    // Construir el payload con los items del carrito
     const payload = {
-      payerEmail: this.authService.getCurrentUser().email, // Obtener el email del usuario logueado
       items: this.cartItems.map(item => ({
-        productId: item.id,
-        quantity: item.quantity
+        productoId: item.id,
+        cantidad: item.quantity,
+        precioUnitario: item.price
       }))
     };
 
     const headers = {
       headers: {
-        Authorization: token // Usar el token en el encabezado
+        Authorization: `Bearer ${token}` // Usar el token en el encabezado con formato Bearer
       }
     };
 
-    this.http.post(`${environment.apiUrl}/api/orders/checkout`, payload, headers).subscribe(
-      (response: any) => {
+    this.http.post(`${environment.apiUrl}/api/orders/checkout`, payload, headers).subscribe({
+      next: (response: any) => {
         if (response.initPoint) {
           window.location.href = response.initPoint; // Redirigir al initPoint
         }
       },
-      error => {
+      error: (error: any) => {
         if (error.error && error.error.error) {
           alert(error.error.error); // Mostrar el mensaje de error
         } else {
@@ -116,6 +115,6 @@ export class ShoppingCartComponent implements OnInit {
         }
         console.error(error);
       }
-    );
+    });
   }
 }
