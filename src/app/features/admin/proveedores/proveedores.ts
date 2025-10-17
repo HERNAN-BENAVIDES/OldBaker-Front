@@ -17,6 +17,9 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTabsModule } from '@angular/material/tabs';
+import { DetallePedidoDialogComponent } from './dialogs/detalle-pedido-dialog.component';
+import { MatChipsModule } from '@angular/material/chips';
+import { PedidoDialogComponent } from './dialogs/pedido-dialog.component';
 
 // Importar diálogos (los crearemos por separado)
 import { ProveedorDialogComponent } from './dialogs/proveedor-dialog.component';
@@ -46,6 +49,27 @@ export interface Proveedor {
   numero_cuenta: string;
 }
 
+interface ItemPedido {
+  id: number;
+  insumo: string;
+  cantidadPedida: number;
+  cantidadRecibida: number;
+  precioUnitario: number;
+  fechaVencimiento?: string;
+  estado: 'completo' | 'incompleto' | 'vencido' | 'defectuoso';
+  observaciones?: string;
+}
+
+interface PedidoDetalle {
+  id: number;
+  proveedor: string;
+  fechaPedido: string;
+  fechaEntrega: string;
+  estado: 'pendiente' | 'recibido' | 'verificado' | 'incompleto' | 'aprobado' | 'rechazado';
+  items: ItemPedido[];
+  total: number;
+}
+
 export interface InsumoProveedor {
   id_insumo: number;
   nombre: string;
@@ -65,7 +89,9 @@ export interface PedidoInsumo {
   id_proveedor: number;
   costo_total: number;
   fecha_pedido: Date;
+  fecha_entrega_estimada?: Date; 
   es_pagable: boolean;
+  estado?: 'pendiente' | 'en_proceso' | 'recibido' | 'cancelado';  // ← NUEVO
   detalles: DetallePedido[];
 }
 
@@ -76,7 +102,8 @@ export interface DetallePedido {
   es_devuelto: boolean;
   id_insumo: number;
   id_pedido: number;
-  nombre_insumo?: string;
+  nombre_insumo?: string; 
+  costo_unitario?: number;
 }
 
 export interface Reporte {
@@ -87,15 +114,23 @@ export interface Reporte {
   id_detalle: number;
 }
 
+export interface InsumoReceta {
+  id_insumo: number;
+  nombre_insumo: string;
+  cantidad: number;
+}
+
 export interface Receta {
   id_receta: number;
   nombre: string;
   descripcion: string;
-  cantidad_insumo: number;
-  id_insumo: number;
   id_producto: number;
-  nombre_insumo?: string;
   nombre_producto?: string;
+  insumos: InsumoReceta[]; // ⭐ Array de múltiples insumos
+  // Para compatibilidad con la tabla
+  id_insumo?: number;
+  nombre_insumo?: string;
+  cantidad_insumo?: number;
 }
 
 export interface Insumo {
@@ -139,7 +174,8 @@ type DialogType = 'proveedor' | 'insumo' | 'producto' | 'insumo-proveedor' | 're
     MatNativeDateModule,
     MatCheckboxModule,
     MatTooltipModule,
-    MatTabsModule
+    MatTabsModule,
+    MatChipsModule  
   ],
   templateUrl: './proveedores.html',
   styleUrls: ['./proveedores.css']
@@ -149,6 +185,7 @@ export class AdminProveedoresComponent implements OnInit, OnDestroy {
   activeModule = 'dashboard';
 
   // Data Sources para las tablas
+  detallesPedidosDataSource = new MatTableDataSource<PedidoDetalle>([]);
   proveedoresDataSource = new MatTableDataSource<Proveedor>([]);
   insumosProveedorDataSource = new MatTableDataSource<InsumoProveedor>([]);
   pedidosDataSource = new MatTableDataSource<PedidoInsumo>([]);
@@ -159,9 +196,11 @@ export class AdminProveedoresComponent implements OnInit, OnDestroy {
   productosDataSource = new MatTableDataSource<Producto>([]);
 
   // Definición de columnas para cada tabla
+  detallesPedidosColumns: string[] = ['id', 'proveedor', 'fechaPedido', 'fechaEntrega', 'estado', 'total', 'acciones'];
   proveedoresColumns: string[] = ['id_proveedor', 'nombre', 'telefono', 'email', 'numero_cuenta', 'acciones'];
   insumosProveedorColumns: string[] = ['id_insumo', 'nombre', 'descripcion', 'costo_unitario', 'fecha_vencimiento', 'cantidad_disponible', 'nombre_proveedor', 'acciones'];
-  pedidosColumns: string[] = ['id_pedido', 'nombre', 'descripcion', 'nombre_proveedor', 'costo_total', 'fecha_pedido', 'es_pagable', 'acciones'];
+  pedidosColumns: string[] = ['id_pedido', 'nombre', 'descripcion', 'nombre_proveedor', 'cantidad_items', 'costo_total', 'fecha_pedido', 'fecha_entrega_estimada','estado',
+'es_pagable', 'acciones'];  
   detallesColumns: string[] = ['id_detalle', 'cantidad_insumo', 'costo_subtotal', 'es_devuelto', 'nombre_insumo', 'id_pedido', 'acciones'];
   reportesColumns: string[] = ['id_devolucion', 'razon', 'es_devolucion', 'fecha_devolucion', 'id_detalle', 'acciones'];
   recetasColumns: string[] = ['id_receta', 'nombre', 'descripcion', 'cantidad_insumo', 'nombre_insumo', 'nombre_producto', 'acciones'];
@@ -191,6 +230,7 @@ export class AdminProveedoresComponent implements OnInit, OnDestroy {
   }
 
   loadAllData(): void {
+    this.loadDetallesPedidos();
     this.loadProveedores();
     this.loadInsumos();
     this.loadProductos();
@@ -200,6 +240,128 @@ export class AdminProveedoresComponent implements OnInit, OnDestroy {
     this.loadReportes();
     this.loadRecetas();
   }
+
+  private loadDetallesPedidos(): void {
+  const mockData: PedidoDetalle[] = [
+    {
+      id: 1001,
+      proveedor: 'Molinos La Rosa',
+      fechaPedido: '2024-01-15',
+      fechaEntrega: '2024-01-18',
+      estado: 'recibido',
+      total: 1250.50,
+      items: [
+        {
+          id: 1,
+          insumo: 'Harina de Trigo (50kg)',
+          cantidadPedida: 10,
+          cantidadRecibida: 10,
+          precioUnitario: 45.00,
+          fechaVencimiento: '2024-06-15',
+          estado: 'completo'
+        },
+        {
+          id: 2,
+          insumo: 'Azúcar Blanca (25kg)',
+          cantidadPedida: 15,
+          cantidadRecibida: 12,
+          precioUnitario: 35.00,
+          fechaVencimiento: '',
+          estado: 'incompleto',
+          observaciones: 'Faltaron 3 bultos en la entrega'
+        }
+      ]
+    },
+    {
+      id: 1002,
+      proveedor: 'Lácteos del Valle',
+      fechaPedido: '2024-01-16',
+      fechaEntrega: '2024-01-19',
+      estado: 'pendiente',
+      total: 890.25,
+      items: [
+        {
+          id: 3,
+          insumo: 'Mantequilla (5kg)',
+          cantidadPedida: 8,
+          cantidadRecibida: 0,
+          precioUnitario: 55.00,
+          fechaVencimiento: '',
+          estado: 'completo'
+        },
+        {
+          id: 4,
+          insumo: 'Leche Entera (1L)',
+          cantidadPedida: 20,
+          cantidadRecibida: 0,
+          precioUnitario: 15.50,
+          fechaVencimiento: '',
+          estado: 'completo'
+        }
+      ]
+    },
+    {
+      id: 1003,
+      proveedor: 'Distribuidora Central',
+      fechaPedido: '2024-01-17',
+      fechaEntrega: '2024-01-20',
+      estado: 'verificado',
+      total: 2340.00,
+      items: [
+        {
+          id: 5,
+          insumo: 'Levadura Fresca (500g)',
+          cantidadPedida: 30,
+          cantidadRecibida: 30,
+          precioUnitario: 12.00,
+          fechaVencimiento: '2024-02-15',
+          estado: 'completo'
+        },
+        {
+          id: 6,
+          insumo: 'Sal Refinada (1kg)',
+          cantidadPedida: 50,
+          cantidadRecibida: 50,
+          precioUnitario: 8.00,
+          fechaVencimiento: '2026-01-01',
+          estado: 'completo'
+        }
+      ]
+    },
+    {
+      id: 1004,
+      proveedor: 'Ingredientes Premium',
+      fechaPedido: '2024-01-14',
+      fechaEntrega: '2024-01-17',
+      estado: 'incompleto',
+      total: 1890.00,
+      items: [
+        {
+          id: 7,
+          insumo: 'Chocolate en Polvo (2kg)',
+          cantidadPedida: 20,
+          cantidadRecibida: 15,
+          precioUnitario: 45.00,
+          fechaVencimiento: '2025-03-01',
+          estado: 'incompleto',
+          observaciones: 'Llegaron solo 15 unidades. El proveedor confirmó el envío del faltante.'
+        },
+        {
+          id: 8,
+          insumo: 'Vainilla Líquida (250ml)',
+          cantidadPedida: 10,
+          cantidadRecibida: 8,
+          precioUnitario: 28.00,
+          fechaVencimiento: '2024-12-01',
+          estado: 'incompleto',
+          observaciones: 'Dos botellas llegaron con el sello roto'
+        }
+      ]
+    }
+  ];
+  
+  this.detallesPedidosDataSource.data = mockData;
+}
 
   private loadProveedores(): void {
     const mockData: Proveedor[] = [
@@ -295,13 +457,36 @@ export class AdminProveedoresComponent implements OnInit, OnDestroy {
         nombre_proveedor: 'Distribuidora Central',
         id_proveedor: 1,
         costo_total: 150000,
-        fecha_pedido: new Date(),
+        fecha_pedido: new Date('2025-10-16'),
+        fecha_entrega_estimada: new Date('2025-10-18'),
         es_pagable: true,
-        detalles: []
-      }
-    ];
-    this.pedidosDataSource.data = mockData;
-  }
+        estado: 'pendiente',
+        detalles: [
+         {
+          id_detalle: 1,
+          id_insumo: 1,
+          id_pedido: 1,
+          nombre_insumo: 'Harina de Trigo',
+          cantidad_insumo: 10,
+          costo_unitario: 2500,
+          costo_subtotal: 25000,
+          es_devuelto: false
+        },
+        {
+          id_detalle: 2,
+          id_insumo: 2,
+          id_pedido: 1,
+          nombre_insumo: 'Azúcar Blanca',
+          cantidad_insumo: 15,
+          costo_unitario: 3000,
+          costo_subtotal: 45000,
+          es_devuelto: false
+        }
+      ]
+    }
+  ];
+  this.pedidosDataSource.data = mockData;
+}
 
   private loadDetalles(): void {
     const mockData: DetallePedido[] = [
@@ -330,133 +515,217 @@ export class AdminProveedoresComponent implements OnInit, OnDestroy {
     ];
     this.reportesDataSource.data = mockData;
   }
+  
 
-  private loadRecetas(): void {
+private loadRecetas(): void {
+    // DATOS MOCK ACTUALIZADOS CON MÚLTIPLES INSUMOS
     const mockData: Receta[] = [
       {
         id_receta: 1,
         nombre: 'Pan Integral',
-        descripcion: 'Receta básica de pan integral',
-        cantidad_insumo: 500,
-        id_insumo: 1,
+        descripcion: 'Receta básica de pan integral con ingredientes naturales',
         id_producto: 1,
+        nombre_producto: 'Pan Artesanal',
+        insumos: [
+          { id_insumo: 1, nombre_insumo: 'Harina de Trigo', cantidad: 500 },
+          { id_insumo: 2, nombre_insumo: 'Azúcar Blanca', cantidad: 50 },
+          { id_insumo: 3, nombre_insumo: 'Mantequilla', cantidad: 100 }
+        ],
+        // Para compatibilidad con la tabla (muestra el primero)
+        id_insumo: 1,
         nombre_insumo: 'Harina de Trigo',
-        nombre_producto: 'Pan Artesanal'
+        cantidad_insumo: 500
+      },
+      {
+        id_receta: 2,
+        nombre: 'Torta de Chocolate Especial',
+        descripcion: 'Deliciosa torta de chocolate con varios ingredientes',
+        id_producto: 2,
+        nombre_producto: 'Torta de Chocolate',
+        insumos: [
+          { id_insumo: 1, nombre_insumo: 'Harina de Trigo', cantidad: 300 },
+          { id_insumo: 2, nombre_insumo: 'Azúcar Blanca', cantidad: 200 },
+          { id_insumo: 3, nombre_insumo: 'Mantequilla', cantidad: 150 },
+          { id_insumo: 4, nombre_insumo: 'Huevos', cantidad: 4 }
+        ],
+        id_insumo: 1,
+        nombre_insumo: 'Harina de Trigo',
+        cantidad_insumo: 300
       }
     ];
     this.recetasDataSource.data = mockData;
   }
+
 
   applyFilter(event: Event, dataSource: MatTableDataSource<any>): void {
     const filterValue = (event.target as HTMLInputElement).value;
     dataSource.filter = filterValue.trim().toLowerCase();
   }
 
-  openAddDialog(type: DialogType): void {
-    // Validación temporal para tipos no implementados
-    if (type === 'pedido' || type === 'detalle') {
-      this.snackBar.open(`Funcionalidad de ${type} en desarrollo`, 'Cerrar', {
-        duration: 3000,
-        panelClass: 'snackbar-warning'
-      });
-      return;
-    }
+  getDetallesPedidosCountByStatus(estado: string): number {
+  return this.detallesPedidosDataSource.data.filter(p => p.estado === estado).length;
+}
 
-    let dialogComponent: any;
-    let dialogData: any = { item: null, isEdit: false, type };
+  // método para abrir el diálogo de detalles
+openDetallePedidoDialog(pedido: PedidoDetalle): void {
+  const dialogRef = this.dialog.open(DetallePedidoDialogComponent, {
+    width: '90%',
+    maxWidth: '1200px',
+    maxHeight: '90vh',
+    data: { pedido, isEdit: true }
+  });
 
-    switch (type) {
-      case 'proveedor':
-        dialogComponent = ProveedorDialogComponent;
-        break;
-      case 'insumo':
-        dialogComponent = InsumoDialogComponent;
-        break;
-      case 'producto':
-        dialogComponent = ProductoDialogComponent;
-        break;
-      case 'insumo-proveedor':
-        dialogComponent = InsumoProveedorDialogComponent;
-        dialogData.proveedores = this.proveedoresDataSource.data;
-        dialogData.insumos = this.insumosDataSource.data;
-        break;
-      case 'receta':
-        dialogComponent = RecetaDialogComponent;
-        dialogData.insumos = this.insumosDataSource.data;
-        dialogData.productos = this.productosDataSource.data;
-        break;
-      case 'reporte':
-        dialogComponent = ReporteDialogComponent;
-        dialogData.detalles = this.detallesDataSource.data;
-        break;
-      default:
-        return;
-    }
-
-    const dialogRef: MatDialogRef<any, any> = this.dialog.open(dialogComponent, {
-      width: '500px',
-      data: dialogData
-    });
-
-    dialogRef.afterClosed().subscribe((result: any) => {
-      if (result) {
-        this.addItem(type, result);
+  
+  dialogRef.afterClosed().subscribe((result: PedidoDetalle | undefined) => {
+    if (result) {
+      // Actualizar el pedido en el DataSource
+      const index = this.detallesPedidosDataSource.data.findIndex(p => p.id === result.id);
+      if (index !== -1) {
+        this.detallesPedidosDataSource.data[index] = result;
+        this.detallesPedidosDataSource.data = [...this.detallesPedidosDataSource.data];
+        
+        this.snackBar.open('Pedido actualizado exitosamente', 'Cerrar', {
+          duration: 3000,
+          panelClass: 'snackbar-success'
+        });
       }
+    }
+  });
+}
+
+openAddDialog(type: DialogType): void {
+  if (type === 'detalle') {
+    this.snackBar.open(`Funcionalidad de ${type} en desarrollo`, 'Cerrar', {
+      duration: 3000,
+      panelClass: 'snackbar-warning'
     });
+    return;
   }
 
-  openEditDialog(type: DialogType, item: any): void {
-    // Validación temporal para tipos no implementados
-    if (type === 'pedido' || type === 'detalle') {
-      this.snackBar.open(`Funcionalidad de edición de ${type} en desarrollo`, 'Cerrar', {
-        duration: 3000,
-        panelClass: 'snackbar-warning'
-      });
+  let dialogComponent: any;
+  let dialogData: any = { item: null, isEdit: false, type };
+
+  switch (type) {
+    case 'proveedor':
+      dialogComponent = ProveedorDialogComponent;
+      break;
+    
+    case 'insumo':
+      dialogComponent = InsumoDialogComponent;
+      break;
+    
+    case 'producto':
+      dialogComponent = ProductoDialogComponent;
+      break;
+    
+    case 'insumo-proveedor':
+      dialogComponent = InsumoProveedorDialogComponent;
+      dialogData.proveedores = this.proveedoresDataSource.data;
+      dialogData.insumos = this.insumosDataSource.data;
+      // ← AGREGAR: Pasar los insumos-proveedor existentes para validación
+      dialogData.insumosProveedorExistentes = this.insumosProveedorDataSource.data;
+      break;
+    
+    case 'receta':
+      dialogComponent = RecetaDialogComponent;
+      dialogData.insumos = this.insumosDataSource.data;
+      dialogData.productos = this.productosDataSource.data;
+      break;
+    
+    case 'reporte':
+      dialogComponent = ReporteDialogComponent;
+      dialogData.detalles = this.detallesDataSource.data;
+      break;
+
+    case 'pedido':
+      dialogComponent = PedidoDialogComponent;
+      dialogData.proveedores = this.proveedoresDataSource.data;
+      dialogData.insumosProveedor = this.insumosProveedorDataSource.data;
+      break;
+    
+    default:
       return;
-    }
-
-    let dialogComponent: any;
-    let dialogData: any = { item, isEdit: true, type };
-
-    switch (type) {
-      case 'proveedor':
-        dialogComponent = ProveedorDialogComponent;
-        break;
-      case 'insumo':
-        dialogComponent = InsumoDialogComponent;
-        break;
-      case 'producto':
-        dialogComponent = ProductoDialogComponent;
-        break;
-      case 'insumo-proveedor':
-        dialogComponent = InsumoProveedorDialogComponent;
-        dialogData.proveedores = this.proveedoresDataSource.data;
-        dialogData.insumos = this.insumosDataSource.data;
-        break;
-      case 'receta':
-        dialogComponent = RecetaDialogComponent;
-        dialogData.insumos = this.insumosDataSource.data;
-        dialogData.productos = this.productosDataSource.data;
-        break;
-      case 'reporte':
-        dialogComponent = ReporteDialogComponent;
-        dialogData.detalles = this.detallesDataSource.data;
-        break;
-      default:
-        return;
-    }
-
-    const dialogRef: MatDialogRef<any, any> = this.dialog.open(dialogComponent, {
-      width: '500px',
-      data: dialogData
-    });
-
-    dialogRef.afterClosed().subscribe((result: any) => {
-      if (result) {
-        this.updateItem(type, item, result);
-      }
-    });
   }
+
+  const dialogRef: MatDialogRef<any, any> = this.dialog.open(dialogComponent, {
+    width: type === 'pedido' ? '900px' : type === 'insumo-proveedor' ? '700px' : '500px',
+    maxHeight: '90vh',
+    data: dialogData
+  });
+
+  dialogRef.afterClosed().subscribe((result: any) => {
+    if (result) {
+      this.addItem(type, result);
+    }
+  });
+}
+
+openEditDialog(type: DialogType, item: any): void {
+  if (type === 'detalle') {
+    this.snackBar.open(`Funcionalidad de edición de ${type} en desarrollo`, 'Cerrar', {
+      duration: 3000,
+      panelClass: 'snackbar-warning'
+    });
+    return;
+  }
+
+  let dialogComponent: any;
+  let dialogData: any = { item, isEdit: true, type };
+
+  switch (type) {
+    case 'proveedor':
+      dialogComponent = ProveedorDialogComponent;
+      break;
+    
+    case 'insumo':
+      dialogComponent = InsumoDialogComponent;
+      break;
+    
+    case 'producto':
+      dialogComponent = ProductoDialogComponent;
+      break;
+    
+    case 'insumo-proveedor':
+      dialogComponent = InsumoProveedorDialogComponent;
+      dialogData.proveedores = this.proveedoresDataSource.data;
+      dialogData.insumos = this.insumosDataSource.data;
+      // ← AGREGAR: Pasar los insumos-proveedor existentes para validación
+      dialogData.insumosProveedorExistentes = this.insumosProveedorDataSource.data;
+      break;
+    
+    case 'receta':
+      dialogComponent = RecetaDialogComponent;
+      dialogData.insumos = this.insumosDataSource.data;
+      dialogData.productos = this.productosDataSource.data;
+      break;
+    
+    case 'reporte':
+      dialogComponent = ReporteDialogComponent;
+      dialogData.detalles = this.detallesDataSource.data;
+      break;
+
+    case 'pedido':
+      dialogComponent = PedidoDialogComponent;
+      dialogData.proveedores = this.proveedoresDataSource.data;
+      dialogData.insumosProveedor = this.insumosProveedorDataSource.data;
+      break;
+    
+    default:
+      return;
+  }
+
+  const dialogRef: MatDialogRef<any, any> = this.dialog.open(dialogComponent, {
+    width: type === 'pedido' ? '900px' : type === 'insumo-proveedor' ? '700px' : '500px',
+    maxHeight: '90vh',
+    data: dialogData
+  });
+
+  dialogRef.afterClosed().subscribe((result: any) => {
+    if (result) {
+      this.updateItem(type, item, result);
+    }
+  });
+}
 
   addItem(type: DialogType, item: any): void {
     switch (type) {
@@ -490,6 +759,7 @@ export class AdminProveedoresComponent implements OnInit, OnDestroy {
         };
         this.recetasDataSource.data = [...this.recetasDataSource.data, newReceta];
         break;
+
       
       case 'reporte':
         const newReporteId = Math.max(...this.reportesDataSource.data.map(r => r.id_devolucion), 0) + 1;
@@ -500,25 +770,6 @@ export class AdminProveedoresComponent implements OnInit, OnDestroy {
         };
         this.reportesDataSource.data = [...this.reportesDataSource.data, newReporte];
         break;
-      
-      case 'insumo-proveedor':
-        const newInsumoProveedorId = Math.max(...this.insumosProveedorDataSource.data.map(ip => ip.id_insumo), 0) + 1;
-        const proveedor = this.proveedoresDataSource.data.find(p => p.id_proveedor == item.id_proveedor);
-        const newInsumoProveedor = { 
-          ...item, 
-          id_insumo: newInsumoProveedorId,
-          nombre_proveedor: proveedor?.nombre || ''
-        };
-        this.insumosProveedorDataSource.data = [...this.insumosProveedorDataSource.data, newInsumoProveedor];
-        break;
-
-      case 'pedido':
-        // Implementar cuando tengamos el componente
-        this.snackBar.open('Funcionalidad de pedidos en desarrollo', 'Cerrar', {
-          duration: 3000,
-          panelClass: 'snackbar-warning'
-        });
-        break;
 
       case 'detalle':
         // Implementar cuando tengamos el componente
@@ -527,9 +778,23 @@ export class AdminProveedoresComponent implements OnInit, OnDestroy {
           panelClass: 'snackbar-warning'
         });
         break;
+
+      case 'pedido':
+        const newPedidoId = Math.max(...this.pedidosDataSource.data.map(p => p.id_pedido), 0) + 1;
+        const proveedor = this.proveedoresDataSource.data.find(p => p.id_proveedor == item.id_proveedor);
+        const newPedido = { 
+          ...item, 
+          id_pedido: newPedidoId,
+          nombre_proveedor: proveedor?.nombre || item.nombre_proveedor || '',
+          estado: item.estado || 'pendiente'
+      };
+      this.pedidosDataSource.data = [...this.pedidosDataSource.data, newPedido];
+      break;
+
     }
     
     if (type !== 'pedido' && type !== 'detalle') {
+     
       this.snackBar.open(`${this.getTypeName(type)} agregado exitosamente`, 'Cerrar', {
         duration: 3000,
         panelClass: 'snackbar-success'
@@ -585,6 +850,19 @@ export class AdminProveedoresComponent implements OnInit, OnDestroy {
           this.reportesDataSource.data = [...this.reportesDataSource.data];
         }
         break;
+
+      case 'pedido':
+        const pedidoIndex = this.pedidosDataSource.data.findIndex(p => p.id_pedido === oldItem.id_pedido);
+        if (pedidoIndex !== -1) {
+          const proveedor = this.proveedoresDataSource.data.find(p => p.id_proveedor == newItem.id_proveedor);
+          this.pedidosDataSource.data[pedidoIndex] = { 
+            ...oldItem, 
+            ...newItem,
+            nombre_proveedor: proveedor?.nombre || newItem.nombre_proveedor || ''
+        };
+        this.pedidosDataSource.data = [...this.pedidosDataSource.data];
+      }
+      break;
       
       case 'insumo-proveedor':
         const insumoProveedorIndex = this.insumosProveedorDataSource.data.findIndex(ip => ip.id_insumo === oldItem.id_insumo);
@@ -608,11 +886,11 @@ export class AdminProveedoresComponent implements OnInit, OnDestroy {
         return;
     }
     
-    this.snackBar.open(`${this.getTypeName(type)} actualizado exitosamente`, 'Cerrar', {
-      duration: 3000,
-      panelClass: 'snackbar-success'
-    });
-  }
+  this.snackBar.open(`${this.getTypeName(type)} actualizado exitosamente`, 'Cerrar', {
+    duration: 3000,
+    panelClass: 'snackbar-success'
+  });
+}
 
   deleteItem(type: DialogType, item: any): void {
     if (confirm('¿Está seguro de eliminar este elemento?')) {
@@ -650,6 +928,21 @@ export class AdminProveedoresComponent implements OnInit, OnDestroy {
     }
   }
 
+
+  getCantidadItemsPedido(pedido: PedidoInsumo): number {
+  return pedido.detalles?.length || 0;
+}
+
+getEstadoPedidoColor(estado: string): string {
+  const colores: Record<string, string> = {
+    'pendiente': 'warn',
+    'en_proceso': 'accent',
+    'recibido': 'primary',
+    'cancelado': 'warn'
+  };
+  return colores[estado] || 'basic';
+}
+
   private getTypeName(type: DialogType): string {
     const names: Record<DialogType, string> = {
       'proveedor': 'Proveedor',
@@ -664,5 +957,3 @@ export class AdminProveedoresComponent implements OnInit, OnDestroy {
     return names[type] || type;
   }
 }
-
-export const PedidoDialogComponent = null; // Temporal - eliminar cuando se implemente el componente real

@@ -1,0 +1,226 @@
+<h2 mat-dialog-title class="dialog-title">
+  <mat-icon>receipt_long</mat-icon>
+  Detalles del Pedido #{{ pedido.id }}
+</h2>
+
+<mat-dialog-content class="dialog-content">
+  <!-- Información del Pedido -->
+  <mat-card class="info-card">
+    <mat-card-header>
+      <mat-card-title>Información General</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="info-grid">
+        <div class="info-item">
+          <strong>Proveedor:</strong>
+          <span>{{ pedido.proveedor }}</span>
+        </div>
+        <div class="info-item">
+          <strong>Fecha Pedido:</strong>
+          <span>{{ pedido.fechaPedido }}</span>
+        </div>
+        <div class="info-item">
+          <strong>Fecha Entrega:</strong>
+          <span>{{ pedido.fechaEntrega }}</span>
+        </div>
+        <div class="info-item">
+          <strong>Estado:</strong>
+          <mat-chip [color]="getEstadoColor(pedido.estado)" selected>
+            {{ pedido.estado | uppercase }}
+          </mat-chip>
+        </div>
+        <div class="info-item total-item">
+          <strong>Total:</strong>
+          <span class="total-amount">${{ pedido.total | number:'1.2-2' }}</span>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Mensaje de ayuda -->
+  <mat-card class="alert-card info" *ngIf="pedido.estado === 'recibido'">
+    <mat-icon>info</mat-icon>
+    <span>Complete la información de cada ítem para verificar el pedido</span>
+  </mat-card>
+
+  <!-- Tabla de Items -->
+  <mat-card class="items-card">
+    <mat-card-header>
+      <mat-card-title>Detalles de los Ítems</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="table-container">
+        <mat-table [dataSource]="pedido.items" class="items-table">
+          
+          <!-- Columna Insumo -->
+          <ng-container matColumnDef="insumo">
+            <mat-header-cell *matHeaderCellDef>Insumo</mat-header-cell>
+            <mat-cell *matCellDef="let item">
+              <strong>{{ item.insumo }}</strong>
+            </mat-cell>
+          </ng-container>
+
+          <!-- Columna Cantidad Pedida -->
+          <ng-container matColumnDef="pedido">
+            <mat-header-cell *matHeaderCellDef>Pedido</mat-header-cell>
+            <mat-cell *matCellDef="let item">{{ item.cantidadPedida }}</mat-cell>
+          </ng-container>
+
+          <!-- Columna Cantidad Recibida -->
+          <ng-container matColumnDef="recibido">
+            <mat-header-cell *matHeaderCellDef>Recibido</mat-header-cell>
+            <mat-cell *matCellDef="let item">
+              <mat-form-field appearance="outline" class="small-input">
+                <input matInput type="number" 
+                       [value]="item.cantidadRecibida"
+                       (input)="updateCantidadRecibida(item, $event)"
+                       [disabled]="pedido.estado === 'aprobado' || pedido.estado === 'rechazado'"
+                       min="0"
+                       [max]="item.cantidadPedida">
+              </mat-form-field>
+            </mat-cell>
+          </ng-container>
+
+          <!-- Columna Precio Unitario -->
+          <ng-container matColumnDef="precio">
+            <mat-header-cell *matHeaderCellDef>Precio Unit.</mat-header-cell>
+            <mat-cell *matCellDef="let item">
+              ${{ item.precioUnitario | number:'1.2-2' }}
+            </mat-cell>
+          </ng-container>
+
+          <!-- Columna Fecha Vencimiento -->
+          <ng-container matColumnDef="vencimiento">
+            <mat-header-cell *matHeaderCellDef>Vencimiento</mat-header-cell>
+            <mat-cell *matCellDef="let item">
+              <mat-form-field appearance="outline" class="date-input">
+                <input matInput type="date"
+                       [value]="item.fechaVencimiento || ''"
+                       (input)="updateFechaVencimiento(item, $event)"
+                       [disabled]="pedido.estado === 'aprobado' || pedido.estado === 'rechazado'"
+                       [class.vencido]="isVencido(item.fechaVencimiento)">
+              </mat-form-field>
+            </mat-cell>
+          </ng-container>
+
+          <!-- Columna Estado -->
+          <ng-container matColumnDef="estado">
+            <mat-header-cell *matHeaderCellDef>Estado</mat-header-cell>
+            <mat-cell *matCellDef="let item">
+              <mat-form-field appearance="outline" class="select-input">
+                <mat-select [value]="item.estado"
+                            (selectionChange)="updateEstadoItem(item, $event)"
+                            [disabled]="pedido.estado === 'aprobado' || pedido.estado === 'rechazado'">
+                  <mat-option value="completo">Completo</mat-option>
+                  <mat-option value="incompleto">Incompleto</mat-option>
+                  <mat-option value="vencido">Vencido</mat-option>
+                  <mat-option value="defectuoso">Defectuoso</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </mat-cell>
+          </ng-container>
+
+          <!-- Columna Observaciones -->
+          <ng-container matColumnDef="observaciones">
+            <mat-header-cell *matHeaderCellDef>Observaciones</mat-header-cell>
+            <mat-cell *matCellDef="let item">
+              <div class="observaciones-cell">
+                <mat-chip *ngIf="item.observaciones" 
+                          [color]="'accent'" 
+                          (click)="abrirObservaciones(item)">
+                  <mat-icon>description</mat-icon>
+                  Ver nota
+                </mat-chip>
+                <span *ngIf="!item.observaciones && item.estado !== 'completo'" 
+                      class="no-observacion">
+                  Sin nota
+                </span>
+              </div>
+            </mat-cell>
+          </ng-container>
+
+          <!-- Columna Acciones -->
+          <ng-container matColumnDef="acciones">
+            <mat-header-cell *matHeaderCellDef>Acciones</mat-header-cell>
+            <mat-cell *matCellDef="let item">
+              <button mat-icon-button 
+                      color="primary"
+                      (click)="abrirObservaciones(item)"
+                      [disabled]="pedido.estado === 'aprobado' || pedido.estado === 'rechazado'"
+                      matTooltip="Agregar/Editar observación">
+                <mat-icon>{{ item.observaciones ? 'edit_note' : 'add_comment' }}</mat-icon>
+              </button>
+            </mat-cell>
+          </ng-container>
+
+          <mat-header-row *matHeaderRowDef="itemColumns"></mat-header-row>
+          <mat-row *matRowDef="let row; columns: itemColumns;"></mat-row>
+        </mat-table>
+      </div>
+
+      <!-- Mensaje de Validación -->
+      <mat-card class="alert-card warning" *ngIf="!puedeAprobar() && pedido.estado !== 'aprobado'">
+        <mat-icon>warning</mat-icon>
+        <span>{{ getMensajeValidacion() }}</span>
+      </mat-card>
+
+      <!-- Botones de Acción -->
+      <div class="action-buttons" *ngIf="pedido.estado !== 'aprobado' && pedido.estado !== 'rechazado'">
+        <button mat-raised-button 
+                color="primary"
+                (click)="aprobarPedido()"
+                [disabled]="!puedeAprobar()">
+          <mat-icon>check_circle</mat-icon>
+          Aprobar como Pagable
+        </button>
+        <button mat-raised-button 
+                color="warn"
+                (click)="marcarIncompleto()">
+          <mat-icon>warning</mat-icon>
+          Marcar Incompleto
+        </button>
+        <button mat-raised-button 
+                color="warn"
+                (click)="rechazarPedido()">
+          <mat-icon>cancel</mat-icon>
+          Rechazar Pedido
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Modal de Observaciones -->
+  <div class="modal-overlay" *ngIf="mostrarObservacionModal" (click)="cerrarModalObservacion()">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+      <h3>
+        <mat-icon>description</mat-icon>
+        Observaciones del Ítem
+      </h3>
+      <p class="item-name">
+        <strong>{{ itemSeleccionado?.insumo }}</strong>
+      </p>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Descripción del problema o situación</mat-label>
+        <textarea matInput 
+                  [(ngModel)]="observacionTemp"
+                  rows="5"
+                  placeholder="Describe el problema o situación específica de este ítem..."></textarea>
+      </mat-form-field>
+      <div class="modal-actions">
+        <button mat-button (click)="cerrarModalObservacion()">Cancelar</button>
+        <button mat-raised-button color="primary" (click)="guardarObservacion()">
+          <mat-icon>save</mat-icon>
+          Guardar Observación
+        </button>
+      </div>
+    </div>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="dialog-actions">
+  <button mat-button (click)="onCancel()">Cerrar</button>
+  <button mat-raised-button color="primary" (click)="onSave()">
+    <mat-icon>save</mat-icon>
+    Guardar Cambios
+  </button>
+</mat-dialog-actions>

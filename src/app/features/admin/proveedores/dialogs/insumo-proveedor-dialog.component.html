@@ -1,0 +1,225 @@
+<h2 mat-dialog-title class="dialog-title">
+  <mat-icon>inventory</mat-icon>
+  {{ data.isEdit ? 'Editar' : 'Agregar' }} Insumo por Proveedor
+</h2>
+
+<mat-dialog-content class="dialog-content">
+  <form [formGroup]="form">
+    
+    <!-- Alerta de combinación existente -->
+    <mat-card class="alert-card error" *ngIf="existeCombinacion">
+      <mat-icon>error</mat-icon>
+      <span>Esta combinación de Insumo + Proveedor ya existe. Por favor seleccione otra.</span>
+    </mat-card>
+
+    <!-- Sección: Selección de Insumo -->
+    <mat-card class="form-section">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>spa</mat-icon>
+          Información del Insumo
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Seleccionar Insumo</mat-label>
+          <mat-select formControlName="id_insumo" 
+                      required 
+                      (selectionChange)="onInsumoChange($event.value)">
+            <mat-option value="">-- Seleccione un insumo --</mat-option>
+            <mat-option *ngFor="let insumo of data.insumos" [value]="insumo.id_insumo">
+              {{ insumo.nombre }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="form.get('id_insumo')?.hasError('required')">
+            Debe seleccionar un insumo
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Info del insumo seleccionado -->
+        <div class="info-preview" *ngIf="insumoSeleccionado">
+          <mat-divider></mat-divider>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="label">Descripción:</span>
+              <span class="value">{{ insumoSeleccionado.descripcion }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Precio Base:</span>
+              <span class="value price">${{ insumoSeleccionado.costo_unitario | number:'1.2-2' }}</span>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Sección: Selección de Proveedor -->
+    <mat-card class="form-section">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>business</mat-icon>
+          Información del Proveedor
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Seleccionar Proveedor</mat-label>
+          <mat-select formControlName="id_proveedor" 
+                      required 
+                      (selectionChange)="onProveedorChange($event.value)">
+            <mat-option value="">-- Seleccione un proveedor --</mat-option>
+            <mat-option *ngFor="let proveedor of data.proveedores" [value]="proveedor.id_proveedor">
+              {{ proveedor.nombre }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="form.get('id_proveedor')?.hasError('required')">
+            Debe seleccionar un proveedor
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Info del proveedor seleccionado -->
+        <div class="info-preview" *ngIf="proveedorSeleccionado">
+          <mat-divider></mat-divider>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="label">Teléfono:</span>
+              <span class="value">
+                <mat-icon class="small-icon">phone</mat-icon>
+                {{ proveedorSeleccionado.telefono }}
+              </span>
+            </div>
+            <div class="info-item">
+              <span class="label">Email:</span>
+              <span class="value">
+                <mat-icon class="small-icon">email</mat-icon>
+                {{ proveedorSeleccionado.email }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Sección: Detalles de la Relación -->
+    <mat-card class="form-section">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>attach_money</mat-icon>
+          Precio y Disponibilidad
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Precio Unitario del Proveedor</mat-label>
+            <span matPrefix>$&nbsp;</span>
+            <input matInput 
+                   type="number" 
+                   formControlName="costo_unitario" 
+                   required
+                   min="0"
+                   step="0.01">
+            <mat-error *ngIf="form.get('costo_unitario')?.hasError('required')">
+              El precio es requerido
+            </mat-error>
+            <mat-error *ngIf="form.get('costo_unitario')?.hasError('min')">
+              El precio debe ser mayor a 0
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Cantidad Disponible</mat-label>
+            <input matInput 
+                   type="number" 
+                   formControlName="cantidad_disponible" 
+                   required
+                   min="0">
+            <mat-icon matSuffix>inventory_2</mat-icon>
+            <mat-error *ngIf="form.get('cantidad_disponible')?.hasError('required')">
+              La cantidad es requerida
+            </mat-error>
+            <mat-error *ngIf="form.get('cantidad_disponible')?.hasError('min')">
+              La cantidad debe ser mayor o igual a 0
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Comparación de precio -->
+        <div class="price-comparison" *ngIf="insumoSeleccionado && form.get('costo_unitario')?.value">
+          <mat-divider></mat-divider>
+          <div class="comparison-grid">
+            <div class="comparison-item">
+              <span class="comparison-label">Precio Base:</span>
+              <span class="comparison-value">${{ precioBase | number:'1.2-2' }}</span>
+            </div>
+            <div class="comparison-item">
+              <span class="comparison-label">Diferencia:</span>
+              <span class="comparison-value" [ngClass]="getColorDiferencia()">
+                <mat-icon *ngIf="getDiferenciaPrecio() > 0">arrow_upward</mat-icon>
+                <mat-icon *ngIf="getDiferenciaPrecio() < 0">arrow_downward</mat-icon>
+                <mat-icon *ngIf="getDiferenciaPrecio() === 0">remove</mat-icon>
+                ${{ getDiferenciaPrecio() | number:'1.2-2' }}
+                ({{ getPorcentajeDiferencia() | number:'1.1-1' }}%)
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fecha de vencimiento -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Fecha de Vencimiento</mat-label>
+          <input matInput 
+                 [matDatepicker]="picker" 
+                 formControlName="fecha_vencimiento" 
+                 required>
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+          <mat-error *ngIf="form.get('fecha_vencimiento')?.hasError('required')">
+            La fecha de vencimiento es requerida
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Alertas -->
+        <div class="alerts-container">
+          <!-- Alerta de vencimiento -->
+          <mat-chip-listbox *ngIf="diasHastaVencimiento > 0">
+            <mat-chip [ngClass]="alertaVencimiento ? 'chip-warning' : 'chip-info'">
+              <mat-icon matChipAvatar>event</mat-icon>
+              {{ getAlertaVencimientoTexto() }}
+            </mat-chip>
+          </mat-chip-listbox>
+
+          <mat-chip-listbox *ngIf="diasHastaVencimiento <= 0">
+            <mat-chip class="chip-error">
+              <mat-icon matChipAvatar>warning</mat-icon>
+              Producto Vencido
+            </mat-chip>
+          </mat-chip-listbox>
+
+          <!-- Alerta de stock bajo -->
+          <mat-chip-listbox *ngIf="alertaStockBajo">
+            <mat-chip class="chip-warning">
+              <mat-icon matChipAvatar>inventory</mat-icon>
+              Stock Bajo (menos de 20 unidades)
+            </mat-chip>
+          </mat-chip-listbox>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="dialog-actions">
+  <button mat-button (click)="onCancel()">
+    <mat-icon>close</mat-icon>
+    Cancelar
+  </button>
+  <button mat-raised-button 
+          color="primary" 
+          (click)="onSave()" 
+          [disabled]="!form.valid || existeCombinacion">
+    <mat-icon>save</mat-icon>
+    {{ data.isEdit ? 'Actualizar' : 'Guardar' }}
+  </button>
+</mat-dialog-actions>

@@ -69,17 +69,17 @@
         </mat-card-content>
       </mat-card>
 
-      <!-- Detalles de Pedidos -->
-      <mat-card class="module-card" (click)="setActiveModule('detalles')">
+      <!-- Detalles de Pedidos - NUEVA VERSIÓN -->
+      <mat-card class="module-card" (click)="setActiveModule('detalles-pedidos')">
         <mat-card-header>
           <mat-icon class="module-icon">receipt_long</mat-icon>
           <mat-card-title>Detalles de Pedidos</mat-card-title>
         </mat-card-header>
         <mat-card-content>
-          <p>Ver detalles específicos de cada pedido realizado a proveedores.</p>
+          <p>Ver y gestionar detalles específicos de cada pedido realizado a proveedores con verificación de items.</p>
           <div class="card-stats">
-            <span class="stat-number">{{ detallesDataSource.data.length }}</span>
-            <span class="stat-label">Detalles</span>
+            <span class="stat-number">{{ detallesPedidosDataSource.data.length }}</span>
+            <span class="stat-label">Pedidos Detallados</span>
           </div>
         </mat-card-content>
       </mat-card>
@@ -328,175 +328,273 @@
     </div>
   </div>
 
-  <!-- ================= MÓDULO DE PEDIDOS DE INSUMOS ================= -->
-  <div class="module-content" *ngIf="activeModule === 'pedidos'">
-    <div class="module-header">
-      <h2 class="module-title">
-        <mat-icon>shopping_cart</mat-icon>
-        Gestión de Pedidos de Insumos
-      </h2>
-      <button mat-raised-button class="add-btn" (click)="openAddDialog('pedido')">
-        <mat-icon>add</mat-icon>
-        Hacer Pedido de Insumos
-      </button>
-    </div>
-
-    <div class="search-container">
-      <mat-form-field appearance="outline" class="search-field">
-        <mat-label>Buscar pedidos...</mat-label>
-        <input matInput (keyup)="applyFilter($event, pedidosDataSource)" placeholder="Nombre o descripción">
-        <mat-icon matSuffix>search</mat-icon>
-      </mat-form-field>
-    </div>
-
-    <div class="table-container">
-      <mat-table [dataSource]="pedidosDataSource" class="data-table">
-        <ng-container matColumnDef="id_pedido">
-          <mat-header-cell *matHeaderCellDef>ID</mat-header-cell>
-          <mat-cell *matCellDef="let item"><span class="id-badge">{{ item.id_pedido }}</span></mat-cell>
-        </ng-container>
-
-        <ng-container matColumnDef="nombre">
-          <mat-header-cell *matHeaderCellDef>Nombre</mat-header-cell>
-          <mat-cell *matCellDef="let item">{{ item.nombre }}</mat-cell>
-        </ng-container>
-
-        <ng-container matColumnDef="descripcion">
-          <mat-header-cell *matHeaderCellDef>Descripción</mat-header-cell>
-          <mat-cell *matCellDef="let item">{{ item.descripcion }}</mat-cell>
-        </ng-container>
-
-        <ng-container matColumnDef="nombre_proveedor">
-          <mat-header-cell *matHeaderCellDef>Proveedor</mat-header-cell>
-          <mat-cell *matCellDef="let item">{{ item.nombre_proveedor }}</mat-cell>
-        </ng-container>
-
-        <ng-container matColumnDef="costo_total">
-          <mat-header-cell *matHeaderCellDef>Costo Total</mat-header-cell>
-          <mat-cell *matCellDef="let item">
-            <span class="price total">${{ item.costo_total | number:'1.0-0' }}</span>
-          </mat-cell>
-        </ng-container>
-
-        <ng-container matColumnDef="fecha_pedido">
-          <mat-header-cell *matHeaderCellDef>Fecha Pedido</mat-header-cell>
-          <mat-cell *matCellDef="let item">{{ item.fecha_pedido | date:'dd/MM/yyyy' }}</mat-cell>
-        </ng-container>
-
-        <ng-container matColumnDef="es_pagable">
-          <mat-header-cell *matHeaderCellDef>Estado Pago</mat-header-cell>
-          <mat-cell *matCellDef="let item">
-            <span class="status" [ngClass]="item.es_pagable ? 'paid' : 'unpaid'">
-              {{ item.es_pagable ? 'Pagable' : 'No Pagable' }}
-            </span>
-          </mat-cell>
-        </ng-container>
-
-        <ng-container matColumnDef="acciones">
-          <mat-header-cell *matHeaderCellDef class="actions-header">Acciones</mat-header-cell>
-          <mat-cell *matCellDef="let item" class="actions-cell">
-            <div class="actions-container">
-              <button mat-mini-fab class="action-btn view-btn" (click)="openEditDialog('pedido', item)" matTooltip="Ver/Editar">
-                <mat-icon>visibility</mat-icon>
-              </button>
-              <button mat-mini-fab class="action-btn edit-btn" (click)="openEditDialog('pedido', item)" matTooltip="Editar">
-                <mat-icon>edit</mat-icon>
-              </button>
-              <button mat-mini-fab class="action-btn delete-btn" (click)="deleteItem('pedido', item)" matTooltip="Eliminar">
-                <mat-icon>delete</mat-icon>
-              </button>
-            </div>
-          </mat-cell>
-        </ng-container>
-
-        <mat-header-row *matHeaderRowDef="pedidosColumns"></mat-header-row>
-        <mat-row *matRowDef="let row; columns: pedidosColumns;"></mat-row>
-      </mat-table>
-
-      <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
-    </div>
+<!-- ================= MÓDULO DE PEDIDOS DE INSUMOS (MEJORADO) ================= -->
+<div class="module-content" *ngIf="activeModule === 'pedidos'">
+  <div class="module-header">
+    <h2 class="module-title">
+      <mat-icon>shopping_cart</mat-icon>
+      Gestión de Pedidos de Insumos
+    </h2>
+    <button mat-raised-button class="add-btn" (click)="openAddDialog('pedido')">
+      <mat-icon>add</mat-icon>
+      Hacer Pedido de Insumos
+    </button>
   </div>
 
+  <div class="search-container">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Buscar pedidos...</mat-label>
+      <input matInput (keyup)="applyFilter($event, pedidosDataSource)" placeholder="Nombre, proveedor o descripción">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+  </div>
+
+  <div class="table-container">
+    <mat-table [dataSource]="pedidosDataSource" class="data-table">
+      
+      <!-- Columna: ID -->
+      <ng-container matColumnDef="id_pedido">
+        <mat-header-cell *matHeaderCellDef>ID</mat-header-cell>
+        <mat-cell *matCellDef="let item">
+          <span class="id-badge">#{{ item.id_pedido }}</span>
+        </mat-cell>
+      </ng-container>
+
+      <!-- Columna: Nombre -->
+      <ng-container matColumnDef="nombre">
+        <mat-header-cell *matHeaderCellDef>Nombre</mat-header-cell>
+        <mat-cell *matCellDef="let item">
+          <strong>{{ item.nombre }}</strong>
+        </mat-cell>
+      </ng-container>
+
+      <!-- Columna: Descripción -->
+      <ng-container matColumnDef="descripcion">
+        <mat-header-cell *matHeaderCellDef>Descripción</mat-header-cell>
+        <mat-cell *matCellDef="let item">
+          <span class="descripcion-text">{{ item.descripcion }}</span>
+        </mat-cell>
+      </ng-container>
+
+      <!-- Columna: Proveedor -->
+      <ng-container matColumnDef="nombre_proveedor">
+        <mat-header-cell *matHeaderCellDef>Proveedor</mat-header-cell>
+        <mat-cell *matCellDef="let item">
+          <div class="proveedor-cell">
+            <mat-icon class="cell-icon">business</mat-icon>
+            <span>{{ item.nombre_proveedor }}</span>
+          </div>
+        </mat-cell>
+      </ng-container>
+
+      <!-- Columna: Cantidad de Items (NUEVO) -->
+      <ng-container matColumnDef="cantidad_items">
+        <mat-header-cell *matHeaderCellDef>Items</mat-header-cell>
+        <mat-cell *matCellDef="let item">
+          <mat-chip class="items-chip">
+            <mat-icon matChipAvatar>shopping_basket</mat-icon>
+            {{ getCantidadItemsPedido(item) }}
+          </mat-chip>
+        </mat-cell>
+      </ng-container>
+
+      <!-- Columna: Costo Total -->
+      <ng-container matColumnDef="costo_total">
+        <mat-header-cell *matHeaderCellDef>Total</mat-header-cell>
+        <mat-cell *matCellDef="let item">
+          <span class="price total">${{ item.costo_total | number:'1.2-2' }}</span>
+        </mat-cell>
+      </ng-container>
+
+      <!-- Columna: Fecha Pedido -->
+      <ng-container matColumnDef="fecha_pedido">
+        <mat-header-cell *matHeaderCellDef>Fecha Pedido</mat-header-cell>
+        <mat-cell *matCellDef="let item">
+          <div class="fecha-cell">
+            <mat-icon class="cell-icon">event</mat-icon>
+            <span>{{ item.fecha_pedido | date:'dd/MM/yyyy' }}</span>
+          </div>
+        </mat-cell>
+      </ng-container>
+
+      <!-- Columna: Fecha Entrega (NUEVO) -->
+      <ng-container matColumnDef="fecha_entrega_estimada">
+        <mat-header-cell *matHeaderCellDef>Entrega</mat-header-cell>
+        <mat-cell *matCellDef="let item">
+          <div class="fecha-cell" *ngIf="item.fecha_entrega_estimada">
+            <mat-icon class="cell-icon">local_shipping</mat-icon>
+            <span>{{ item.fecha_entrega_estimada | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <span *ngIf="!item.fecha_entrega_estimada" class="text-muted">Sin fecha</span>
+        </mat-cell>
+      </ng-container>
+
+      <!-- Columna: Estado (NUEVO) -->
+      <ng-container matColumnDef="estado">
+        <mat-header-cell *matHeaderCellDef>Estado</mat-header-cell>
+        <mat-cell *matCellDef="let item">
+          <mat-chip [color]="getEstadoPedidoColor(item.estado || 'pendiente')" selected>
+            {{ (item.estado || 'pendiente') | uppercase }}
+          </mat-chip>
+        </mat-cell>
+      </ng-container>
+
+      <!-- Columna: Estado Pago -->
+      <ng-container matColumnDef="es_pagable">
+        <mat-header-cell *matHeaderCellDef>Pago</mat-header-cell>
+        <mat-cell *matCellDef="let item">
+          <span class="status" [ngClass]="item.es_pagable ? 'paid' : 'unpaid'">
+            {{ item.es_pagable ? 'Pagable' : 'No Pagable' }}
+          </span>
+        </mat-cell>
+      </ng-container>
+
+      <!-- Columna: Acciones -->
+      <ng-container matColumnDef="acciones">
+        <mat-header-cell *matHeaderCellDef class="actions-header">Acciones</mat-header-cell>
+        <mat-cell *matCellDef="let item" class="actions-cell">
+          <div class="actions-container">
+            <button mat-mini-fab 
+                    class="action-btn view-btn" 
+                    (click)="openEditDialog('pedido', item)" 
+                    matTooltip="Ver/Editar Pedido">
+              <mat-icon>visibility</mat-icon>
+            </button>
+            <button mat-mini-fab 
+                    class="action-btn edit-btn" 
+                    (click)="openEditDialog('pedido', item)" 
+                    matTooltip="Editar">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-mini-fab 
+                    class="action-btn delete-btn" 
+                    (click)="deleteItem('pedido', item)" 
+                    matTooltip="Eliminar">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </mat-cell>
+      </ng-container>
+
+      <mat-header-row *matHeaderRowDef="pedidosColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: pedidosColumns;"></mat-row>
+    </mat-table>
+
+    <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+  </div>
+</div>
+
   <!-- ================= MÓDULO DE DETALLES DE PEDIDOS ================= -->
-  <div class="module-content" *ngIf="activeModule === 'detalles'">
+  <div class="module-content" *ngIf="activeModule === 'detalles-pedidos'">
     <div class="module-header">
       <h2 class="module-title">
         <mat-icon>receipt_long</mat-icon>
         Gestión de Detalles de Pedidos
       </h2>
-      <button mat-raised-button class="add-btn" (click)="openAddDialog('detalle')">
-        <mat-icon>add</mat-icon>
-        Agregar Detalle
-      </button>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="stats-container">
+      <mat-card class="stat-card pendiente">
+        <mat-card-content>
+          <h3>Pendientes</h3>
+          <div class="stat-number">{{ getDetallesPedidosCountByStatus('pendiente') }}</div>
+        </mat-card-content>
+      </mat-card>
+      
+      <mat-card class="stat-card recibido">
+        <mat-card-content>
+          <h3>Recibidos</h3>
+          <div class="stat-number">{{ getDetallesPedidosCountByStatus('recibido') }}</div>
+        </mat-card-content>
+      </mat-card>
+      
+      <mat-card class="stat-card verificado">
+        <mat-card-content>
+          <h3>Verificados</h3>
+          <div class="stat-number">{{ getDetallesPedidosCountByStatus('verificado') }}</div>
+        </mat-card-content>
+      </mat-card>
+      
+      <mat-card class="stat-card incompleto">
+        <mat-card-content>
+          <h3>Incompletos</h3>
+          <div class="stat-number">{{ getDetallesPedidosCountByStatus('incompleto') }}</div>
+        </mat-card-content>
+      </mat-card>
     </div>
 
     <div class="search-container">
       <mat-form-field appearance="outline" class="search-field">
-        <mat-label>Buscar detalles...</mat-label>
-        <input matInput (keyup)="applyFilter($event, detallesDataSource)" placeholder="ID pedido o insumo">
+        <mat-label>Buscar pedidos...</mat-label>
+        <input matInput (keyup)="applyFilter($event, detallesPedidosDataSource)" placeholder="Proveedor, ID o estado">
         <mat-icon matSuffix>search</mat-icon>
       </mat-form-field>
     </div>
 
     <div class="table-container">
-      <mat-table [dataSource]="detallesDataSource" class="data-table">
-        <ng-container matColumnDef="id_detalle">
-          <mat-header-cell *matHeaderCellDef>ID</mat-header-cell>
-          <mat-cell *matCellDef="let item"><span class="id-badge">{{ item.id_detalle }}</span></mat-cell>
-        </ng-container>
-
-        <ng-container matColumnDef="cantidad_insumo">
-          <mat-header-cell *matHeaderCellDef>Cantidad</mat-header-cell>
+      <mat-table [dataSource]="detallesPedidosDataSource" class="data-table">
+        
+        <ng-container matColumnDef="id">
+          <mat-header-cell *matHeaderCellDef>ID Pedido</mat-header-cell>
           <mat-cell *matCellDef="let item">
-            <span class="quantity">{{ item.cantidad_insumo }}</span>
+            <span class="id-badge">#{{ item.id }}</span>
           </mat-cell>
         </ng-container>
 
-        <ng-container matColumnDef="costo_subtotal">
-          <mat-header-cell *matHeaderCellDef>Subtotal</mat-header-cell>
-          <mat-cell *matCellDef="let item">
-            <span class="price">${{ item.costo_subtotal | number:'1.0-0' }}</span>
-          </mat-cell>
+        <ng-container matColumnDef="proveedor">
+          <mat-header-cell *matHeaderCellDef>Proveedor</mat-header-cell>
+          <mat-cell *matCellDef="let item">{{ item.proveedor }}</mat-cell>
         </ng-container>
 
-        <ng-container matColumnDef="es_devuelto">
+        <ng-container matColumnDef="fechaPedido">
+          <mat-header-cell *matHeaderCellDef>Fecha Pedido</mat-header-cell>
+          <mat-cell *matCellDef="let item">{{ item.fechaPedido }}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="fechaEntrega">
+          <mat-header-cell *matHeaderCellDef>Fecha Entrega</mat-header-cell>
+          <mat-cell *matCellDef="let item">{{ item.fechaEntrega }}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="estado">
           <mat-header-cell *matHeaderCellDef>Estado</mat-header-cell>
           <mat-cell *matCellDef="let item">
-            <span class="status" [ngClass]="item.es_devuelto ? 'returned' : 'delivered'">
-              {{ item.es_devuelto ? 'Devuelto' : 'Entregado' }}
-            </span>
+            <mat-chip [ngClass]="'status-' + item.estado" class="status-chip">
+              {{ item.estado | uppercase }}
+            </mat-chip>
           </mat-cell>
         </ng-container>
 
-        <ng-container matColumnDef="id_insumo">
-          <mat-header-cell *matHeaderCellDef>ID Insumo</mat-header-cell>
-          <mat-cell *matCellDef="let item">{{ item.id_insumo }}</mat-cell>
-        </ng-container>
-
-        <ng-container matColumnDef="id_pedido">
-          <mat-header-cell *matHeaderCellDef>ID Pedido</mat-header-cell>
-          <mat-cell *matCellDef="let item">{{ item.id_pedido }}</mat-cell>
+        <ng-container matColumnDef="total">
+          <mat-header-cell *matHeaderCellDef>Total</mat-header-cell>
+          <mat-cell *matCellDef="let item">
+            <span class="price total">${{ item.total | number:'1.2-2' }}</span>
+          </mat-cell>
         </ng-container>
 
         <ng-container matColumnDef="acciones">
           <mat-header-cell *matHeaderCellDef class="actions-header">Acciones</mat-header-cell>
           <mat-cell *matCellDef="let item" class="actions-cell">
             <div class="actions-container">
-              <button mat-mini-fab class="action-btn edit-btn" (click)="openEditDialog('detalle', item)" matTooltip="Editar">
+              <button mat-mini-fab 
+                      class="action-btn view-btn" 
+                      (click)="openDetallePedidoDialog(item)" 
+                      matTooltip="Ver/Editar Detalles">
+                <mat-icon>visibility</mat-icon>
+              </button>
+              <button mat-mini-fab 
+                      class="action-btn edit-btn" 
+                      (click)="openDetallePedidoDialog(item)" 
+                      matTooltip="Gestionar Pedido">
                 <mat-icon>edit</mat-icon>
-              </button>
-              <button mat-mini-fab class="action-btn report-btn" (click)="openAddDialog('reporte')" matTooltip="Reportar Problema">
-                <mat-icon>report_problem</mat-icon>
-              </button>
-              <button mat-mini-fab class="action-btn delete-btn" (click)="deleteItem('detalle', item)" matTooltip="Eliminar">
-                <mat-icon>delete</mat-icon>
               </button>
             </div>
           </mat-cell>
         </ng-container>
 
-        <mat-header-row *matHeaderRowDef="detallesColumns"></mat-header-row>
-        <mat-row *matRowDef="let row; columns: detallesColumns;"></mat-row>
+        <mat-header-row *matHeaderRowDef="detallesPedidosColumns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: detallesPedidosColumns;"></mat-row>
       </mat-table>
 
       <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
@@ -625,14 +723,18 @@
           </mat-cell>
         </ng-container>
 
-        <ng-container matColumnDef="id_insumo">
-          <mat-header-cell *matHeaderCellDef>ID Insumo</mat-header-cell>
-          <mat-cell *matCellDef="let item">{{ item.id_insumo }}</mat-cell>
+        <ng-container matColumnDef="nombre_insumo">
+          <mat-header-cell *matHeaderCellDef>Insumo</mat-header-cell>
+          <mat-cell *matCellDef="let item">
+            <span class="ingredient-badge">{{ item.nombre_insumo || 'N/A' }}</span>
+          </mat-cell>
         </ng-container>
 
-        <ng-container matColumnDef="id_producto">
-          <mat-header-cell *matHeaderCellDef>ID Producto</mat-header-cell>
-          <mat-cell *matCellDef="let item">{{ item.id_producto }}</mat-cell>
+        <ng-container matColumnDef="nombre_producto">
+          <mat-header-cell *matHeaderCellDef>Producto</mat-header-cell>
+          <mat-cell *matCellDef="let item">
+            <span class="product-badge">{{ item.nombre_producto || 'N/A' }}</span>
+          </mat-cell>
         </ng-container>
 
         <ng-container matColumnDef="acciones">
