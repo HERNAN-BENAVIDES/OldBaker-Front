@@ -11,6 +11,7 @@ export interface Producto {
   vidaUtilDias: string;
   categoriaNombre: string;
   url: string;
+  pedidoMinimo?: number; // Agregar campo pedido mínimo
 }
 
 export interface RecetaItem {
@@ -28,6 +29,7 @@ export interface ProductoDetalle {
   vidaUtilDias: string;
   categoriaNombre: string;
   receta: RecetaItem[];
+  pedidoMinimo?: number; // Agregar campo pedido mínimo
 }
 
 @Injectable({

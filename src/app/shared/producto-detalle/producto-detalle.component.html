@@ -36,13 +36,17 @@
             <span class="meta-label">Vida útil:</span>
             <span class="meta-value">{{ producto.vidaUtilDias }} días</span>
           </div>
+          <div class="meta-item">
+            <span class="meta-label">Pedido mínimo:</span>
+            <span class="meta-value">{{ producto.pedidoMinimo || 1 }} unidades</span>
+          </div>
         </div>
 
         <!-- Selector de cantidad -->
         <div class="quantity-selector">
           <label class="quantity-label">Cantidad:</label>
           <div class="quantity-controls">
-            <button class="btn-quantity" (click)="decrementQuantity()" [disabled]="quantity <= 1" aria-label="Disminuir cantidad">
+            <button class="btn-quantity" (click)="decrementQuantity()" [disabled]="quantity <= (producto.pedidoMinimo || 1)" aria-label="Disminuir cantidad">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
               </svg>

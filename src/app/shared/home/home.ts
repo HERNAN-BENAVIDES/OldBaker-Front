@@ -33,7 +33,7 @@ import { ProductosService, Producto } from '../../services/productos.service';
             </div>
             <div class="product-body">
               <h3 class="product-name">{{ p.nombre }}</h3>
-              <p class="product-desc">{{ p.descripcion }}</p>
+              <p class="product-desc">Pedido mínimo: {{ p.minimumOrder || 1 }} unidades</p>
               <span class="category">{{ p.categoriaNombre }}</span>
               <span class="price">{{ p.price | currency:'COP':'symbol':'1.0-0' }}</span>
               <button class="btn small" (click)="addToCart(p); $event.stopPropagation()">Agregar</button>
@@ -77,7 +77,8 @@ export class Home implements OnInit {
           price: p.costoUnitario,
           categoriaNombre: p.categoriaNombre,
           vidaUtilDias: p.vidaUtilDias,
-          image: p.url // Usar la URL que viene del backend
+          image: p.url, // Usar la URL que viene del backend
+          minimumOrder: p.pedidoMinimo || 1 // Agregar el pedido mínimo
         }));
         this.loading = false;
         console.log('Productos cargados exitosamente:', this.products);
@@ -97,12 +98,16 @@ export class Home implements OnInit {
   }
 
   addToCart(product: any) {
-    this.cartService.addItem({
-      id: product.id,
-      name: product.nombre,
-      price: product.price,
-      image: product.image
-    });
+    const quantity = product.minimumOrder || 1;
+    // Agregar la cantidad mínima requerida al carrito
+    for (let i = 0; i < quantity; i++) {
+      this.cartService.addItem({
+        id: product.id,
+        name: product.nombre,
+        price: product.price,
+        image: product.image
+      });
+    }
   }
 
   onImageError(event: Event) {

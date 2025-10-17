@@ -8,7 +8,7 @@
         </div>
         <div class="product-body">
           <h3 class="product-name">{{ p.name }}</h3>
-          <p class="product-desc">{{ p.description }}</p>
+          <p class="product-desc">Pedido mínimo: {{ p.minimumOrder || 1 }} unidades</p>
           <span class="price">{{ p.price | currency:'COP':'symbol':'1.0-0' }}</span>
           <button class="btn small">Agregar</button>
         </div>

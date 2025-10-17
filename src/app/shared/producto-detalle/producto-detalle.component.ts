@@ -45,6 +45,8 @@ export class ProductoDetalleComponent implements OnInit {
     this.productosService.getProductoById(id).subscribe({
       next: (producto) => {
         this.producto = producto;
+        // Establecer la cantidad inicial como el pedido mínimo
+        this.quantity = producto.pedidoMinimo || 1;
         // La URL de la imagen viene en la lista de productos, la obtenemos del localStorage o del servicio
         this.productoUrl = this.getProductoImageUrl(id);
         this.loading = false;
@@ -94,8 +96,8 @@ export class ProductoDetalleComponent implements OnInit {
           image: this.productoUrl
         });
       }
-      // Resetear cantidad después de agregar
-      this.quantity = 1;
+      // Resetear cantidad al pedido mínimo después de agregar
+      this.quantity = this.producto.pedidoMinimo || 1;
     }
   }
 
@@ -106,7 +108,8 @@ export class ProductoDetalleComponent implements OnInit {
   }
 
   decrementQuantity() {
-    if (this.quantity > 1) {
+    const minQuantity = this.producto?.pedidoMinimo || 1;
+    if (this.quantity > minQuantity) {
       this.quantity--;
     }
   }
