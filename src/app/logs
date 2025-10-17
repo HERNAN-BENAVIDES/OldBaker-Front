@@ -1,39 +1,30 @@
-PS C:\Users\herna\Downloads\OldBaker-Front> npm install @angular/animations animate.css
-npm error code ERESOLVE
-npm error ERESOLVE could not resolve
-npm error
-npm error While resolving: old-baker-front@0.0.0
-npm error Found: @angular/animations@20.2.3
-npm error node_modules/@angular/animations
-npm error   peerOptional @angular/animations@"20.2.3" from @angular/platform-browser@20.2.3
-npm error   node_modules/@angular/platform-browser
-npm error     peerOptional @angular/platform-browser@"^20.0.0" from @angular/build@20.2.1
-npm error     node_modules/@angular/build
-npm error       dev @angular/build@"^20.2.1" from the root project
-npm error     peer @angular/platform-browser@"20.2.3" from @angular/forms@20.2.3
-npm error     node_modules/@angular/forms
-npm error       peer @angular/forms@"^20.0.0 || ^21.0.0" from @angular/material@20.2.2
-npm error       node_modules/@angular/material
-npm error         @angular/material@"^20.2.2" from the root project
-npm error       1 more (the root project)
-npm error     3 more (@angular/material, @angular/router, the root project)
-npm error   @angular/animations@"^20.2.3" from the root project
-npm error
-npm error Could not resolve dependency:
-npm error @angular/animations@"^20.2.3" from the root project
-npm error
-npm error Conflicting peer dependency: @angular/core@20.3.6
-npm error node_modules/@angular/core
-npm error   peer @angular/core@"20.3.6" from @angular/animations@20.3.6
-npm error   node_modules/@angular/animations
-npm error     @angular/animations@"^20.2.3" from the root project
-npm error
-npm error Fix the upstream dependency conflict, or retry
-npm error this command with --force or --legacy-peer-deps
-npm error to accept an incorrect (and potentially broken) dependency resolution.
-npm error
-npm error
-npm error For a full report see:
-npm error C:\Users\herna\AppData\Local\npm-cache\_logs\2025-10-17T00_23_55_559Z-eresolve-report.txt
-npm error A complete log of this run can be found in: C:\Users\herna\AppData\Local\npm-cache\_logs\2025-10-17T00_23_55_559Z-debug-0.log
+PS C:\Users\herna\Downloads\OldBaker-Front> ng build
+Application bundle generation failed. [11.555 seconds]
+
+X [ERROR] TS2339: Property 'isLoading' does not exist on type 'AdminProveedoresComponent'. [plugin angular-compiler]
+
+    src/app/features/admin/proveedores/proveedores.html:926:31:
+      926 │ <footer class="footer" *ngIf="!isLoading()">
+          ╵                                ~~~~~~~~~
+
+  Error occurs in the template of component AdminProveedoresComponent.
+
+    src/app/features/admin/proveedores/proveedores.ts:180:15:
+      180 │   templateUrl: './proveedores.html',
+          ╵                ~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2339: Property 'getLastUpdateTime' does not exist on type 'AdminProveedoresComponent'. [plugin angular-compiler]
+
+    src/app/features/admin/proveedores/proveedores.html:929:32:
+      929 │     <p>Última actualización: {{ getLastUpdateTime() }}</p>
+          ╵                               ~~~~~~~~~~~~~~~~~
+
+  Error occurs in the template of component AdminProveedoresComponent.
+
+    src/app/features/admin/proveedores/proveedores.ts:180:15:
+      180 │   templateUrl: './proveedores.html',
+          ╵                ~~~~~~~~~~~~~~~~~~~~
+
+
 PS C:\Users\herna\Downloads\OldBaker-Front>

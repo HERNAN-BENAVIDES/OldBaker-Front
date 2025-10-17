@@ -1,6 +1,6 @@
 <!-- Dashboard Principal del Administrador -->
 <div class="admin-container">
-  
+
   <!-- Header Principal -->
   <div class="main-header">
     <div class="header-content">
@@ -21,9 +21,9 @@
   <!-- Dashboard de Opciones -->
   <div class="dashboard-container" *ngIf="activeModule === 'dashboard'">
     <h2 class="section-title">Seleccione el módulo a gestionar</h2>
-    
+
     <div class="modules-grid">
-      
+
       <!-- Proveedores -->
       <mat-card class="module-card" (click)="setActiveModule('proveedores')">
         <mat-card-header>
@@ -351,7 +351,7 @@
 
   <div class="table-container">
     <mat-table [dataSource]="pedidosDataSource" class="data-table">
-      
+
       <!-- Columna: ID -->
       <ng-container matColumnDef="id_pedido">
         <mat-header-cell *matHeaderCellDef>ID</mat-header-cell>
@@ -454,21 +454,21 @@
         <mat-header-cell *matHeaderCellDef class="actions-header">Acciones</mat-header-cell>
         <mat-cell *matCellDef="let item" class="actions-cell">
           <div class="actions-container">
-            <button mat-mini-fab 
-                    class="action-btn view-btn" 
-                    (click)="openEditDialog('pedido', item)" 
+            <button mat-mini-fab
+                    class="action-btn view-btn"
+                    (click)="openEditDialog('pedido', item)"
                     matTooltip="Ver/Editar Pedido">
               <mat-icon>visibility</mat-icon>
             </button>
-            <button mat-mini-fab 
-                    class="action-btn edit-btn" 
-                    (click)="openEditDialog('pedido', item)" 
+            <button mat-mini-fab
+                    class="action-btn edit-btn"
+                    (click)="openEditDialog('pedido', item)"
                     matTooltip="Editar">
               <mat-icon>edit</mat-icon>
             </button>
-            <button mat-mini-fab 
-                    class="action-btn delete-btn" 
-                    (click)="deleteItem('pedido', item)" 
+            <button mat-mini-fab
+                    class="action-btn delete-btn"
+                    (click)="deleteItem('pedido', item)"
                     matTooltip="Eliminar">
               <mat-icon>delete</mat-icon>
             </button>
@@ -501,21 +501,21 @@
           <div class="stat-number">{{ getDetallesPedidosCountByStatus('pendiente') }}</div>
         </mat-card-content>
       </mat-card>
-      
+
       <mat-card class="stat-card recibido">
         <mat-card-content>
           <h3>Recibidos</h3>
           <div class="stat-number">{{ getDetallesPedidosCountByStatus('recibido') }}</div>
         </mat-card-content>
       </mat-card>
-      
+
       <mat-card class="stat-card verificado">
         <mat-card-content>
           <h3>Verificados</h3>
           <div class="stat-number">{{ getDetallesPedidosCountByStatus('verificado') }}</div>
         </mat-card-content>
       </mat-card>
-      
+
       <mat-card class="stat-card incompleto">
         <mat-card-content>
           <h3>Incompletos</h3>
@@ -534,7 +534,7 @@
 
     <div class="table-container">
       <mat-table [dataSource]="detallesPedidosDataSource" class="data-table">
-        
+
         <ng-container matColumnDef="id">
           <mat-header-cell *matHeaderCellDef>ID Pedido</mat-header-cell>
           <mat-cell *matCellDef="let item">
@@ -577,15 +577,15 @@
           <mat-header-cell *matHeaderCellDef class="actions-header">Acciones</mat-header-cell>
           <mat-cell *matCellDef="let item" class="actions-cell">
             <div class="actions-container">
-              <button mat-mini-fab 
-                      class="action-btn view-btn" 
-                      (click)="openDetallePedidoDialog(item)" 
+              <button mat-mini-fab
+                      class="action-btn view-btn"
+                      (click)="openDetallePedidoDialog(item)"
                       matTooltip="Ver/Editar Detalles">
                 <mat-icon>visibility</mat-icon>
               </button>
-              <button mat-mini-fab 
-                      class="action-btn edit-btn" 
-                      (click)="openDetallePedidoDialog(item)" 
+              <button mat-mini-fab
+                      class="action-btn edit-btn"
+                      (click)="openDetallePedidoDialog(item)"
                       matTooltip="Gestionar Pedido">
                 <mat-icon>edit</mat-icon>
               </button>
@@ -921,3 +921,11 @@
   </div>
 
 </div>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-content">
+    <p>&copy; 2025 OldBaker - Panel del Administrador</p>
+    <p>Última actualización: {{ getLastUpdateTime() }}</p>
+  </div>
+</footer>

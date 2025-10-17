@@ -31,13 +31,13 @@ import { ReporteDialogComponent } from './dialogs/reporte-dialog.component';
 import { InsumoProveedorDialogComponent } from './dialogs/insumo-proveedor-dialog.component';
 
 // Exportar componentes de diálogo para uso en tests
-export { 
-  ProveedorDialogComponent, 
-  InsumoDialogComponent, 
-  ProductoDialogComponent, 
-  RecetaDialogComponent, 
-  ReporteDialogComponent, 
-  InsumoProveedorDialogComponent 
+export {
+  ProveedorDialogComponent,
+  InsumoDialogComponent,
+  ProductoDialogComponent,
+  RecetaDialogComponent,
+  ReporteDialogComponent,
+  InsumoProveedorDialogComponent
 };
 
 // Interfaces
@@ -89,7 +89,7 @@ export interface PedidoInsumo {
   id_proveedor: number;
   costo_total: number;
   fecha_pedido: Date;
-  fecha_entrega_estimada?: Date; 
+  fecha_entrega_estimada?: Date;
   es_pagable: boolean;
   estado?: 'pendiente' | 'en_proceso' | 'recibido' | 'cancelado';  // ← NUEVO
   detalles: DetallePedido[];
@@ -102,7 +102,7 @@ export interface DetallePedido {
   es_devuelto: boolean;
   id_insumo: number;
   id_pedido: number;
-  nombre_insumo?: string; 
+  nombre_insumo?: string;
   costo_unitario?: number;
 }
 
@@ -175,13 +175,13 @@ type DialogType = 'proveedor' | 'insumo' | 'producto' | 'insumo-proveedor' | 're
     MatCheckboxModule,
     MatTooltipModule,
     MatTabsModule,
-    MatChipsModule  
+    MatChipsModule
   ],
   templateUrl: './proveedores.html',
   styleUrls: ['./proveedores.css']
 })
 export class AdminProveedoresComponent implements OnInit, OnDestroy {
-  
+
   activeModule = 'dashboard';
 
   // Data Sources para las tablas
@@ -200,7 +200,7 @@ export class AdminProveedoresComponent implements OnInit, OnDestroy {
   proveedoresColumns: string[] = ['id_proveedor', 'nombre', 'telefono', 'email', 'numero_cuenta', 'acciones'];
   insumosProveedorColumns: string[] = ['id_insumo', 'nombre', 'descripcion', 'costo_unitario', 'fecha_vencimiento', 'cantidad_disponible', 'nombre_proveedor', 'acciones'];
   pedidosColumns: string[] = ['id_pedido', 'nombre', 'descripcion', 'nombre_proveedor', 'cantidad_items', 'costo_total', 'fecha_pedido', 'fecha_entrega_estimada','estado',
-'es_pagable', 'acciones'];  
+'es_pagable', 'acciones'];
   detallesColumns: string[] = ['id_detalle', 'cantidad_insumo', 'costo_subtotal', 'es_devuelto', 'nombre_insumo', 'id_pedido', 'acciones'];
   reportesColumns: string[] = ['id_devolucion', 'razon', 'es_devolucion', 'fecha_devolucion', 'id_detalle', 'acciones'];
   recetasColumns: string[] = ['id_receta', 'nombre', 'descripcion', 'cantidad_insumo', 'nombre_insumo', 'nombre_producto', 'acciones'];
@@ -359,7 +359,7 @@ export class AdminProveedoresComponent implements OnInit, OnDestroy {
       ]
     }
   ];
-  
+
   this.detallesPedidosDataSource.data = mockData;
 }
 
@@ -515,7 +515,7 @@ export class AdminProveedoresComponent implements OnInit, OnDestroy {
     ];
     this.reportesDataSource.data = mockData;
   }
-  
+
 
 private loadRecetas(): void {
     // DATOS MOCK ACTUALIZADOS CON MÚLTIPLES INSUMOS
@@ -575,7 +575,7 @@ openDetallePedidoDialog(pedido: PedidoDetalle): void {
     data: { pedido, isEdit: true }
   });
 
-  
+
   dialogRef.afterClosed().subscribe((result: PedidoDetalle | undefined) => {
     if (result) {
       // Actualizar el pedido en el DataSource
@@ -583,7 +583,7 @@ openDetallePedidoDialog(pedido: PedidoDetalle): void {
       if (index !== -1) {
         this.detallesPedidosDataSource.data[index] = result;
         this.detallesPedidosDataSource.data = [...this.detallesPedidosDataSource.data];
-        
+
         this.snackBar.open('Pedido actualizado exitosamente', 'Cerrar', {
           duration: 3000,
           panelClass: 'snackbar-success'
@@ -609,15 +609,15 @@ openAddDialog(type: DialogType): void {
     case 'proveedor':
       dialogComponent = ProveedorDialogComponent;
       break;
-    
+
     case 'insumo':
       dialogComponent = InsumoDialogComponent;
       break;
-    
+
     case 'producto':
       dialogComponent = ProductoDialogComponent;
       break;
-    
+
     case 'insumo-proveedor':
       dialogComponent = InsumoProveedorDialogComponent;
       dialogData.proveedores = this.proveedoresDataSource.data;
@@ -625,13 +625,13 @@ openAddDialog(type: DialogType): void {
       // ← AGREGAR: Pasar los insumos-proveedor existentes para validación
       dialogData.insumosProveedorExistentes = this.insumosProveedorDataSource.data;
       break;
-    
+
     case 'receta':
       dialogComponent = RecetaDialogComponent;
       dialogData.insumos = this.insumosDataSource.data;
       dialogData.productos = this.productosDataSource.data;
       break;
-    
+
     case 'reporte':
       dialogComponent = ReporteDialogComponent;
       dialogData.detalles = this.detallesDataSource.data;
@@ -642,7 +642,7 @@ openAddDialog(type: DialogType): void {
       dialogData.proveedores = this.proveedoresDataSource.data;
       dialogData.insumosProveedor = this.insumosProveedorDataSource.data;
       break;
-    
+
     default:
       return;
   }
@@ -676,15 +676,15 @@ openEditDialog(type: DialogType, item: any): void {
     case 'proveedor':
       dialogComponent = ProveedorDialogComponent;
       break;
-    
+
     case 'insumo':
       dialogComponent = InsumoDialogComponent;
       break;
-    
+
     case 'producto':
       dialogComponent = ProductoDialogComponent;
       break;
-    
+
     case 'insumo-proveedor':
       dialogComponent = InsumoProveedorDialogComponent;
       dialogData.proveedores = this.proveedoresDataSource.data;
@@ -692,13 +692,13 @@ openEditDialog(type: DialogType, item: any): void {
       // ← AGREGAR: Pasar los insumos-proveedor existentes para validación
       dialogData.insumosProveedorExistentes = this.insumosProveedorDataSource.data;
       break;
-    
+
     case 'receta':
       dialogComponent = RecetaDialogComponent;
       dialogData.insumos = this.insumosDataSource.data;
       dialogData.productos = this.productosDataSource.data;
       break;
-    
+
     case 'reporte':
       dialogComponent = ReporteDialogComponent;
       dialogData.detalles = this.detallesDataSource.data;
@@ -709,7 +709,7 @@ openEditDialog(type: DialogType, item: any): void {
       dialogData.proveedores = this.proveedoresDataSource.data;
       dialogData.insumosProveedor = this.insumosProveedorDataSource.data;
       break;
-    
+
     default:
       return;
   }
@@ -734,25 +734,25 @@ openEditDialog(type: DialogType, item: any): void {
         const newProveedor = { ...item, id_proveedor: newProveedorId };
         this.proveedoresDataSource.data = [...this.proveedoresDataSource.data, newProveedor];
         break;
-      
+
       case 'insumo':
         const newInsumoId = Math.max(...this.insumosDataSource.data.map(i => i.id_insumo), 0) + 1;
         const newInsumo = { ...item, id_insumo: newInsumoId };
         this.insumosDataSource.data = [...this.insumosDataSource.data, newInsumo];
         break;
-      
+
       case 'producto':
         const newProductoId = Math.max(...this.productosDataSource.data.map(p => p.id_producto), 0) + 1;
         const newProducto = { ...item, id_producto: newProductoId };
         this.productosDataSource.data = [...this.productosDataSource.data, newProducto];
         break;
-      
+
       case 'receta':
         const newRecetaId = Math.max(...this.recetasDataSource.data.map(r => r.id_receta), 0) + 1;
         const insumo = this.insumosDataSource.data.find(i => i.id_insumo == item.id_insumo);
         const producto = this.productosDataSource.data.find(p => p.id_producto == item.id_producto);
-        const newReceta = { 
-          ...item, 
+        const newReceta = {
+          ...item,
           id_receta: newRecetaId,
           nombre_insumo: insumo?.nombre || '',
           nombre_producto: producto?.nombre || ''
@@ -760,11 +760,11 @@ openEditDialog(type: DialogType, item: any): void {
         this.recetasDataSource.data = [...this.recetasDataSource.data, newReceta];
         break;
 
-      
+
       case 'reporte':
         const newReporteId = Math.max(...this.reportesDataSource.data.map(r => r.id_devolucion), 0) + 1;
-        const newReporte = { 
-          ...item, 
+        const newReporte = {
+          ...item,
           id_devolucion: newReporteId,
           fecha_devolucion: new Date()
         };
@@ -782,8 +782,8 @@ openEditDialog(type: DialogType, item: any): void {
       case 'pedido':
         const newPedidoId = Math.max(...this.pedidosDataSource.data.map(p => p.id_pedido), 0) + 1;
         const proveedor = this.proveedoresDataSource.data.find(p => p.id_proveedor == item.id_proveedor);
-        const newPedido = { 
-          ...item, 
+        const newPedido = {
+          ...item,
           id_pedido: newPedidoId,
           nombre_proveedor: proveedor?.nombre || item.nombre_proveedor || '',
           estado: item.estado || 'pendiente'
@@ -792,9 +792,9 @@ openEditDialog(type: DialogType, item: any): void {
       break;
 
     }
-    
+
     if (type !== 'pedido' && type !== 'detalle') {
-     
+
       this.snackBar.open(`${this.getTypeName(type)} agregado exitosamente`, 'Cerrar', {
         duration: 3000,
         panelClass: 'snackbar-success'
@@ -811,7 +811,7 @@ openEditDialog(type: DialogType, item: any): void {
           this.proveedoresDataSource.data = [...this.proveedoresDataSource.data];
         }
         break;
-      
+
       case 'insumo':
         const insumoIndex = this.insumosDataSource.data.findIndex(i => i.id_insumo === oldItem.id_insumo);
         if (insumoIndex !== -1) {
@@ -819,7 +819,7 @@ openEditDialog(type: DialogType, item: any): void {
           this.insumosDataSource.data = [...this.insumosDataSource.data];
         }
         break;
-      
+
       case 'producto':
         const productoIndex = this.productosDataSource.data.findIndex(p => p.id_producto === oldItem.id_producto);
         if (productoIndex !== -1) {
@@ -827,14 +827,14 @@ openEditDialog(type: DialogType, item: any): void {
           this.productosDataSource.data = [...this.productosDataSource.data];
         }
         break;
-      
+
       case 'receta':
         const recetaIndex = this.recetasDataSource.data.findIndex(r => r.id_receta === oldItem.id_receta);
         if (recetaIndex !== -1) {
           const insumo = this.insumosDataSource.data.find(i => i.id_insumo == newItem.id_insumo);
           const producto = this.productosDataSource.data.find(p => p.id_producto == newItem.id_producto);
-          this.recetasDataSource.data[recetaIndex] = { 
-            ...oldItem, 
+          this.recetasDataSource.data[recetaIndex] = {
+            ...oldItem,
             ...newItem,
             nombre_insumo: insumo?.nombre || '',
             nombre_producto: producto?.nombre || ''
@@ -842,7 +842,7 @@ openEditDialog(type: DialogType, item: any): void {
           this.recetasDataSource.data = [...this.recetasDataSource.data];
         }
         break;
-      
+
       case 'reporte':
         const reporteIndex = this.reportesDataSource.data.findIndex(r => r.id_devolucion === oldItem.id_devolucion);
         if (reporteIndex !== -1) {
@@ -855,21 +855,21 @@ openEditDialog(type: DialogType, item: any): void {
         const pedidoIndex = this.pedidosDataSource.data.findIndex(p => p.id_pedido === oldItem.id_pedido);
         if (pedidoIndex !== -1) {
           const proveedor = this.proveedoresDataSource.data.find(p => p.id_proveedor == newItem.id_proveedor);
-          this.pedidosDataSource.data[pedidoIndex] = { 
-            ...oldItem, 
+          this.pedidosDataSource.data[pedidoIndex] = {
+            ...oldItem,
             ...newItem,
             nombre_proveedor: proveedor?.nombre || newItem.nombre_proveedor || ''
         };
         this.pedidosDataSource.data = [...this.pedidosDataSource.data];
       }
       break;
-      
+
       case 'insumo-proveedor':
         const insumoProveedorIndex = this.insumosProveedorDataSource.data.findIndex(ip => ip.id_insumo === oldItem.id_insumo);
         if (insumoProveedorIndex !== -1) {
           const proveedor = this.proveedoresDataSource.data.find(p => p.id_proveedor == newItem.id_proveedor);
-          this.insumosProveedorDataSource.data[insumoProveedorIndex] = { 
-            ...oldItem, 
+          this.insumosProveedorDataSource.data[insumoProveedorIndex] = {
+            ...oldItem,
             ...newItem,
             nombre_proveedor: proveedor?.nombre || ''
           };
@@ -877,15 +877,14 @@ openEditDialog(type: DialogType, item: any): void {
         }
         break;
 
-      case 'pedido':
       case 'detalle':
-        this.snackBar.open(`Funcionalidad de edición de ${type} en desarrollo`, 'Cerrar', {
+        this.snackBar.open(`Funcionalidad de edición de detalle en desarrollo`, 'Cerrar', {
           duration: 3000,
           panelClass: 'snackbar-warning'
         });
         return;
     }
-    
+
   this.snackBar.open(`${this.getTypeName(type)} actualizado exitosamente`, 'Cerrar', {
     duration: 3000,
     panelClass: 'snackbar-success'
@@ -920,7 +919,7 @@ openEditDialog(type: DialogType, item: any): void {
           this.detallesDataSource.data = this.detallesDataSource.data.filter(d => d.id_detalle !== item.id_detalle);
           break;
       }
-      
+
       this.snackBar.open(`${this.getTypeName(type)} eliminado exitosamente`, 'Cerrar', {
         duration: 3000,
         panelClass: 'snackbar-success'
@@ -955,5 +954,12 @@ getEstadoPedidoColor(estado: string): string {
       'detalle': 'Detalle'
     };
     return names[type] || type;
+  }
+
+  /**
+   * Obtiene la hora de la última actualización
+   */
+  getLastUpdateTime(): string {
+    return new Date().toLocaleTimeString('es-ES');
   }
 }
