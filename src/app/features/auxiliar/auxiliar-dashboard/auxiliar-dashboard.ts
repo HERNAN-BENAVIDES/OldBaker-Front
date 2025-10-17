@@ -2,6 +2,12 @@ import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
+import { AuthService } from '../../auth/services/auth.service';
+import { MatButtonModule } from '@angular/material/button';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatIconModule } from '@angular/material/icon';
+import { NotificationService } from '../../../shared/notification/notification.service';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 interface ModuleStats {
   pendingOrders: number;
@@ -15,7 +21,7 @@ interface ModuleStats {
 @Component({
   selector: 'app-auxiliar-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, MatButtonModule, MatMenuModule, MatIconModule, MatSnackBarModule],
   templateUrl: './auxiliar-dashboard.html',
   styleUrls: ['./auxiliar-dashboard.css']
 })
@@ -36,14 +42,31 @@ export class AuxiliarDashboardComponent implements OnInit, OnDestroy {
   readonly notificationMessage = signal('');
   readonly notificationType = signal<'success' | 'error' | 'info' | 'warning'>('info');
 
+  // Usuario actual
+  userName: string = 'Auxiliar';
+
   private refreshSubscription?: Subscription;
 
-  constructor(private router: Router) { }
+  constructor(
+    private router: Router,
+    private authService: AuthService,
+    private notifications: NotificationService,
+    private snackBar: MatSnackBar
+  ) { }
 
   ngOnInit(): void {
     console.log('Panel del Auxiliar - OldBaker iniciado');
+    this.loadUserInfo();
     this.loadModuleStats();
     this.setupAutoRefresh();
+  }
+
+  // Cargar información del usuario
+  loadUserInfo(): void {
+    const user = this.authService.getCurrentUser();
+    if (user && user.nombre) {
+      this.userName = user.nombre;
+    }
   }
 
   ngOnDestroy(): void {
@@ -58,7 +81,7 @@ export class AuxiliarDashboardComponent implements OnInit, OnDestroy {
   navigateToModule(module: string): void {
     console.log(`Navegando a: ${module}`);
     this.showLoadingIndicator();
-    
+
     // Simular delay de navegación
     setTimeout(() => {
       switch (module) {
@@ -84,7 +107,7 @@ export class AuxiliarDashboardComponent implements OnInit, OnDestroy {
   quickAction(action: string): void {
     console.log(`Ejecutando acción: ${action}`);
     this.showLoadingIndicator();
-    
+
     switch (action) {
       case 'verificar-pedido':
         this.verifyLastOrder();
@@ -108,7 +131,7 @@ export class AuxiliarDashboardComponent implements OnInit, OnDestroy {
     setTimeout(() => {
       this.hideLoadingIndicator();
       this.showNotificationMessage('Redirigiendo a verificación de pedido...', 'info');
-      
+
       setTimeout(() => {
         this.router.navigate(['/auxiliar/verificar-pedido']);
       }, 1000);
@@ -122,7 +145,7 @@ export class AuxiliarDashboardComponent implements OnInit, OnDestroy {
     setTimeout(() => {
       this.hideLoadingIndicator();
       this.showNotificationMessage('Abriendo formulario de reporte...', 'info');
-      
+
       setTimeout(() => {
         this.router.navigate(['/auxiliar/crear-reporte']);
       }, 1000);
@@ -136,7 +159,7 @@ export class AuxiliarDashboardComponent implements OnInit, OnDestroy {
     setTimeout(() => {
       this.hideLoadingIndicator();
       this.showNotificationMessage('Cargando historial...', 'info');
-      
+
       setTimeout(() => {
         this.router.navigate(['/auxiliar/historial']);
       }, 1000);
@@ -156,7 +179,7 @@ export class AuxiliarDashboardComponent implements OnInit, OnDestroy {
       pendingVerification: Math.floor(Math.random() * 5),
       activeReports: Math.floor(Math.random() * 3)
     };
-    
+
     this.moduleStats.set(stats);
     console.log('Estadísticas del módulo cargadas:', this.moduleStats());
   }
@@ -167,7 +190,7 @@ export class AuxiliarDashboardComponent implements OnInit, OnDestroy {
   private setupAutoRefresh(): void {
     // Actualizar cada 30 segundos
     const refreshInterval = 30000;
-    
+
     this.refreshSubscription = new Subscription();
     const intervalId = setInterval(() => {
       console.log('Actualizando estadísticas automáticamente...');
@@ -226,7 +249,7 @@ export class AuxiliarDashboardComponent implements OnInit, OnDestroy {
    * Muestra una notificación al usuario
    */
   private showNotificationMessage(
-    message: string, 
+    message: string,
     type: 'success' | 'error' | 'info' | 'warning' = 'info'
   ): void {
     this.notificationMessage.set(message);
@@ -260,5 +283,27 @@ export class AuxiliarDashboardComponent implements OnInit, OnDestroy {
     console.error('Error de navegación:', error);
     this.showNotificationMessage('Error de navegación. Intente nuevamente.', 'error');
     this.hideLoadingIndicator();
+  }
+
+  /**
+   * Cierra la sesión del usuario
+   */
+  logout(): void {
+    this.notifications.showConfirm(
+      '¿Está seguro de que desea cerrar sesión?',
+      () => {
+        // Usuario confirmó
+        this.authService.logout();
+        this.snackBar.open('Cerrando sesión...', 'Cerrar', {
+          duration: 2000
+        });
+        setTimeout(() => {
+          this.router.navigate(['/auth/worker/login']);
+        }, 500);
+      },
+      () => {
+        // Usuario canceló (no hacer nada)
+      }
+    );
   }
 }

@@ -64,10 +64,33 @@
   gap: 0.5rem;
   background: #2c4a9e;
   color: white;
-  padding: 0.75rem 1.25rem;
+  padding: 0;
   border-radius: 50px;
   font-weight: 500;
   box-shadow: 0 4px 15px rgba(118, 75, 162, 0.3);
+}
+
+.user-menu-button {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  padding: 0.75rem 1.25rem !important;
+  color: white !important;
+  font-weight: 500 !important;
+  border-radius: 50px !important;
+  min-width: auto !important;
+}
+
+.user-menu-button:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.dropdown-icon {
+  transition: transform 0.3s ease;
+}
+
+.user-menu-button[aria-expanded="true"] .dropdown-icon {
+  transform: rotate(180deg);
 }
 
 .admin-info mat-icon {

@@ -5,8 +5,17 @@
       <h1>Panel del Auxiliar - OldBaker</h1>
     </div>
     <div class="user-info">
-      <span class="user-icon">👤</span>
-      <span>Auxiliar</span>
+      <button mat-button [matMenuTriggerFor]="userMenu" class="user-menu-button">
+        <span class="user-icon">👤</span>
+        <span>{{ userName }}</span>
+        <span class="dropdown-icon">▼</span>
+      </button>
+      <mat-menu #userMenu="matMenu" class="user-dropdown">
+        <button mat-menu-item (click)="logout()">
+          <mat-icon>exit_to_app</mat-icon>
+          <span>Cerrar sesión</span>
+        </button>
+      </mat-menu>
     </div>
   </div>
   <p class="subtitle">Verificación y gestión de pedidos de insumos</p>
@@ -14,7 +23,7 @@
 
 <main class="main-content">
   <h2>Módulos de Gestión</h2>
-  
+
   <div class="modules-grid">
     <!-- Detalles de Pedidos -->
     <div class="module-card" (click)="navigateToModule('detalles-pedidos')">
@@ -91,22 +100,22 @@
   <div class="quick-actions">
     <h3>Acciones Rápidas</h3>
     <div class="action-buttons">
-      <button 
-        class="action-btn primary" 
+      <button
+        class="action-btn primary"
         (click)="quickAction('verificar-pedido')"
         [disabled]="isLoading()">
         <span class="btn-icon">🔍</span>
         Verificar Último Pedido
       </button>
-      <button 
-        class="action-btn secondary" 
+      <button
+        class="action-btn secondary"
         (click)="quickAction('crear-reporte')"
         [disabled]="isLoading()">
         <span class="btn-icon">📝</span>
         Crear Reporte
       </button>
-      <button 
-        class="action-btn tertiary" 
+      <button
+        class="action-btn tertiary"
         (click)="quickAction('ver-historial')"
         [disabled]="isLoading()">
         <span class="btn-icon">📊</span>
@@ -117,8 +126,8 @@
 
   <!-- Botón de Actualización Manual -->
   <div class="refresh-section">
-    <button 
-      class="action-btn primary refresh-btn" 
+    <button
+      class="action-btn primary refresh-btn"
       (click)="refreshStats()"
       [disabled]="isLoading()">
       <span class="btn-icon">🔄</span>
@@ -134,9 +143,9 @@
 </div>
 
 <!-- Notification -->
-<div 
-  class="notification" 
-  [ngClass]="notificationType()" 
+<div
+  class="notification"
+  [ngClass]="notificationType()"
   *ngIf="showNotification()">
   <span class="notification-icon">
     <span *ngIf="notificationType() === 'success'">✅</span>
@@ -145,8 +154,8 @@
     <span *ngIf="notificationType() === 'warning'">⚠️</span>
   </span>
   <span class="notification-message">{{ notificationMessage() }}</span>
-  <button 
-    class="notification-close" 
+  <button
+    class="notification-close"
     (click)="closeNotification()"
     aria-label="Cerrar notificación">
     ×

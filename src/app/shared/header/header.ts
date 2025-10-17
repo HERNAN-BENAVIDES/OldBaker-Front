@@ -60,29 +60,40 @@ export class Header implements OnInit, OnDestroy {
   }
 
   logout() {
-    const currentUser = this.authService.getCurrentUser();
-    const email = currentUser?.email ?? null;
-    const token = this.authService.getToken();
+    // Usar el servicio de notificaciones para confirmar antes de hacer logout
+    this.notifications.showConfirm(
+      '¿Está seguro de que desea cerrar sesión?',
+      () => {
+        // Usuario confirmó: realizar la petición de logout a backend con token en Bearer y cuerpo
+        const currentUser = this.authService.getCurrentUser();
+        const email = currentUser?.email ?? null;
+        const token = this.authService.getToken();
 
-    if (email && token) {
-      this.authService.logoutRequest({ email, token }).subscribe({
-        next: (res: any) => {
-          // success
-          try { this.notifications.showSuccess(res?.mensaje ?? 'Logout exitoso'); } catch (e) { /* ignore */ }
-          try { this.authService.clearLocalAuth(); } catch (e) { /* ignore */ }
-          try { this.router.navigate(['/']); } catch (e) { /* ignore */ }
-        },
-        error: (err: any) => {
-          const serverMsg = err?.error?.mensaje ?? err?.error?.message ?? err?.message ?? 'Error al cerrar sesión';
-          try { this.notifications.showError(serverMsg); } catch (e) { /* ignore */ }
-          console.warn('[Header] logoutRequest error', err);
+        if (email && token) {
+          this.authService.logoutRequest({ email, token }).subscribe({
+            next: (res: any) => {
+              try { this.notifications.showSuccess(res?.mensaje ?? 'Logout exitoso'); } catch (e) {}
+              try { this.authService.clearLocalAuth(); } catch (e) {}
+              try { this.router.navigate(['/']); } catch (e) {}
+            },
+            error: (err: any) => {
+              const serverMsg = err?.error?.mensaje ?? err?.error?.message ?? err?.message ?? 'Error al cerrar sesión';
+              try { this.notifications.showError(serverMsg); } catch (e) {}
+              // Aun así limpiar local para evitar estar en estado inconsistente
+              try { this.authService.clearLocalAuth(); } catch (e) {}
+              try { this.router.navigate(['/']); } catch (e) {}
+            }
+          });
+        } else {
+          // Fallback local
+          try { this.authService.clearLocalAuth(); } catch (e) {}
+          try { this.notifications.showSuccess('Sesión cerrada'); } catch (e) {}
+          try { this.router.navigate(['/']); } catch (e) {}
         }
-      });
-    } else {
-      // fallback local
-      try { this.authService.clearLocalAuth(); } catch (e) { /* ignore */ }
-      try { this.notifications.showSuccess('Sesión cerrada'); } catch (e) { /* ignore */ }
-      try { this.router.navigate(['/']); } catch (e) { /* ignore */ }
-    }
+      },
+      () => {
+        // Canceló: nada
+      }
+    );
   }
 }

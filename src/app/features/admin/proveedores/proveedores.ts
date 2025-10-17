@@ -20,6 +20,10 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { DetallePedidoDialogComponent } from './dialogs/detalle-pedido-dialog.component';
 import { MatChipsModule } from '@angular/material/chips';
 import { PedidoDialogComponent } from './dialogs/pedido-dialog.component';
+import { AuthService } from '../../auth/services/auth.service';
+import { MatMenuModule } from '@angular/material/menu';
+import { Router } from '@angular/router';
+import { NotificationService } from '../../../shared/notification/notification.service';
 
 // Importar diálogos (los crearemos por separado)
 import { ProveedorDialogComponent } from './dialogs/proveedor-dialog.component';
@@ -175,7 +179,8 @@ type DialogType = 'proveedor' | 'insumo' | 'producto' | 'insumo-proveedor' | 're
     MatCheckboxModule,
     MatTooltipModule,
     MatTabsModule,
-    MatChipsModule
+    MatChipsModule,
+    MatMenuModule
   ],
   templateUrl: './proveedores.html',
   styleUrls: ['./proveedores.css']
@@ -207,13 +212,28 @@ export class AdminProveedoresComponent implements OnInit, OnDestroy {
   insumosColumns: string[] = ['id_insumo', 'nombre', 'descripcion', 'costo_unitario', 'cantidad_actual', 'acciones'];
   productosColumns: string[] = ['id_producto', 'nombre', 'descripcion', 'costo_unitario', 'fecha_vencimiento', 'categoria', 'acciones'];
 
+  // Usuario actual
+  userName: string = 'Administrador';
+
   constructor(
     private dialog: MatDialog,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private authService: AuthService,
+    private router: Router,
+    private notifications: NotificationService
   ) {}
 
   ngOnInit(): void {
+    this.loadUserInfo();
     this.loadAllData();
+  }
+
+  // Cargar información del usuario
+  loadUserInfo(): void {
+    const user = this.authService.getCurrentUser();
+    if (user && user.nombre) {
+      this.userName = user.nombre;
+    }
   }
 
   ngOnDestroy(): void {
@@ -961,5 +981,28 @@ getEstadoPedidoColor(estado: string): string {
    */
   getLastUpdateTime(): string {
     return new Date().toLocaleTimeString('es-ES');
+  }
+
+  /**
+   * Cierra la sesión del usuario
+   */
+  logout(): void {
+    this.notifications.showConfirm(
+      '¿Está seguro de que desea cerrar sesión?',
+      () => {
+        // Usuario confirmó
+        this.authService.logout();
+        this.snackBar.open('Cerrando sesión...', 'Cerrar', {
+          duration: 2000,
+          panelClass: 'snackbar-success'
+        });
+        setTimeout(() => {
+          this.router.navigate(['/auth/worker/login']);
+        }, 500);
+      },
+      () => {
+        // Usuario canceló (no hacer nada)
+      }
+    );
   }
 }
