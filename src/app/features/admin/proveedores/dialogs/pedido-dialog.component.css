@@ -1,18 +1,42 @@
-.dialog-content {
-  max-height: 80vh;
-  overflow-y: auto;
-  padding: 0;
-}
-
 .dialog-title {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  color: #2c3e50;
+  gap: 0.75rem;
+  color: #2c4a9e;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+  padding: 1.5rem;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.dialog-content {
+  max-height: 75vh;
+  overflow-y: auto;
+  padding: 1.5rem;
+}
+
+/* Form Sections */
+.form-section {
+  margin-bottom: 1.5rem;
+}
+
+.form-section mat-card-header {
   margin-bottom: 1rem;
 }
 
-.info-card, .detalles-card {
+.form-section mat-card-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #2c4a9e;
+}
+
+/* Form Fields */
+.full-width {
+  width: 100%;
   margin-bottom: 1rem;
 }
 
@@ -20,14 +44,15 @@
   display: flex;
   gap: 1rem;
   align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+.form-row.align-end {
+  align-items: flex-end;
 }
 
 .half-width {
   flex: 1;
-}
-
-.full-width {
-  width: 100%;
 }
 
 .flex-1 {
@@ -35,56 +60,315 @@
 }
 
 .quantity-field {
-  width: 120px;
+  width: 140px;
 }
 
-.quantity-input {
-  width: 80px;
+.add-button {
+  height: 56px;
+  padding: 0 1.5rem !important;
 }
 
-.add-insumo-section {
-  background: #f8f9fa;
+/* Proveedor Info */
+.proveedor-info {
+  margin-top: 1rem;
   padding: 1rem;
+  background: #f8f9fa;
   border-radius: 8px;
+}
+
+.info-grid {
+  display: flex;
+  gap: 2rem;
+  margin-top: 1rem;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #666;
+}
+
+.info-icon {
+  color: #2c4a9e !important;
+  font-size: 1.2rem;
+}
+
+/* Checkbox */
+.checkbox-row {
+  margin-top: 1rem;
+}
+
+.checkbox-helper {
+  display: block;
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 0.25rem;
+}
+
+/* Add Insumo Section */
+.add-insumo-section {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e8ecf1 100%);
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  border-left: 4px solid #2c4a9e;
+}
+
+.stock-info {
+  font-size: 0.85rem;
+  color: #666;
+  margin-left: 0.5rem;
+}
+
+/* Detalles Section */
+.detalles-section {
+  margin-top: 1.5rem;
+}
+
+.section-subtitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  margin: 1rem 0;
+}
+
+/* Table */
+.table-container {
+  overflow-x: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   margin-bottom: 1rem;
 }
 
 .detalles-table {
-  margin-top: 1rem;
-}
-
-.detalles-data-table {
   width: 100%;
-  margin-top: 1rem;
+  background: white;
 }
 
-.total-section {
-  margin-top: 1rem;
-  text-align: right;
+.detalles-table .mat-mdc-header-cell {
+  background: #2c4a9e;
+  color: white !important;
+  font-weight: 600;
+  padding: 1rem 0.5rem;
 }
 
-.total-card {
+.detalles-table .mat-mdc-cell {
+  padding: 1rem 0.5rem;
+}
+
+.detalles-table .mat-mdc-row:hover {
+  background: #f8f9fa;
+}
+
+.text-center {
+  text-align: center !important;
+}
+
+/* Insumo Cell */
+.insumo-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.stock-badge {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
   display: inline-block;
-  padding: 1rem;
-  background: #e8f5e8;
-  border: 2px solid #4caf50;
+  width: fit-content;
 }
 
-.total-card h3 {
-  margin: 0;
+.stock-badge.success {
+  background: #d4edda;
+  color: #155724;
+}
+
+.stock-badge.error {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+/* Prices */
+.price {
+  color: #28a745;
+  font-weight: 500;
+}
+
+.price.subtotal {
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+/* Quantity Input */
+.quantity-input {
+  width: 100px;
+}
+
+.quantity-input .mat-mdc-form-field-flex {
+  padding: 0.25rem 0.5rem;
+}
+
+/* Alert Cards */
+.alert-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  border-left: 4px solid;
+}
+
+.alert-card mat-icon {
+  color: inherit;
+  margin-top: 0.1rem;
+}
+
+.alert-card.info {
+  background: #d1e7ff;
+  color: #004085;
+  border-left-color: #2196f3;
+}
+
+.alert-card.warning {
+  background: #fff3cd;
+  color: #856404;
+  border-left-color: #ffc107;
+}
+
+.alert-card.error {
+  background: #f8d7da;
+  color: #721c24;
+  border-left-color: #dc3545;
+}
+
+.alert-card p {
+  margin: 0.25rem 0 0 0;
+  font-size: 0.9rem;
+}
+
+/* Summary Card */
+.summary-card {
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  border: 2px solid #4caf50;
+  margin-top: 1rem;
+  padding: 1.5rem;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.summary-item.total-item {
+  grid-column: span 2;
+}
+
+.summary-label {
+  font-size: 0.9rem;
+  color: #2e7d32;
+  font-weight: 500;
+}
+
+.summary-value {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #1b5e20;
+}
+
+.summary-value.total {
+  font-size: 1.8rem;
   color: #2e7d32;
 }
 
+/* Dialog Actions */
 .dialog-actions {
-  padding: 1rem;
-  border-top: 1px solid #e0e0e0;
+  padding: 1rem 1.5rem;
+  border-top: 2px solid #f0f0f0;
+  gap: 1rem;
 }
 
-mat-card-header {
-  margin-bottom: 1rem;
+.dialog-actions button {
+  min-width: 140px;
 }
 
-mat-card-title {
-  font-size: 1.1rem;
-  font-weight: 500;
+.dialog-actions button mat-icon {
+  margin-right: 0.5rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .dialog-content {
+    padding: 1rem;
+  }
+
+  .form-row {
+    flex-direction: column;
+  }
+
+  .form-row.align-end {
+    align-items: stretch;
+  }
+
+  .half-width,
+  .quantity-field {
+    width: 100%;
+  }
+
+  .add-button {
+    width: 100%;
+  }
+
+  .info-grid {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .summary-item.total-item {
+    grid-column: span 1;
+  }
+
+  .detalles-table {
+    font-size: 0.85rem;
+  }
+
+  .dialog-title {
+    font-size: 1.25rem;
+    padding: 1rem;
+  }
+}
+
+/* Scrollbar personalizada */
+.dialog-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.dialog-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.dialog-content::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, #2c4a9e, #2c4a9e);
+  border-radius: 4px;
+}
+
+.dialog-content::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(45deg, #1e3a7a, #1e3a7a);
 }
