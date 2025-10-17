@@ -3,7 +3,7 @@
 /* Container principal */
 .admin-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  background: linear-gradient(135deg, #2c4a9e 0%, #2c4a9e 100%);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 }
 
@@ -34,7 +34,7 @@
   gap: 0.75rem;
   font-size: 1.8rem;
   font-weight: 700;
-  background: linear-gradient(45deg, #764ba2, #667eea);
+  background: linear-gradient(45deg, #2c4a9e, #2c4a9e);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -42,7 +42,7 @@
 }
 
 .title-icon {
-  color: #764ba2 !important;
+  color: #2c4a9e !important;
   font-size: 2rem !important;
 }
 
@@ -56,7 +56,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: #764ba2;
+  background: #2c4a9e;
   color: white;
   padding: 0.75rem 1.25rem;
   border-radius: 50px;
@@ -103,6 +103,225 @@
   position: relative;
   overflow: hidden;
 }
+/* ================= ESTILOS PARA DETALLES DE PEDIDOS ================= */
+
+/* Stats Container */
+.stats-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+}
+
+.stat-card.pendiente::before {
+  background: #ffc107;
+}
+
+.stat-card.recibido::before {
+  background: #2c4a9e;
+}
+
+.stat-card.verificado::before {
+  background: #28a745;
+}
+
+.stat-card.incompleto::before {
+  background: #ff9800;
+}
+
+.stat-card h3 {
+  color: #666;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.stat-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #2c4a9e;
+}
+
+/* Status Chips */
+.status-chip {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+}
+
+.status-chip.status-pendiente {
+  background: #fff3cd !important;
+  color: #856404 !important;
+}
+
+.status-chip.status-recibido {
+  background: #d1e7ff !important;
+  color: #004085 !important;
+}
+
+.status-chip.status-verificado {
+  background: #d4edda !important;
+  color: #155724 !important;
+}
+
+.status-chip.status-incompleto {
+  background: #ffe5b4 !important;
+  color: #8b4513 !important;
+}
+
+.status-chip.status-aprobado {
+  background: #d4edda !important;
+  color: #155724 !important;
+}
+
+.status-chip.status-rechazado {
+  background: #f8d7da !important;
+  color: #721c24 !important;
+}
+
+/* ================= ESTILOS ADICIONALES PARA PEDIDOS ================= */
+
+/* Espaciado mejorado para tabla de pedidos */
+.data-table .mat-mdc-cell {
+  padding: 1.5rem 1rem !important;
+}
+
+.data-table .mat-mdc-header-cell {
+  padding: 1.5rem 1rem !important;
+}
+
+/* Mejor espaciado para el contenido del módulo */
+.module-content {
+  padding: 2rem !important;
+}
+
+/* Espacio entre búsqueda y tabla */
+.search-container {
+  margin-bottom: 2.5rem !important;
+}
+
+/* Chips personalizados */
+.items-chip {
+  background: #e3f2fd !important;
+  color: #1976d2 !important;
+  font-weight: 600;
+}
+
+.items-chip mat-icon {
+  color: #1976d2 !important;
+}
+
+/* Celdas con iconos */
+.proveedor-cell,
+.fecha-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cell-icon {
+  color: #666 !important;
+  font-size: 1.2rem !important;
+  width: 1.2rem !important;
+  height: 1.2rem !important;
+}
+
+/* Descripción */
+.descripcion-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+/* Texto muted */
+.text-muted {
+  color: #999;
+  font-style: italic;
+  font-size: 0.85rem;
+}
+
+/* Estados adicionales para mat-chip */
+.mat-mdc-chip.mat-accent {
+  background: #d1e7ff !important;
+  color: #004085 !important;
+}
+
+.mat-mdc-chip.mat-warn {
+  background: #fff3cd !important;
+  color: #856404 !important;
+}
+
+/* Responsive para tabla de pedidos */
+@media (max-width: 1200px) {
+  .descripcion-text {
+    max-width: 150px;
+  }
+}
+
+@media (max-width: 768px) {
+  .proveedor-cell,
+  .fecha-cell {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+  
+  .cell-icon {
+    display: none;
+  }
+  
+  .descripcion-text {
+    max-width: 100%;
+  }
+}
+
+/* Snackbar personalizado */
+.snackbar-success {
+  background: #4caf50 !important;
+  color: white !important;
+}
+
+.snackbar-warning {
+  background: #ff9800 !important;
+  color: white !important;
+}
+
+.snackbar-error {
+  background: #f44336 !important;
+  color: white !important;
+}
+
+/* Responsive para stats */
+@media (max-width: 768px) {
+  .stats-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .stat-number {
+    font-size: 2rem;
+  }
+}
 
 .module-card.mat-mdc-card::before {
   content: '';
@@ -111,7 +330,7 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(45deg, #764ba2, #667eea);
+  background: linear-gradient(45deg, #2c4a9e, #2c4a9e);
   transform: scaleX(0);
   transition: transform 0.3s ease;
   z-index: 1;
@@ -124,7 +343,7 @@
 .module-card.mat-mdc-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2) !important;
-  border-color: #764ba2;
+  border-color: #2c4a9e;
 }
 
 /* Mat Card Header */
@@ -157,7 +376,7 @@
 .module-icon {
   font-size: 2.5rem !important;
   color: white !important;
-  background: linear-gradient(45deg, #764ba2, #667eea);
+  background: linear-gradient(45deg, #2c4a9e, #2c4a9e);
   padding: 1rem;
   border-radius: 12px;
   display: flex;
@@ -179,7 +398,7 @@
 .stat-number {
   font-size: 1.8rem;
   font-weight: 700;
-  color: #764ba2;
+  color: #2c4a9e;
 }
 
 .stat-label {
@@ -199,12 +418,12 @@
 
 .back-btn {
   background: rgba(255, 255, 255, 0.9) !important;
-  color: #764ba2 !important;
-  border: 1px solid #764ba2 !important;
+  color: #2c4a9e !important;
+  border: 1px solid #2c4a9e !important;
 }
 
 .back-btn:hover {
-  background: #764ba2 !important;
+  background: #2c4a9e !important;
   color: white !important;
 }
 
@@ -254,12 +473,12 @@
 }
 
 .module-title mat-icon {
-  color: #764ba2 !important;
+  color: #2c4a9e !important;
   font-size: 2rem !important;
 }
 
 .add-btn {
-  background: linear-gradient(45deg, #764ba2, #667eea) !important;
+  background: linear-gradient(45deg, #2c4a9e, #2c4a9e) !important;
   color: white !important;
   border: none !important;
   padding: 0.75rem 1.5rem !important;
@@ -303,7 +522,7 @@
 }
 
 .data-table .mat-mdc-header-cell {
-  background: linear-gradient(45deg, #764ba2, #667eea);
+  background: linear-gradient(45deg, #2c4a9e, #2c4a9e);
   color: white !important;
   font-weight: 600 !important;
   padding: 1rem !important;
@@ -321,7 +540,7 @@
 
 /* Table Elements */
 .id-badge {
-  background: linear-gradient(45deg, #764ba2, #667eea);
+  background: linear-gradient(45deg, #2c4a9e, #2c4a9e);
   color: white;
   padding: 0.25rem 0.75rem;
   border-radius: 12px;
@@ -355,12 +574,12 @@
 
 .price.total {
   font-size: 1.1rem;
-  color: #007bff;
+  color: #2c4a9e;
 }
 
 .quantity {
   background: #e3f2fd;
-  color: #1976d2;
+  color: #2c4a9e;
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   font-weight: 600;
@@ -417,7 +636,7 @@
 }
 
 .category-badge {
-  background: linear-gradient(45deg, #4facfe, #00f2fe);
+  background: linear-gradient(45deg, #2c4a9e, #2c4a9e);
   color: white;
   padding: 0.25rem 0.75rem;
   border-radius: 12px;
@@ -548,12 +767,96 @@
 }
 
 .table-container::-webkit-scrollbar-thumb {
-  background: linear-gradient(45deg, #764ba2, #667eea);
+  background: linear-gradient(45deg, #2c4a9e, #2c4a9e);
   border-radius: 4px;
 }
 
 .table-container::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(45deg, #5a3a7a, #4a5bc2);
+  background: linear-gradient(45deg, #2c4a9e, #2c4a9e);
+}
+
+/* ================= ESTILOS ADICIONALES PARA PEDIDOS ================= */
+
+/* Chips personalizados */
+.items-chip {
+  background: #e3f2fd !important;
+  color: #1976d2 !important;
+  font-weight: 600;
+}
+
+.items-chip mat-icon {
+  color: #1976d2 !important;
+}
+
+/* Celdas con iconos */
+.proveedor-cell,
+.fecha-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cell-icon {
+  color: #666 !important;
+  font-size: 1.2rem !important;
+  width: 1.2rem !important;
+  height: 1.2rem !important;
+}
+
+/* Descripción */
+.descripcion-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+/* Texto muted */
+.text-muted {
+  color: #999;
+  font-style: italic;
+  font-size: 0.85rem;
+}
+
+/* Estados adicionales para mat-chip */
+.mat-mdc-chip.mat-accent {
+  background: #d1e7ff !important;
+  color: #004085 !important;
+}
+
+.mat-mdc-chip.mat-warn {
+  background: #fff3cd !important;
+  color: #856404 !important;
+}
+
+
+
+/* Responsive para tabla de pedidos */
+@media (max-width: 1200px) {
+  .descripcion-text {
+    max-width: 150px;
+  }
+}
+
+@media (max-width: 768px) {
+  .proveedor-cell,
+  .fecha-cell {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+  
+  .cell-icon {
+    display: none;
+  }
+  
+  .descripcion-text {
+    max-width: 100%;
+  }
 }
 
 /* Animaciones adicionales */
@@ -584,11 +887,58 @@
 
 /* Mejoras para accesibilidad */
 .action-btn:focus {
-  outline: 2px solid #764ba2;
+  outline: 2px solid #2c4a9e;
   outline-offset: 2px;
 }
 
 .module-card:focus {
-  outline: 2px solid #764ba2;
+  outline: 2px solid #2c4a9e;
   outline-offset: 2px;
+}
+
+.items-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 0.5rem 1rem;
+  border-radius: 16px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.items-badge mat-icon {
+  font-size: 1.2rem;
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.estado-badge {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: 16px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
+.estado-badge.estado-pendiente {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.estado-badge.estado-en_proceso {
+  background: #d1e7ff;
+  color: #004085;
+}
+
+.estado-badge.estado-recibido {
+  background: #d4edda;
+  color: #155724;
+}
+
+.estado-badge.estado-cancelado {
+  background: #f8d7da;
+  color: #721c24;
 }
