@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {environment} from '../../../../environments/environment';
+import { ShoppingCartService } from '../../../shared/shopping-cart/shopping-cart.service';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +14,10 @@ export class AuthService {
   public currentUser$ = this.currentUserSubj.asObservable();
   public isAuthenticated$ = this.currentUser$.pipe(map(u => !!u));
 
-  constructor(private http: HttpClient) {
+  constructor(
+    private http: HttpClient,
+    private shoppingCartService: ShoppingCartService
+  ) {
     // Inicializar estado desde localStorage si existe y el token es válido
     this.initializeAuthState();
   }
@@ -180,23 +184,16 @@ export class AuthService {
     if (email && token) {
       this.logoutRequest({ email, token }).subscribe({
         next: (res) => {
-          try { localStorage.removeItem('auth_user'); } catch (e) {}
-          try { localStorage.removeItem('auth_token'); } catch (e) {}
-          try { localStorage.removeItem('refresh_token'); } catch (e) {}
-          try { sessionStorage.removeItem('oauth_user_id'); } catch (e) {}
-          this.currentUserSubj.next(null);
+          this.clearAuthAndCart();
         },
         error: (err) => {
-          console.warn('[AuthService] logoutRequest failed, storage not cleared', err);
+          console.warn('[AuthService] logoutRequest failed, clearing local data anyway', err);
+          this.clearAuthAndCart();
         }
       });
     } else {
       // fallback: limpiar localmente
-      try { localStorage.removeItem('auth_user'); } catch (e) {}
-      try { localStorage.removeItem('auth_token'); } catch (e) {}
-      try { localStorage.removeItem('refresh_token'); } catch (e) {}
-      try { sessionStorage.removeItem('oauth_user_id'); } catch (e) {}
-      this.currentUserSubj.next(null);
+      this.clearAuthAndCart();
     }
   }
 
@@ -250,10 +247,19 @@ export class AuthService {
 
   // Limpiar solo datos locales de autenticación y notificar suscriptores
   clearLocalAuth(): void {
+    this.clearAuthAndCart();
+  }
+
+  // Método centralizado para limpiar autenticación y carrito
+  private clearAuthAndCart(): void {
     try { localStorage.removeItem('auth_user'); } catch (e) {}
     try { localStorage.removeItem('auth_token'); } catch (e) {}
     try { localStorage.removeItem('refresh_token'); } catch (e) {}
     try { sessionStorage.removeItem('oauth_user_id'); } catch (e) {}
+
+    // Limpiar el carrito de compras
+    this.shoppingCartService.clearCart();
+
     this.currentUserSubj.next(null);
   }
 
