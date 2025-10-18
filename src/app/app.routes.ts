@@ -115,26 +115,6 @@ export const routes: Routes = [
     canActivate: [AuthGuard]
   },
 
-  // Rutas de retorno para pasarelas de pago (callback desde el back) - públicas
-  {
-    path: 'payment/success',
-    loadComponent: () => import('./features/payment/payment-result.component')
-      .then(m => m.PaymentResultComponent),
-    canActivate: [AuthGuard]
-  },
-  {
-    path: 'payment/failure',
-    loadComponent: () => import('./features/payment/payment-result.component')
-      .then(m => m.PaymentResultComponent),
-    canActivate: [AuthGuard]
-  },
-  {
-    path: 'payment/pending',
-    loadComponent: () => import('./features/payment/payment-result.component')
-      .then(m => m.PaymentResultComponent),
-    canActivate: [AuthGuard]
-  },
-
   // Ruta por defecto para rutas no encontradas
   {
     path: '**',

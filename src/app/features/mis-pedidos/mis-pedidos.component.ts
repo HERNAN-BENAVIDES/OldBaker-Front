@@ -1,9 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../features/auth/services/auth.service';
+import { NotificationService } from '../../shared/notification/notification.service';
+import { ShoppingCartService } from '../../shared/shopping-cart/shopping-cart.service';
 
 interface PedidoItem {
   productoId: number;
@@ -38,12 +40,53 @@ export class MisPedidosComponent implements OnInit {
 
   constructor(
     private router: Router,
+    private route: ActivatedRoute,
     private http: HttpClient,
-    private authService: AuthService
+    private authService: AuthService,
+    private notifications: NotificationService,
+    private cartService: ShoppingCartService
   ) {}
 
   ngOnInit() {
+    // Verificar si viene de un retorno de pago
+    this.route.queryParams.subscribe(params => {
+      const status = params['status'];
+      const externalRef = params['external_reference'];
+
+      if (status && externalRef) {
+        this.handlePaymentReturn(status, externalRef);
+        // Limpiar los query params de la URL sin recargar
+        this.router.navigate([], {
+          relativeTo: this.route,
+          queryParams: {},
+          replaceUrl: true
+        });
+      }
+    });
+
     this.cargarPedidos();
+  }
+
+  handlePaymentReturn(status: string, externalRef: string) {
+    switch (status.toLowerCase()) {
+      case 'approved':
+        this.notifications.showSuccess('¡Pago aprobado! Tu pedido ha sido confirmado.');
+        // Limpiar el carrito cuando el pago es aprobado
+        try {
+          this.cartService.clearCart();
+        } catch (e) {
+          console.error('Error al limpiar carrito:', e);
+        }
+        break;
+      case 'pending':
+        this.notifications.showInfo('Tu pago está pendiente de confirmación. Te notificaremos cuando se confirme.');
+        break;
+      case 'failed':
+        this.notifications.showError('El pago no pudo ser procesado. Por favor, intenta nuevamente.');
+        break;
+      default:
+        this.notifications.showInfo(`Estado del pago: ${status}`);
+    }
   }
 
   cargarPedidos() {
