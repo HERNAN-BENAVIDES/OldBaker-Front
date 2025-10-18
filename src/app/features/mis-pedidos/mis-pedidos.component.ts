@@ -1,17 +1,27 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
+import { AuthService } from '../../features/auth/services/auth.service';
+
+interface PedidoItem {
+  productoId: number;
+  productoNombre: string;
+  cantidad: number;
+  precioUnitario: number;
+  subtotal: number;
+}
 
 interface Pedido {
   id: number;
-  fecha: string;
+  externalReference: string;
+  status: string;
+  paymentId: string | null;
   total: number;
-  estado: 'pendiente' | 'en_proceso' | 'completado' | 'cancelado';
-  productos: {
-    nombre: string;
-    cantidad: number;
-    precioUnitario: number;
-  }[];
+  fechaCreacion: string;
+  payerEmail: string;
+  items: PedidoItem[];
 }
 
 @Component({
@@ -26,69 +36,73 @@ export class MisPedidosComponent implements OnInit {
   loading = true;
   error: string | null = null;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private http: HttpClient,
+    private authService: AuthService
+  ) {}
 
   ngOnInit() {
     this.cargarPedidos();
   }
 
   cargarPedidos() {
-    // Simulación de carga - aquí deberías hacer la petición HTTP real
-    setTimeout(() => {
-      this.pedidos = [
-        {
-          id: 1001,
-          fecha: '2025-01-15',
-          total: 25000,
-          estado: 'completado',
-          productos: [
-            { nombre: 'Baguette', cantidad: 2, precioUnitario: 3500 },
-            { nombre: 'Croissant', cantidad: 4, precioUnitario: 4500 }
-          ]
-        },
-        {
-          id: 1002,
-          fecha: '2025-01-14',
-          total: 15000,
-          estado: 'en_proceso',
-          productos: [
-            { nombre: 'Pan de Queso', cantidad: 6, precioUnitario: 2500 }
-          ]
-        },
-        {
-          id: 1003,
-          fecha: '2025-01-10',
-          total: 42000,
-          estado: 'completado',
-          productos: [
-            { nombre: 'Pan Integral', cantidad: 3, precioUnitario: 3200 },
-            { nombre: 'Ciabatta', cantidad: 5, precioUnitario: 3800 },
-            { nombre: 'Rollos de Canela', cantidad: 4, precioUnitario: 4000 }
-          ]
-        }
-      ];
+    const currentUser = this.authService.getCurrentUser();
+
+    if (!currentUser || !currentUser.id) {
+      this.error = 'No se pudo obtener la información del usuario';
       this.loading = false;
-    }, 1000);
+      return;
+    }
+
+    const token = this.authService.getToken();
+
+    if (!token) {
+      this.error = 'No se encontró el token de autenticación';
+      this.loading = false;
+      return;
+    }
+
+    // Limpiar el token: remover prefijo "Bearer " si ya existe
+    const cleanToken = String(token).replace(/^Bearer\s+/i, '').trim();
+
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${cleanToken}`
+    });
+
+    const url = `${environment.apiUrl}/api/user/orders?idUsuario=${currentUser.id}`;
+
+    this.http.get<Pedido[]>(url, { headers }).subscribe({
+      next: (response) => {
+        this.pedidos = response || [];
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Error al cargar pedidos:', err);
+        this.error = 'Error al cargar los pedidos. Por favor, intenta nuevamente.';
+        this.loading = false;
+      }
+    });
   }
 
   getEstadoClass(estado: string): string {
-    const clases: { [key: string]: string } = {
-      'pendiente': 'estado-pendiente',
-      'en_proceso': 'estado-en-proceso',
-      'completado': 'estado-completado',
-      'cancelado': 'estado-cancelado'
+    const statusMap: { [key: string]: string } = {
+      'PAID': 'estado-completado',
+      'PENDING': 'estado-pendiente',
+      'CANCELLED': 'estado-cancelado',
+      'FAILED': 'estado-cancelado'
     };
-    return clases[estado] || '';
+    return statusMap[estado] || 'estado-pendiente';
   }
 
   getEstadoTexto(estado: string): string {
-    const textos: { [key: string]: string } = {
-      'pendiente': 'Pendiente',
-      'en_proceso': 'En proceso',
-      'completado': 'Completado',
-      'cancelado': 'Cancelado'
+    const statusText: { [key: string]: string } = {
+      'PAID': 'Pagado',
+      'PENDING': 'Pendiente',
+      'CANCELLED': 'Cancelado',
+      'FAILED': 'Fallido'
     };
-    return textos[estado] || estado;
+    return statusText[estado] || estado;
   }
 
   formatearFecha(fecha: string): string {
@@ -96,7 +110,9 @@ export class MisPedidosComponent implements OnInit {
     return date.toLocaleDateString('es-ES', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
     });
   }
 

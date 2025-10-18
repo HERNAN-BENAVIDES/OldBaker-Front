@@ -41,6 +41,7 @@ export class Login implements OnInit {
   hidePassword = true;
   isLoading = false;
   errorMessage: string | null = null;
+  private returnUrl: string | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -60,6 +61,20 @@ export class Login implements OnInit {
     this.route.queryParams.subscribe(params => {
       if (params['sessionExpired'] === 'true') {
         this.notifications.showError('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
+      }
+
+      // Capturar returnUrl para redirigir después del login (protegido por AuthGuard)
+      const r = params['returnUrl'];
+      if (r && typeof r === 'string') {
+        // Puede venir codificado por AuthGuard (encodeURIComponent). Intentar decodificar.
+        try {
+          const decoded = decodeURIComponent(r);
+          // Guardar solo rutas internas (empiezan por '/'), si no, conservar original
+          this.returnUrl = (typeof decoded === 'string' && decoded.startsWith('/')) ? decoded : r;
+        } catch (e) {
+          // fallback: usar el valor tal cual
+          this.returnUrl = r;
+        }
       }
     });
   }
@@ -104,7 +119,15 @@ export class Login implements OnInit {
 
           // Navegar después de un pequeño delay para que se vea la notificación
           setTimeout(() => {
-            this.router.navigate(['/']);
+            // Si el AuthGuard solicitó redirección, usarla; validar que sea ruta interna
+            let dest = '/';
+            try {
+              if (this.returnUrl && this.returnUrl.startsWith('/')) {
+                dest = this.returnUrl;
+              }
+            } catch (e) { /* fallback a / */ }
+
+            this.router.navigateByUrl(dest);
           }, 300);
 
           return;

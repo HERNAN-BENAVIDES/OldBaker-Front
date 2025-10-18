@@ -20,20 +20,23 @@
         <div class="pedido-header">
           <div class="pedido-info">
             <h3 class="pedido-id">Pedido #{{ pedido.id }}</h3>
-            <p class="pedido-fecha">{{ formatearFecha(pedido.fecha) }}</p>
+            <p class="pedido-fecha">{{ formatearFecha(pedido.fechaCreacion) }}</p>
+            <p class="pedido-reference" *ngIf="pedido.externalReference">
+              Ref: {{ pedido.externalReference }}
+            </p>
           </div>
-          <span class="pedido-estado" [ngClass]="getEstadoClass(pedido.estado)">
-            {{ getEstadoTexto(pedido.estado) }}
+          <span class="pedido-estado" [ngClass]="getEstadoClass(pedido.status)">
+            {{ getEstadoTexto(pedido.status) }}
           </span>
         </div>
 
         <div class="pedido-productos">
-          <div class="producto-item" *ngFor="let producto of pedido.productos">
+          <div class="producto-item" *ngFor="let item of pedido.items">
             <div class="producto-info">
-              <span class="producto-nombre">{{ producto.nombre }}</span>
-              <span class="producto-cantidad">x{{ producto.cantidad }}</span>
+              <span class="producto-nombre">{{ item.productoNombre }}</span>
+              <span class="producto-cantidad">x{{ item.cantidad }}</span>
             </div>
-            <span class="producto-precio">{{ producto.precioUnitario * producto.cantidad | currency:'COP':'symbol':'1.0-0' }}</span>
+            <span class="producto-precio">{{ item.subtotal | currency:'COP':'symbol':'1.0-0' }}</span>
           </div>
         </div>
 

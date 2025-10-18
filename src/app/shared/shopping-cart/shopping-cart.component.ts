@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { AuthService } from 'src/app/features/auth/services/auth.service';
+import { NotificationService } from '../notification/notification.service';
 
 @Component({
   selector: 'app-shopping-cart',
@@ -31,7 +32,8 @@ export class ShoppingCartComponent implements OnInit {
     private cartService: ShoppingCartService,
     private router: Router,
     private http: HttpClient,
-    private authService: AuthService
+    private authService: AuthService,
+    private notifications: NotificationService
   ) {}
 
   ngOnInit() {
@@ -59,14 +61,18 @@ export class ShoppingCartComponent implements OnInit {
   }
 
   clearCart() {
-    if (confirm('¿Estás seguro de que deseas vaciar el carrito?')) {
-      this.cartService.clearCart();
-    }
+    this.notifications.showConfirm(
+      '¿Estás seguro de que deseas vaciar el carrito?',
+      () => {
+        this.cartService.clearCart();
+        this.notifications.showSuccess('Carrito vaciado correctamente');
+      }
+    );
   }
 
   checkout() {
     if (this.cartItems.length === 0) {
-      alert('El carrito está vacío');
+      this.notifications.showInfo('El carrito está vacío');
       return;
     }
 
@@ -82,22 +88,35 @@ export class ShoppingCartComponent implements OnInit {
 
     if (!token) {
       console.error('Error: No se encontró un token de autenticación.');
-      alert('No se pudo procesar el pago porque no se encontró un token de autenticación.');
+      this.notifications.showError('No se pudo procesar el pago porque no se encontró un token de autenticación.');
       return;
     }
 
-    // Construir el payload con los items del carrito
+    // Obtener el email del usuario autenticado
+    const currentUser = this.authService.getCurrentUser();
+    const payerEmail = currentUser?.email;
+
+    if (!payerEmail) {
+      console.error('Error: No se pudo obtener el email del usuario.');
+      this.notifications.showError('No se pudo procesar el pago porque no se encontró el email del usuario.');
+      return;
+    }
+
+    // Construir el payload con el formato correcto: { payerEmail, items: [{ productId, quantity }] }
     const payload = {
+      payerEmail: payerEmail,
       items: this.cartItems.map(item => ({
-        productoId: item.id,
-        cantidad: item.quantity,
-        precioUnitario: item.price
+        productId: item.id,
+        quantity: item.quantity
       }))
     };
 
+    // Limpiar el token: remover prefijo "Bearer " si ya existe para evitar duplicación
+    const cleanToken = String(token).replace(/^Bearer\s+/i, '').trim();
+
     const headers = {
       headers: {
-        Authorization: `Bearer ${token}` // Usar el token en el encabezado con formato Bearer
+        Authorization: `Bearer ${cleanToken}` // Usar el token limpio con formato Bearer
       }
     };
 
@@ -109,9 +128,9 @@ export class ShoppingCartComponent implements OnInit {
       },
       error: (error: any) => {
         if (error.error && error.error.error) {
-          alert(error.error.error); // Mostrar el mensaje de error
+          this.notifications.showError(error.error.error);
         } else {
-          alert('Hubo un error al procesar el pedido');
+          this.notifications.showError('Hubo un error al procesar el pedido');
         }
         console.error(error);
       }

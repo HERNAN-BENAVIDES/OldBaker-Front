@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { AuthGuard } from './features/auth/services/auth.guard';
 
 export const routes: Routes = [
   // Ruta principal - Home
@@ -55,16 +56,18 @@ export const routes: Routes = [
       .then(m => m.OauthCallback)
   },
 
-  // Rutas de administrador
+  // Rutas de administrador (protegidas)
   {
     path: 'admin',
     loadComponent: () => import('./features/admin/proveedores/proveedores')
-      .then(c => c.AdminProveedoresComponent)
+      .then(c => c.AdminProveedoresComponent),
+    canActivate: [AuthGuard]
   },
   {
     path: 'admin/proveedores',
     loadComponent: () => import('./features/admin/proveedores/proveedores')
-      .then(c => c.AdminProveedoresComponent)
+      .then(c => c.AdminProveedoresComponent),
+    canActivate: [AuthGuard]
   },
   {
     path: 'admin/dashboard',
@@ -72,38 +75,64 @@ export const routes: Routes = [
     pathMatch: 'full'
   },
 
-  // Rutas de auxiliar
+  // Rutas de auxiliar (protegidas)
   {
     path: 'auxiliar',
     loadComponent: () => import('./features/auxiliar/auxiliar-dashboard/auxiliar-dashboard')
-      .then(c => c.AuxiliarDashboardComponent)
+      .then(c => c.AuxiliarDashboardComponent),
+    canActivate: [AuthGuard]
   },
   {
     path: 'auxiliar/detalles-pedidos',
     loadComponent: () => import('./features/auxiliar/detalles-pedidos/detalles-pedidos.component')
-      .then(c => c.DetallesPedidosComponent)
+      .then(c => c.DetallesPedidosComponent),
+    canActivate: [AuthGuard]
   },
   {
     path: 'auxiliar/pedidos-insumos',
     loadComponent: () => import('./features/auxiliar/pedidos-insumos/pedidos-insumos.component')
-      .then(c => c.PedidosInsumosComponent)
+      .then(c => c.PedidosInsumosComponent),
+    canActivate: [AuthGuard]
   },
   {
     path: 'auxiliar/reportes-proveedores',
     loadComponent: () => import('./features/auxiliar/reportes-proveedores/reportes-proveedores.component')
-      .then(c => c.ReportesProveedoresComponent)
+      .then(c => c.ReportesProveedoresComponent),
+    canActivate: [AuthGuard]
   },
 
-  // Ruta de pedidos del usuario
+  // Ruta de pedidos del usuario (protegida)
   {
     path: 'mis-pedidos',
     loadComponent: () => import('./features/mis-pedidos/mis-pedidos.component')
-      .then(m => m.MisPedidosComponent)
+      .then(m => m.MisPedidosComponent),
+    canActivate: [AuthGuard]
   },
   {
     path: 'mi-perfil',
     loadComponent: () => import('./features/perfil/perfil.component')
-      .then(m => m.PerfilComponent)
+      .then(m => m.PerfilComponent),
+    canActivate: [AuthGuard]
+  },
+
+  // Rutas de retorno para pasarelas de pago (callback desde el back) - públicas
+  {
+    path: 'payment/success',
+    loadComponent: () => import('./features/payment/payment-result.component')
+      .then(m => m.PaymentResultComponent),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'payment/failure',
+    loadComponent: () => import('./features/payment/payment-result.component')
+      .then(m => m.PaymentResultComponent),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'payment/pending',
+    loadComponent: () => import('./features/payment/payment-result.component')
+      .then(m => m.PaymentResultComponent),
+    canActivate: [AuthGuard]
   },
 
   // Ruta por defecto para rutas no encontradas
