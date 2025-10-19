@@ -9,6 +9,14 @@ export class AuthGuard implements CanActivate {
   constructor(private auth: AuthService, private router: Router) {}
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | UrlTree {
+    // Excepción: permitir acceso a /mis-pedidos si viene desde MercadoPago (con status y external_reference)
+    // Esto evita problemas de sesión perdida durante la redirección de pago
+    if (state.url.includes('/mis-pedidos') &&
+        (state.url.includes('status=') && state.url.includes('external_reference='))) {
+      console.log('[AuthGuard] Permitiendo acceso temporal desde retorno de pago MercadoPago');
+      return true;
+    }
+
     // Preferir la verificación de token por seguridad
     try {
       if (this.auth.isTokenValid() || this.auth.isLoggedIn()) {

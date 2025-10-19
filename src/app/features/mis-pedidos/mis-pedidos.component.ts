@@ -64,6 +64,21 @@ export class MisPedidosComponent implements OnInit {
       }
     });
 
+    // Verificar si el usuario está autenticado antes de cargar pedidos
+    const isAuthenticated = this.authService.isLoggedIn() || this.authService.isTokenValid();
+
+    if (!isAuthenticated) {
+      // Si viene de MercadoPago pero no tiene sesión, mostrar mensaje y redirigir a login
+      this.loading = false;
+      this.error = 'Tu sesión ha expirado. Por favor, inicia sesión para ver tus pedidos.';
+
+      // Redirigir al login después de 3 segundos
+      setTimeout(() => {
+        this.router.navigate(['/login']);
+      }, 3000);
+      return;
+    }
+
     this.cargarPedidos();
   }
 
