@@ -102,6 +102,9 @@ export class ShoppingCartComponent implements OnInit {
       return;
     }
 
+    // Limpiar advertencias de stock previas
+    this.clearStockWarnings();
+
     // Construir el payload con el formato correcto: { payerEmail, items: [{ productId, quantity }] }
     const payload = {
       payerEmail: payerEmail,
@@ -127,13 +130,53 @@ export class ShoppingCartComponent implements OnInit {
         }
       },
       error: (error: any) => {
+        // Procesar error de stock
+        this.handleCheckoutError(error);
+      }
+    });
+  }
+
+  clearStockWarnings() {
+    this.cartItems.forEach(item => {
+      item.stockWarning = undefined;
+      item.maxAvailable = undefined;
+    });
+  }
+
+  handleCheckoutError(error: any) {
+    try {
+      const errorMessage = error?.error?.error || error?.error?.message || '';
+
+      // Detectar si es un error de stock
+      // Formato esperado: "Producto 'Pan hamburguesa' no se puede preparar en la cantidad solicitada (142). Se puede preparar hasta 100 unidades."
+      const stockErrorRegex = /Producto '([^']+)' no se puede preparar en la cantidad solicitada \((\d+)\)\. Se puede preparar hasta (\d+) unidades/;
+      const match = errorMessage.match(stockErrorRegex);
+
+      if (match) {
+        const productName = match[1];
+        const maxAvailable = parseInt(match[3], 10);
+
+        // Buscar el producto en el carrito por nombre y agregar la advertencia
+        const affectedItem = this.cartItems.find(item => item.name === productName);
+
+        if (affectedItem) {
+          affectedItem.stockWarning = `Se puede preparar hasta ${maxAvailable} unidades.`;
+          affectedItem.maxAvailable = maxAvailable;
+
+          // Forzar actualización de la vista
+          this.cartItems = [...this.cartItems];
+        }
+      } else {
+        // Error genérico
         if (error.error && error.error.error) {
           this.notifications.showError(error.error.error);
         } else {
           this.notifications.showError('Hubo un error al procesar el pedido');
         }
-        console.error(error);
       }
-    });
+    } catch (e) {
+      console.error('Error procesando error de checkout:', e);
+      this.notifications.showError('Hubo un error al procesar el pedido');
+    }
   }
 }

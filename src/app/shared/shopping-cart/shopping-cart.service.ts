@@ -7,6 +7,8 @@ export interface CartItem {
   price: number;
   quantity: number;
   image?: string;
+  stockWarning?: string; // Mensaje de advertencia de stock
+  maxAvailable?: number; // Cantidad máxima disponible
 }
 
 @Injectable({
@@ -88,4 +90,3 @@ export class ShoppingCartService {
     return this.cartItems.value.reduce((count, item) => count + item.quantity, 0);
   }
 }
-

@@ -404,6 +404,36 @@
   to { opacity: 1; }
 }
 
+/* Advertencia de stock */
+.stock-warning {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  background: #fef3c7;
+  border: 1px solid #fbbf24;
+  border-radius: 6px;
+  margin-top: 4px;
+  animation: warningPulse 0.5s ease;
+}
+
+.stock-warning .warning-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.stock-warning .warning-text {
+  font-size: 0.8rem;
+  color: #92400e;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+@keyframes warningPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .shopping-cart-floating-container {
