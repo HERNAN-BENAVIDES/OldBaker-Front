@@ -25,11 +25,11 @@
             </mat-error>
           </mat-form-field>
 
-          <mat-form-field appearance="outline" class="half-width">
+            <mat-form-field appearance="outline" class="half-width">
             <mat-label>Proveedor</mat-label>
             <mat-select formControlName="id_proveedor" 
                         required 
-                        (selectionChange)="onProveedorChange()">
+                        (selectionChange)="onProveedorChange($event.value)">
               <mat-option value="">-- Seleccione un proveedor --</mat-option>
               <mat-option *ngFor="let proveedor of proveedores" [value]="proveedor.id_proveedor">
                 {{ proveedor.nombre }}

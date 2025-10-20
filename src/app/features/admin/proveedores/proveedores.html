@@ -42,7 +42,7 @@
         <mat-card-content>
           <p>Gestionar información de proveedores, contactos y cuentas bancarias.</p>
           <div class="card-stats">
-            <span class="stat-number">{{ proveedoresDataSource.data.length }}</span>
+            <span class="stat-number">{{ proveedoresTotal }}</span>
             <span class="stat-label">Proveedores</span>
           </div>
         </mat-card-content>
@@ -57,7 +57,7 @@
         <mat-card-content>
           <p>Ver y gestionar qué insumos vende cada proveedor con precios y disponibilidad.</p>
           <div class="card-stats">
-            <span class="stat-number">{{ insumosProveedorDataSource.data.length }}</span>
+            <span class="stat-number">{{ insumosTotal }}</span>
             <span class="stat-label">Insumos</span>
           </div>
         </mat-card-content>
@@ -72,7 +72,7 @@
         <mat-card-content>
           <p>Crear y gestionar pedidos de insumos faltantes a proveedores.</p>
           <div class="card-stats">
-            <span class="stat-number">{{ pedidosDataSource.data.length }}</span>
+            <span class="stat-number">{{ pedidosTotal }}</span>
             <span class="stat-label">Pedidos</span>
           </div>
         </mat-card-content>
@@ -87,7 +87,7 @@
         <mat-card-content>
           <p>Ver y gestionar detalles específicos de cada pedido realizado a proveedores con verificación de items.</p>
           <div class="card-stats">
-            <span class="stat-number">{{ detallesPedidosDataSource.data.length }}</span>
+            <span class="stat-number">{{ detallesPedidosTotal }}</span>
             <span class="stat-label">Pedidos Detallados</span>
           </div>
         </mat-card-content>
@@ -102,7 +102,7 @@
         <mat-card-content>
           <p>Gestionar devoluciones y reportes de problemas con pedidos.</p>
           <div class="card-stats">
-            <span class="stat-number">{{ reportesDataSource.data.length }}</span>
+            <span class="stat-number">{{ reportesTotal }}</span>
             <span class="stat-label">Reportes</span>
           </div>
         </mat-card-content>
@@ -117,7 +117,7 @@
         <mat-card-content>
           <p>Administrar recetas de productos con sus ingredientes y cantidades.</p>
           <div class="card-stats">
-            <span class="stat-number">{{ recetasDataSource.data.length }}</span>
+            <span class="stat-number">{{ recetasTotal }}</span>
             <span class="stat-label">Recetas</span>
           </div>
         </mat-card-content>
@@ -132,7 +132,7 @@
         <mat-card-content>
           <p>Gestionar inventario actual de insumos individuales disponibles.</p>
           <div class="card-stats">
-            <span class="stat-number">{{ insumosDataSource.data.length }}</span>
+            <span class="stat-number">{{ insumosLocalTotal }}</span>
             <span class="stat-label">Insumos</span>
           </div>
         </mat-card-content>
@@ -147,7 +147,7 @@
         <mat-card-content>
           <p>Administrar catálogo de productos finales que vende la panadería.</p>
           <div class="card-stats">
-            <span class="stat-number">{{ productosDataSource.data.length }}</span>
+            <span class="stat-number">{{ productosTotal }}</span>
             <span class="stat-label">Productos</span>
           </div>
         </mat-card-content>
@@ -247,7 +247,7 @@
         <mat-row *matRowDef="let row; columns: proveedoresColumns;"></mat-row>
       </mat-table>
 
-      <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+  <mat-paginator #proveedoresPaginator [length]="proveedoresTotal" [pageSize]="proveedoresPageSize" [pageIndex]="proveedoresPageIndex" [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons (page)="onProveedoresPage($event)"></mat-paginator>
     </div>
   </div>
 
@@ -333,7 +333,8 @@
         <mat-row *matRowDef="let row; columns: insumosProveedorColumns;"></mat-row>
       </mat-table>
 
-      <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+  <!-- Si el backend soporta paginado, usar #insumosPaginator y onInsumosPage; si no, insumosLocal... seguirá funcionando -->
+  <mat-paginator #insumosPaginator [length]="insumosTotal" [pageSize]="insumosPageSize" [pageIndex]="insumosPageIndex" [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons (page)="onInsumosPage($event)"></mat-paginator>
     </div>
   </div>
 
@@ -489,7 +490,7 @@
       <mat-row *matRowDef="let row; columns: pedidosColumns;"></mat-row>
     </mat-table>
 
-    <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+    <mat-paginator #pedidosPaginator [length]="pedidosTotal" [pageSize]="pedidosPageSize" [pageIndex]="pedidosPageIndex" [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons (page)="onPedidosPage($event)"></mat-paginator>
   </div>
 </div>
 
@@ -606,7 +607,7 @@
         <mat-row *matRowDef="let row; columns: detallesPedidosColumns;"></mat-row>
       </mat-table>
 
-      <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+      <mat-paginator #detallesPaginator [length]="detallesTotal" [pageSize]="detallesPageSize" [pageIndex]="detallesPageIndex" [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons (page)="onDetallesPage($event)"></mat-paginator>
     </div>
   </div>
 
@@ -683,7 +684,7 @@
         <mat-row *matRowDef="let row; columns: reportesColumns;"></mat-row>
       </mat-table>
 
-      <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+      <mat-paginator #reportesPaginator [length]="reportesTotal" [pageSize]="reportesPageSize" [pageIndex]="reportesPageIndex" [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons (page)="onReportesPage($event)"></mat-paginator>
     </div>
   </div>
 
@@ -767,7 +768,7 @@
         <mat-row *matRowDef="let row; columns: recetasColumns;"></mat-row>
       </mat-table>
 
-      <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+      <mat-paginator #recetasPaginator [length]="recetasTotal" [pageSize]="recetasPageSize" [pageIndex]="recetasPageIndex" [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons (page)="onRecetasPage($event)"></mat-paginator>
     </div>
   </div>
 
@@ -843,7 +844,7 @@
         <mat-row *matRowDef="let row; columns: insumosColumns;"></mat-row>
       </mat-table>
 
-      <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+  <!-- Paginación de productos eliminada: mostramos todos los productos sin paginar -->
     </div>
   </div>
 
@@ -892,9 +893,14 @@
           </mat-cell>
         </ng-container>
 
-        <ng-container matColumnDef="fecha_vencimiento">
-          <mat-header-cell *matHeaderCellDef>Fecha Vencimiento</mat-header-cell>
-          <mat-cell *matCellDef="let item">{{ item.fecha_vencimiento | date:'dd/MM/yyyy' }}</mat-cell>
+        <ng-container matColumnDef="vida_util_dias">
+          <mat-header-cell *matHeaderCellDef>Vida útil (días)</mat-header-cell>
+          <mat-cell *matCellDef="let item">{{ item.vida_util_dias ?? item.vidaUtilDias ?? item.vidaUtil ?? item.vida_util ?? '' }}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="pedido_minimo">
+          <mat-header-cell *matHeaderCellDef>Pedido mínimo</mat-header-cell>
+          <mat-cell *matCellDef="let item">{{ item.pedido_minimo ?? '-' }}</mat-cell>
         </ng-container>
 
         <ng-container matColumnDef="categoria">
@@ -925,7 +931,7 @@
         <mat-row *matRowDef="let row; columns: productosColumns;"></mat-row>
       </mat-table>
 
-      <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+      <!-- paginator intentionally removed: use the bound #productosPaginator above -->
     </div>
   </div>
 

@@ -56,7 +56,7 @@ export const routes: Routes = [
       .then(m => m.OauthCallback)
   },
 
-  // Rutas de administrador (protegidas)
+  // Rutas de administrador
   {
     path: 'admin',
     loadComponent: () => import('./features/admin/proveedores/proveedores')
@@ -75,7 +75,7 @@ export const routes: Routes = [
     pathMatch: 'full'
   },
 
-  // Rutas de auxiliar (protegidas)
+  // Rutas de auxiliar
   {
     path: 'auxiliar',
     loadComponent: () => import('./features/auxiliar/auxiliar-dashboard/auxiliar-dashboard')
