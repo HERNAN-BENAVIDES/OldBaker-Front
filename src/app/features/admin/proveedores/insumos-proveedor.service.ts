@@ -25,7 +25,7 @@ export interface InsumoProveedorRequest {
 
 @Injectable({ providedIn: 'root' })
 export class InsumosProveedorService {
-  private baseUrl = `${environment.apiUrl}/api/insumos-proveedor`;
+  private baseUrl = `${environment.apiUrl}/api/admin/insumos-proveedor`;
 
   constructor(private http: HttpClient, private auth: AuthService) {}
 

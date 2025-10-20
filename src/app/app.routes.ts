@@ -64,15 +64,10 @@ export const routes: Routes = [
     canActivate: [AuthGuard]
   },
   {
-    path: 'admin/proveedores',
+    path: 'admin/:module',
     loadComponent: () => import('./features/admin/proveedores/proveedores')
       .then(c => c.AdminProveedoresComponent),
     canActivate: [AuthGuard]
-  },
-  {
-    path: 'admin/dashboard',
-    redirectTo: 'admin',
-    pathMatch: 'full'
   },
 
   // Rutas de auxiliar
