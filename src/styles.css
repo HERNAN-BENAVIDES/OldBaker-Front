@@ -37,53 +37,100 @@ html {
 /* ========================================
    ACCESIBILIDAD - Alto Contraste
    ======================================== */
-html.a11y-high-contrast,
-html.a11y-high-contrast body {
-  background: #000 !important;
-  color: #fff !important;
+html.a11y-high-contrast {
+  filter: contrast(1.4) saturate(1.2);
+}
+
+html.a11y-high-contrast * {
+  font-weight: 600 !important;
+  letter-spacing: 0.2px !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+  text-rendering: optimizeLegibility !important;
+}
+
+html.a11y-high-contrast h1,
+html.a11y-high-contrast h2,
+html.a11y-high-contrast h3,
+html.a11y-high-contrast h4,
+html.a11y-high-contrast h5,
+html.a11y-high-contrast h6 {
+  font-weight: 700 !important;
+  letter-spacing: 0.3px !important;
+}
+
+html.a11y-high-contrast button,
+html.a11y-high-contrast .btn,
+html.a11y-high-contrast [role="button"] {
+  filter: contrast(1.2);
+  font-weight: 700 !important;
+  border-width: 2px !important;
+  letter-spacing: 0.3px !important;
 }
 
 html.a11y-high-contrast a {
-  color: #0ff !important;
+  font-weight: 700 !important;
   text-decoration: underline !important;
-}
-
-html.a11y-high-contrast button {
-  background: #111 !important;
-  color: #fff !important;
-  border: 2px solid #fff !important;
+  text-decoration-thickness: 2px !important;
+  letter-spacing: 0.2px !important;
 }
 
 html.a11y-high-contrast input,
 html.a11y-high-contrast textarea,
 html.a11y-high-contrast select {
-  background: #000 !important;
-  color: #fff !important;
-  border: 2px solid #fff !important;
+  border-width: 2px !important;
+  font-weight: 500 !important;
 }
 
 html.a11y-high-contrast .mat-mdc-card,
-html.a11y-high-contrast .card {
-  background: #111 !important;
-  color: #fff !important;
-  border: 2px solid #fff !important;
-}
-
-html.a11y-high-contrast .mat-mdc-button,
-html.a11y-high-contrast .mat-mdc-raised-button {
-  background: #000 !important;
-  color: #fff !important;
-  border: 2px solid #fff !important;
+html.a11y-high-contrast .card,
+html.a11y-high-contrast .product-card,
+html.a11y-high-contrast .order-card {
+  border-width: 2px !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3) !important;
 }
 
 html.a11y-high-contrast table {
-  border: 2px solid #fff !important;
+  border-width: 2px !important;
 }
 
 html.a11y-high-contrast th,
 html.a11y-high-contrast td {
-  border: 1px solid #fff !important;
-  color: #fff !important;
+  border-width: 2px !important;
+  font-weight: 600 !important;
+}
+
+html.a11y-high-contrast .header,
+html.a11y-high-contrast header,
+html.a11y-high-contrast nav {
+  border-bottom-width: 3px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+html.a11y-high-contrast .footer,
+html.a11y-high-contrast footer {
+  border-top-width: 3px !important;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+html.a11y-high-contrast .mat-mdc-menu-panel,
+html.a11y-high-contrast .dropdown-menu,
+html.a11y-high-contrast [role="menu"] {
+  border-width: 2px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+html.a11y-high-contrast .notification,
+html.a11y-high-contrast .alert {
+  border-width: 2px !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+html.a11y-high-contrast .badge,
+html.a11y-high-contrast .chip {
+  font-weight: 700 !important;
+  border-width: 2px !important;
 }
 
 /* Reset global margins y box-sizing para que el header pueda ocupar todo el ancho */

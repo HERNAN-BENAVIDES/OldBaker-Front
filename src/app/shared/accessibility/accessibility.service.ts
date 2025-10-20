@@ -14,7 +14,7 @@ export class AccessibilityService {
     const savedSize = (localStorage.getItem(this.FONT_KEY) as FontSize) || 'medium';
     const savedContrast = localStorage.getItem(this.CONTRAST_KEY) === 'true';
     this.applyFontSize(savedSize);
-    this.setContrast(savedContrast);
+    this.applyContrast(savedContrast);
   }
 
   setFontSize(size: FontSize) {
@@ -61,6 +61,10 @@ export class AccessibilityService {
 
   setContrast(enabled: boolean) {
     localStorage.setItem(this.CONTRAST_KEY, String(enabled));
+    this.applyContrast(enabled);
+  }
+
+  private applyContrast(enabled: boolean) {
     if (enabled) {
       this.doc.classList.add('a11y-high-contrast');
     } else {
@@ -69,12 +73,12 @@ export class AccessibilityService {
   }
 
   toggleContrast() {
-    this.setContrast(!this.isHighContrast());
+    const current = this.isHighContrast();
+    this.setContrast(!current);
   }
 
   isHighContrast(): boolean {
-    return this.doc.classList.contains('a11y-high-contrast') ||
-           localStorage.getItem(this.CONTRAST_KEY) === 'true';
+    return localStorage.getItem(this.CONTRAST_KEY) === 'true';
   }
 
   reset() {
