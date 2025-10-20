@@ -1,4 +1,7 @@
 import { Component, Inject, OnInit } from '@angular/core';
+import { InsumosProveedorService } from '../insumos-proveedor.service';
+import { catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormsModule, Validators } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -96,7 +99,8 @@ export class PedidoDialogComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<PedidoDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: DialogData
+    @Inject(MAT_DIALOG_DATA) public data: DialogData,
+    private insumosService: InsumosProveedorService
   ) {
     // Fecha mínima: hoy
     const hoy = new Date();
@@ -114,6 +118,10 @@ export class PedidoDialogComponent implements OnInit {
     });
   }
 
+  // (insumosService injected in constructor)
+
+  // Nota: inyectamos el servicio por fuera del constructor (se usa en el método onProveedorChange)
+
   ngOnInit(): void {
     this.proveedores = this.data.proveedores || [];
     this.insumosProveedor = this.data.insumosProveedor || [];
@@ -128,27 +136,57 @@ export class PedidoDialogComponent implements OnInit {
         this.onProveedorChange(this.data.item.id_proveedor);
       }
     }
+
+    // Si el formulario ya trae un proveedor seleccionado (por ejemplo, crear con proveedor preseleccionado), poblar insumosDisponibles
+    const preProveedor = this.form.get('id_proveedor')?.value;
+    if (!this.data.isEdit && preProveedor) {
+      this.onProveedorChange(preProveedor);
+    }
   }
 
   onProveedorChange(proveedorId?: number): void {
-    const idProveedor = proveedorId || this.form.get('id_proveedor')?.value;
-    
-    if (idProveedor) {
-      // Filtrar insumos del proveedor seleccionado
-      this.insumosDisponibles = this.insumosProveedor.filter(
-        insumo => insumo.id_proveedor === idProveedor
-      );
-      
-      // Cargar información del proveedor
-      this.proveedorSeleccionado = this.proveedores.find(p => p.id_proveedor === idProveedor) || null;
-      
-      // Verificar disponibilidad
-      this.verificarDisponibilidad();
+    // Asegurar que el id sea numérico (el form puede devolver string)
+    const raw = proveedorId ?? this.form.get('id_proveedor')?.value;
+    const idProveedor = raw !== null && raw !== undefined && raw !== '' ? Number(raw) : null;
+
+    if (idProveedor !== null && !isNaN(idProveedor)) {
+      // Primero intentar cargar desde el backend los insumos de este proveedor
+      this.insumosService.listByProveedor(idProveedor).pipe(
+        catchError(err => {
+          console.warn('No se pudo cargar insumos desde backend, usando cache local.', err);
+          return of(null);
+        })
+      ).subscribe(resp => {
+        if (resp && Array.isArray(resp)) {
+          // Mapear respuesta del backend al modelo usado en el diálogo (usar los campos reales del servicio)
+          this.insumosDisponibles = resp.map(item => ({
+            id_insumo: item.id,
+            nombre: item.nombre,
+            descripcion: item.descripcion,
+            costo_unitario: item.costoUnitario,
+            cantidad_disponible: item.cantidadDisponible,
+            id_proveedor: item.idProveedor,
+            nombre_proveedor: ''
+          } as InsumoProveedor));
+        } else {
+          // Fallback: usar array local que trae el diálogo
+          this.insumosDisponibles = this.insumosProveedor.filter(
+            insumo => Number(insumo.id_proveedor) === idProveedor
+          );
+        }
+
+        // Cargar información del proveedor
+        this.proveedorSeleccionado = this.proveedores.find(p => Number(p.id_proveedor) === idProveedor) || null;
+
+        // Verificar disponibilidad
+        this.verificarDisponibilidad();
+        this.alertaSinInsumos = this.insumosDisponibles.length === 0;
+      });
     } else {
       this.insumosDisponibles = [];
       this.proveedorSeleccionado = null;
     }
-    
+
     this.selectedInsumoId = null;
     this.alertaSinInsumos = this.insumosDisponibles.length === 0;
   }
@@ -167,7 +205,7 @@ export class PedidoDialogComponent implements OnInit {
   }
 
   getInsumoDisponible(insumoId: number): InsumoProveedor | undefined {
-    return this.insumosDisponibles.find(i => i.id_insumo === insumoId);
+    return this.insumosDisponibles.find(i => Number(i.id_insumo) === Number(insumoId));
   }
 
   agregarInsumoAPedido(): void {
@@ -198,6 +236,8 @@ export class PedidoDialogComponent implements OnInit {
       this.detallesPedido.push(nuevoDetalle);
     }
 
+    // Forzar actualización de la tabla (MatTable requiere nueva referencia)
+    this.detallesPedido = [...this.detallesPedido];
     // Limpiar selección
     this.selectedInsumoId = null;
     this.cantidadInsumo = 1;
@@ -208,12 +248,15 @@ export class PedidoDialogComponent implements OnInit {
   actualizarSubtotal(index: number): void {
     const detalle = this.detallesPedido[index];
     detalle.costo_subtotal = detalle.costo_unitario * detalle.cantidad_insumo;
+    // Forzar refresh
+    this.detallesPedido = [...this.detallesPedido];
     this.calcularTotal();
     this.verificarDisponibilidad();
   }
 
   eliminarInsumo(index: number): void {
     this.detallesPedido.splice(index, 1);
+    this.detallesPedido = [...this.detallesPedido];
     this.calcularTotal();
     this.verificarDisponibilidad();
   }

@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { AuthGuard } from './features/auth/services/auth.guard';
 
 export const routes: Routes = [
   // Ruta principal - Home
@@ -59,12 +60,23 @@ export const routes: Routes = [
   {
     path: 'admin',
     loadComponent: () => import('./features/admin/proveedores/proveedores')
-      .then(c => c.AdminProveedoresComponent)
+      .then(c => c.AdminProveedoresComponent),
+    canActivate: [AuthGuard],
+    data: { roles: ['ADMINISTRADOR', 'ADMIN'] }
   },
   {
     path: 'admin/proveedores',
     loadComponent: () => import('./features/admin/proveedores/proveedores')
-      .then(c => c.AdminProveedoresComponent)
+      .then(c => c.AdminProveedoresComponent),
+    canActivate: [AuthGuard],
+    data: { roles: ['ADMINISTRADOR', 'ADMIN'] }
+  },
+  {
+    path: 'admin/:module',
+    loadComponent: () => import('./features/admin/proveedores/proveedores')
+      .then(c => c.AdminProveedoresComponent),
+    canActivate: [AuthGuard],
+    data: { roles: ['ADMINISTRADOR', 'ADMIN'] }
   },
   {
     path: 'admin/dashboard',
@@ -76,22 +88,37 @@ export const routes: Routes = [
   {
     path: 'auxiliar',
     loadComponent: () => import('./features/auxiliar/auxiliar-dashboard/auxiliar-dashboard')
-      .then(c => c.AuxiliarDashboardComponent)
+      .then(c => c.AuxiliarDashboardComponent),
+    canActivate: [AuthGuard],
+    data: { roles: ['AUXILIAR'] }
+  },
+  {
+    path: 'auxiliar/:module',
+    loadComponent: () => import('./features/auxiliar/auxiliar-dashboard/auxiliar-dashboard')
+      .then(c => c.AuxiliarDashboardComponent),
+    canActivate: [AuthGuard],
+    data: { roles: ['AUXILIAR'] }
   },
   {
     path: 'auxiliar/detalles-pedidos',
     loadComponent: () => import('./features/auxiliar/detalles-pedidos/detalles-pedidos.component')
-      .then(c => c.DetallesPedidosComponent)
+      .then(c => c.DetallesPedidosComponent),
+    canActivate: [AuthGuard],
+    data: { roles: ['AUXILIAR'] }
   },
   {
     path: 'auxiliar/pedidos-insumos',
     loadComponent: () => import('./features/auxiliar/pedidos-insumos/pedidos-insumos.component')
-      .then(c => c.PedidosInsumosComponent)
+      .then(c => c.PedidosInsumosComponent),
+    canActivate: [AuthGuard],
+    data: { roles: ['AUXILIAR'] }
   },
   {
     path: 'auxiliar/reportes-proveedores',
     loadComponent: () => import('./features/auxiliar/reportes-proveedores/reportes-proveedores.component')
-      .then(c => c.ReportesProveedoresComponent)
+      .then(c => c.ReportesProveedoresComponent),
+    canActivate: [AuthGuard],
+    data: { roles: ['AUXILIAR'] }
   },
 
   // Ruta de pedidos del usuario
@@ -109,6 +136,7 @@ export const routes: Routes = [
   // Ruta por defecto para rutas no encontradas
   {
     path: '**',
-    redirectTo: ''
+    loadComponent: () => import('./shared/route-redirect/route-redirect.component')
+      .then(m => m.RouteRedirectComponent)
   }
 ];
