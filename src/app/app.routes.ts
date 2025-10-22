@@ -108,7 +108,7 @@ export const routes: Routes = [
   // Detalle de pedido por external_reference
   {
     path: 'mis-pedidos/detalle-pedido/:external_reference',
-    loadComponent: () => import('./features/mis-pedidos/detalle-pedido/pedido-detalle.component')
+    loadComponent: () => import('./features/mis-pedidos/detalle-pedido')
       .then(m => m.PedidoDetalleComponent),
     canActivate: [ClienteGuard]
   },

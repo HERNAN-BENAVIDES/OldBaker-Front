@@ -1,0 +1,50 @@
+<section class="pedido-detalle">
+  <div class="header">
+    <h1>Detalle del pedido</h1>
+    <button class="btn-volver" (click)="goBack()">Volver</button>
+  </div>
+
+  <ng-container *ngIf="loading; else contenido">
+    <div class="estado info">Cargando detalle…</div>
+  </ng-container>
+
+  <ng-template #contenido>
+    <ng-container *ngIf="error; else detalle">
+      <div class="estado error">{{ error }}</div>
+    </ng-container>
+  </ng-template>
+
+  <ng-template #detalle>
+    <ng-container *ngIf="pedido; else noEncontrado">
+      <div class="card">
+        <div class="card-header">
+          <div class="ref">Referencia: {{ pedido.externalReference }}</div>
+          <div class="estado-pill" [class.paid]="pedido.status==='PAID'" [class.pending]="pedido.status==='PENDING'" [class.failed]="pedido.status==='FAILED' || pedido.status==='CANCELLED'">
+            {{ getEstadoTexto(pedido.status) }}
+          </div>
+        </div>
+        <div class="meta">
+          <div>Fecha: {{ formatearFecha(pedido.fechaCreacion) }}</div>
+          <div>Total: {{ pedido.total | currency:'COP':'symbol-narrow':'1.0-0' }}</div>
+          <div>Email: {{ pedido.payerEmail }}</div>
+        </div>
+        <div class="items">
+          <div class="item" *ngFor="let it of pedido.items">
+            <div class="info">
+              <div class="nombre">{{ it.productoNombre }}</div>
+              <div class="cant">Cantidad: {{ it.cantidad }}</div>
+            </div>
+            <div class="precios">
+              <div class="precio-unit">{{ it.precioUnitario | currency:'COP':'symbol-narrow':'1.0-0' }}</div>
+              <div class="subtotal">{{ it.subtotal | currency:'COP':'symbol-narrow':'1.0-0' }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+    <ng-template #noEncontrado>
+      <div class="estado warning">No se encontró el pedido solicitado.</div>
+    </ng-template>
+  </ng-template>
+</section>
+
