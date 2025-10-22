@@ -1,5 +1,7 @@
 import { Routes } from '@angular/router';
-import { AuthGuard } from './features/auth/services/auth.guard';
+import { AdminGuard } from './features/auth/services/admin.guard';
+import { AuxiliarGuard } from './features/auth/services/auxiliar.guard';
+import { ClienteGuard } from './features/auth/services/cliente.guard';
 
 export const routes: Routes = [
   // Ruta principal - Home
@@ -61,13 +63,13 @@ export const routes: Routes = [
     path: 'admin',
     loadComponent: () => import('./features/admin/proveedores/proveedores')
       .then(c => c.AdminProveedoresComponent),
-    canActivate: [AuthGuard]
+    canActivate: [AdminGuard]
   },
   {
     path: 'admin/:module',
     loadComponent: () => import('./features/admin/proveedores/proveedores')
       .then(c => c.AdminProveedoresComponent),
-    canActivate: [AuthGuard]
+    canActivate: [AdminGuard]
   },
 
   // Rutas de auxiliar
@@ -75,39 +77,46 @@ export const routes: Routes = [
     path: 'auxiliar',
     loadComponent: () => import('./features/auxiliar/auxiliar-dashboard/auxiliar-dashboard')
       .then(c => c.AuxiliarDashboardComponent),
-    canActivate: [AuthGuard]
+    canActivate: [AuxiliarGuard]
   },
   {
     path: 'auxiliar/detalles-pedidos',
     loadComponent: () => import('./features/auxiliar/detalles-pedidos/detalles-pedidos.component')
       .then(c => c.DetallesPedidosComponent),
-    canActivate: [AuthGuard]
+    canActivate: [AuxiliarGuard]
   },
   {
     path: 'auxiliar/pedidos-insumos',
     loadComponent: () => import('./features/auxiliar/pedidos-insumos/pedidos-insumos.component')
       .then(c => c.PedidosInsumosComponent),
-    canActivate: [AuthGuard]
+    canActivate: [AuxiliarGuard]
   },
   {
     path: 'auxiliar/reportes-proveedores',
     loadComponent: () => import('./features/auxiliar/reportes-proveedores/reportes-proveedores.component')
       .then(c => c.ReportesProveedoresComponent),
-    canActivate: [AuthGuard]
+    canActivate: [AuxiliarGuard]
   },
 
-  // Ruta de pedidos del usuario (protegida)
+  // Ruta de pedidos del usuario (protegida, solo para clientes)
   {
     path: 'mis-pedidos',
     loadComponent: () => import('./features/mis-pedidos/mis-pedidos.component')
       .then(m => m.MisPedidosComponent),
-    canActivate: [AuthGuard]
+    canActivate: [ClienteGuard]
+  },
+  // Detalle de pedido por external_reference
+  {
+    path: 'mis-pedidos/detalle-pedido/:external_reference',
+    loadComponent: () => import('./features/mis-pedidos/detalle-pedido/pedido-detalle.component')
+      .then(m => m.PedidoDetalleComponent),
+    canActivate: [ClienteGuard]
   },
   {
     path: 'mi-perfil',
     loadComponent: () => import('./features/perfil/perfil.component')
       .then(m => m.PerfilComponent),
-    canActivate: [AuthGuard]
+    canActivate: [ClienteGuard]
   },
 
   // Ruta por defecto para rutas no encontradas

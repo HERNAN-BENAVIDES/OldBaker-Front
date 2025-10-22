@@ -54,13 +54,12 @@ export class MisPedidosComponent implements OnInit {
       const externalRef = params['external_reference'];
 
       if (status && externalRef) {
-        this.handlePaymentReturn(status, externalRef);
-        // Limpiar los query params de la URL sin recargar
-        this.router.navigate([], {
-          relativeTo: this.route,
-          queryParams: {},
+        // Redirigir al detalle del pedido con la referencia y mantener status como query param
+        this.router.navigate(['/mis-pedidos/detalle-pedido', externalRef], {
+          queryParams: { status },
           replaceUrl: true
         });
+        return; // Evitar continuar el flujo de esta vista
       }
     });
 
