@@ -2,47 +2,55 @@
   <a routerLink="/" class="brand" aria-label="Ir al inicio">OldBaker</a>
 
   <nav class="actions">
-    <!-- mostrar botones de login/registro sólo si no está autenticado -->
-    <ng-container *ngIf="(isAuthenticated$ | async) === false; else logged">
+    <!-- En rutas de autenticación, mostrar siempre botones y ocultar usuario -->
+    <ng-container *ngIf="isAuthRoute; else nonAuth">
       <a routerLink="/login" class="btn btn-outline">Iniciar sesión</a>
       <a routerLink="/register" class="btn btn-primary">Registrarse</a>
     </ng-container>
 
-    <!-- estado autenticado: mostrar avatar y nombre de perfil -->
-    <ng-template #logged>
-      <div class="user-info" *ngIf="(currentUser$ | async) as user" #menuRef>
-        <button class="avatar-btn" type="button" (click)="toggleMenu($event)" (keydown.enter)="toggleMenu($event)" aria-haspopup="true" [attr.aria-expanded]="showMenu" aria-label="Abrir menú de usuario" tabindex="0">
-          <span class="profile">
-            <span class="profile-name">{{ user.nombre || user.email }}</span>
-          </span>
-          <span class="avatar" aria-hidden="true">{{ avatarInitial(user) }}</span>
-        </button>
+    <ng-template #nonAuth>
+      <!-- mostrar botones de login/registro sólo si no está autenticado -->
+      <ng-container *ngIf="(isAuthenticated$ | async) === false; else logged">
+        <a routerLink="/login" class="btn btn-outline">Iniciar sesión</a>
+        <a routerLink="/register" class="btn btn-primary">Registrarse</a>
+      </ng-container>
 
-        <div class="dropdown" *ngIf="showMenu" role="menu" aria-label="Menú de usuario">
-          <a routerLink="/mi-perfil" class="dropdown-item" (click)="closeMenu()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            Mi perfil
-          </a>
-          <a routerLink="/mis-pedidos" class="dropdown-item" (click)="closeMenu()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <line x1="3" y1="6" x2="21" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M16 10a4 4 0 0 1-8 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            Mis pedidos
-          </a>
-          <button class="dropdown-item" type="button" (click)="logoutMenu()">
-            <!-- Icono actualizado: llave de salida (más claro semánticamente) -->
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M16 13v-2H7V8l-5 4 5 4v-3h9z" fill="currentColor"/>
-            </svg>
-            Cerrar sesión
+      <!-- estado autenticado: mostrar avatar y nombre de perfil -->
+      <ng-template #logged>
+        <div class="user-info" *ngIf="(currentUser$ | async) as user" #menuRef>
+          <button class="avatar-btn" type="button" (click)="toggleMenu($event)" (keydown.enter)="toggleMenu($event)" aria-haspopup="true" [attr.aria-expanded]="showMenu" aria-label="Abrir menú de usuario" tabindex="0">
+            <span class="profile">
+              <span class="profile-name">{{ user.nombre || user.email }}</span>
+            </span>
+            <span class="avatar" aria-hidden="true">{{ avatarInitial(user) }}</span>
           </button>
+
+          <div class="dropdown" *ngIf="showMenu" role="menu" aria-label="Menú de usuario">
+            <a routerLink="/mi-perfil" class="dropdown-item" (click)="closeMenu()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Mi perfil
+            </a>
+            <a routerLink="/mis-pedidos" class="dropdown-item" (click)="closeMenu()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <line x1="3" y1="6" x2="21" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M16 10a4 4 0 0 1-8 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Mis pedidos
+            </a>
+            <button class="dropdown-item" type="button" (click)="logoutMenu()">
+              <!-- Icono actualizado: llave de salida (más claro semánticamente) -->
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M16 13v-2H7V8l-5 4 5 4v-3h9z" fill="currentColor"/>
+              </svg>
+              Cerrar sesión
+            </button>
+          </div>
         </div>
-      </div>
+      </ng-template>
     </ng-template>
   </nav>
 </header>

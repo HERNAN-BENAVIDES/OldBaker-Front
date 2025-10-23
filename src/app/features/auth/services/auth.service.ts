@@ -22,6 +22,16 @@ export class AuthService {
     this.initializeAuthState();
   }
 
+  // Normaliza posibles valores de rol a los valores usados en la app
+  private normalizeRole(role: string | undefined | null): string {
+    if (!role) return '';
+    const r = String(role).trim().toUpperCase();
+    if (r === 'ADMIN' || r === 'ADMINISTRADOR' || r === 'ROLE_ADMIN' || r === 'ROLE_ADMINISTRADOR') return 'ADMINISTRADOR';
+    if (r === 'AUX' || r === 'AUXILIAR' || r === 'ROLE_AUX' || r === 'ROLE_AUXILIAR') return 'AUXILIAR';
+    if (r === 'CLIENT' || r === 'CLIENTE' || r === 'ROLE_CLIENT' || r === 'ROLE_CLIENTE') return 'CLIENTE';
+    return r; // devolver tal cual en mayúsculas si no coincide
+  }
+
   /**
    * Inicializa el estado de autenticación verificando la validez del token
    */
@@ -38,7 +48,14 @@ export class AuthService {
         } else {
           // Token válido, restaurar usuario
           const user = JSON.parse(raw);
+          // Normalizar rol si viene en el usuario
+          if (user) {
+            user.rol = this.normalizeRole(user.rol || user.role);
+          }
           this.currentUserSubj.next(user);
+          // Asegurar que el rol quede persistido normalizado
+          const role = String(user?.rol || user?.role || '').toUpperCase();
+          try { localStorage.setItem('auth_role', role); } catch {}
         }
       }
     } catch (e) {
@@ -154,13 +171,30 @@ export class AuthService {
       console.error('[AuthService] Error al guardar tokens en localStorage:', e);
     }
 
+    // Guardar usuario y rol normalizado
+    try {
+      if (data?.usuario) {
+        // Normalizar rol antes de guardar
+        const u = { ...data.usuario };
+        u.rol = this.normalizeRole(u.rol || u.role);
+        localStorage.setItem('auth_user', JSON.stringify(u));
+        const role = String(u.rol || '').toUpperCase();
+        localStorage.setItem('auth_role', role);
+      }
+    } catch {}
+
     // Actualizar el observable de usuario/logueo
     this.currentUserSubj.next(data.usuario);
   }
 
   // Permite que otros componentes notifiquen el usuario autenticado
   setUser(user: any): void {
-    try { localStorage.setItem('auth_user', JSON.stringify(user)); } catch (e) {}
+    try {
+      const u = { ...user };
+      u.rol = this.normalizeRole(u.rol || u.role);
+      localStorage.setItem('auth_user', JSON.stringify(u));
+    } catch (e) {}
+    try { localStorage.setItem('auth_role', String(user?.rol || user?.role || '').toUpperCase()); } catch {}
     this.currentUserSubj.next(user);
   }
 
@@ -214,8 +248,19 @@ export class AuthService {
         try { localStorage.setItem('refresh_token', refreshToken); } catch (e) {}
       }
       if (usuario) {
-        try { localStorage.setItem('auth_user', JSON.stringify(usuario)); } catch (e) {}
-        this.currentUserSubj.next(usuario);
+        try {
+          // Normalizar rol en el usuario antes de guardar
+          const u = { ...usuario };
+          u.rol = this.normalizeRole(u.rol || u.role);
+          try { localStorage.setItem('auth_user', JSON.stringify(u)); } catch (e) {}
+          try { localStorage.setItem('auth_role', String(u.rol || '').toUpperCase()); } catch (e) {}
+          this.currentUserSubj.next(u);
+        } catch (e) {
+          // fallback: guardar sin normalizar
+          try { localStorage.setItem('auth_user', JSON.stringify(usuario)); } catch (e) {}
+          try { localStorage.setItem('auth_role', String(usuario.rol || usuario.role || '').toUpperCase()); } catch (e) {}
+          this.currentUserSubj.next(usuario);
+        }
       }
     } catch (e) {
       console.warn('No se pudo guardar auth en localStorage', e);
@@ -240,6 +285,19 @@ export class AuthService {
     }
   }
 
+  // Obtener rol normalizado (mayúsculas). Fuente: usuario en memoria o localStorage.
+  getRole(): string {
+    const u = this.currentUserSubj.value;
+    const inMem = String(u?.rol || u?.role || '').toUpperCase();
+    if (inMem) return inMem;
+    try {
+      const fromStore = localStorage.getItem('auth_role');
+      return String(fromStore || '').toUpperCase();
+    } catch {
+      return '';
+    }
+  }
+
   // Obtener usuario actual sincronamente
   getCurrentUser(): any {
     return this.currentUserSubj.value;
@@ -255,6 +313,7 @@ export class AuthService {
     try { localStorage.removeItem('auth_user'); } catch (e) {}
     try { localStorage.removeItem('auth_token'); } catch (e) {}
     try { localStorage.removeItem('refresh_token'); } catch (e) {}
+    try { localStorage.removeItem('auth_role'); } catch (e) {}
     try { sessionStorage.removeItem('oauth_user_id'); } catch (e) {}
 
     // Limpiar el carrito de compras
@@ -276,6 +335,7 @@ export class AuthService {
       const updated = (res && (res.data?.usuario || res.usuario)) || res;
       if (updated) {
         try { localStorage.setItem('auth_user', JSON.stringify(updated)); } catch (e) {}
+        try { localStorage.setItem('auth_role', String(updated.rol || updated.role || '').toUpperCase()); } catch {}
         this.currentUserSubj.next(updated);
       }
       return res;
@@ -294,6 +354,7 @@ export class AuthService {
       try { localStorage.removeItem('auth_user'); } catch (e) {}
       try { localStorage.removeItem('auth_token'); } catch (e) {}
       try { localStorage.removeItem('refresh_token'); } catch (e) {}
+      try { localStorage.removeItem('auth_role'); } catch (e) {}
       this.currentUserSubj.next(null);
       return res;
     }));

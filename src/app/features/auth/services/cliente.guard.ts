@@ -9,16 +9,15 @@ export class ClienteGuard implements CanActivate {
   constructor(private auth: AuthService, private router: Router) {}
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | UrlTree {
-    // Verificar autenticación
-    if (!this.auth.isTokenValid() && !this.auth.isLoggedIn()) {
+    // Si el token no es válido, limpiar y redirigir a login de clientes
+    if (!this.auth.isTokenValid()) {
+      try { this.auth.clearLocalAuth(); } catch {}
       const encoded = encodeURIComponent(state.url || '/');
       return this.router.createUrlTree(['/login'], { queryParams: { returnUrl: encoded } });
     }
 
-    // Verificar que sea un cliente (no admin ni auxiliar)
-    const user = this.auth.getCurrentUser();
-    const rolRaw = user?.rol || user?.role || '';
-    const userRole = String(rolRaw ?? '').toUpperCase();
+    // Verificar rol
+    const userRole = this.auth.getRole();
 
     if (userRole === 'CLIENTE' || !userRole) {
       return true;
@@ -34,4 +33,3 @@ export class ClienteGuard implements CanActivate {
     return this.router.createUrlTree(['/']);
   }
 }
-

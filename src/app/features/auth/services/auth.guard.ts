@@ -9,25 +9,39 @@ export class AuthGuard implements CanActivate {
   constructor(private auth: AuthService, private router: Router) {}
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | UrlTree {
-    // Excepción: permitir acceso a /mis-pedidos si viene desde MercadoPago (con status y external_reference)
-    // Esto evita problemas de sesión perdida durante la redirección de pago
-    if (state.url.includes('/mis-pedidos') &&
-        (state.url.includes('status=') && state.url.includes('external_reference='))) {
-      console.log('[AuthGuard] Permitiendo acceso temporal desde retorno de pago MercadoPago');
+    const requiredRoles: string[] | undefined = route.data?.['roles'];
+
+    // Si no hay token válido, limpiar sesión y redirigir a la pantalla de login correspondiente
+    const tokenValid = this.auth.isTokenValid();
+    if (!tokenValid) {
+      try { this.auth.clearLocalAuth(); } catch {}
+      const encoded = encodeURIComponent(state.url || '/');
+      // Si la ruta requiere rol de trabajador, mandar a login de trabajadores; si no, a login de clientes
+      const needsWorker = (requiredRoles || []).some(r => ['ADMIN', 'ADMINISTRADOR', 'AUXILIAR'].includes(String(r).toUpperCase()));
+      return this.router.createUrlTree(needsWorker ? ['/auth/worker/login'] : ['/login'], { queryParams: { returnUrl: encoded } });
+    }
+
+    // Usuario autenticado: si no hay roles requeridos, permitir
+    if (!requiredRoles || requiredRoles.length === 0) {
       return true;
     }
 
-    // Preferir la verificación de token por seguridad
-    try {
-      if (this.auth.isTokenValid() || this.auth.isLoggedIn()) {
-        return true;
-      }
-    } catch (e) {
-      console.error('[AuthGuard] Error verificando auth', e);
+    // Validar rol actual contra los requeridos
+    const userRole = this.auth.getRole(); // ya viene normalizado en mayúsculas
+    const normalizedRequired = requiredRoles.map(r => String(r).toUpperCase());
+
+    if (normalizedRequired.includes(userRole)) {
+      return true;
     }
 
-    // No autenticado: redirigir a login y pasar returnUrl (codificado para preservar querystring)
-    const encoded = encodeURIComponent(state.url || '/');
-    return this.router.createUrlTree(['/login'], { queryParams: { returnUrl: encoded } });
+    // Rol no autorizado: redirigir a su dashboard acorde a su rol actual
+    if (userRole === 'ADMINISTRADOR' || userRole === 'ADMIN') {
+      return this.router.createUrlTree(['/admin']);
+    }
+    if (userRole === 'AUXILIAR') {
+      return this.router.createUrlTree(['/auxiliar']);
+    }
+    // Cliente u otro: enviar a home
+    return this.router.createUrlTree(['/']);
   }
 }

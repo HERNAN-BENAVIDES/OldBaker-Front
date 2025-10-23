@@ -9,17 +9,15 @@ export class AuxiliarGuard implements CanActivate {
   constructor(private auth: AuthService, private router: Router) {}
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | UrlTree {
-    // Verificar autenticación
-    if (!this.auth.isTokenValid() && !this.auth.isLoggedIn()) {
+    // Si el token no es válido, limpiar y redirigir a login de funcionarios
+    if (!this.auth.isTokenValid()) {
+      try { this.auth.clearLocalAuth(); } catch {}
       const encoded = encodeURIComponent(state.url || '/');
       return this.router.createUrlTree(['/auth/worker/login'], { queryParams: { returnUrl: encoded } });
     }
 
     // Verificar rol de auxiliar
-    const user = this.auth.getCurrentUser();
-    const rolRaw = user?.rol || user?.role || '';
-    const userRole = String(rolRaw ?? '').toUpperCase();
-
+    const userRole = this.auth.getRole();
     if (userRole === 'AUXILIAR') {
       return true;
     }
@@ -32,4 +30,3 @@ export class AuxiliarGuard implements CanActivate {
     }
   }
 }
-

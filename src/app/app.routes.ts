@@ -1,127 +1,167 @@
 import { Routes } from '@angular/router';
-import { AdminGuard } from './features/auth/services/admin.guard';
-import { AuxiliarGuard } from './features/auth/services/auxiliar.guard';
-import { ClienteGuard } from './features/auth/services/cliente.guard';
+import { AuthGuard } from './features/auth/services/auth.guard';
+import { StaffRedirectGuard } from './features/auth/services/staff-redirect.guard';
+import { AlreadyAuthGuard } from './features/auth/services/already-auth.guard';
 
 export const routes: Routes = [
-  // Ruta principal - Home
+  // Ruta principal - Home (pública con redirección para staff)
   {
     path: '',
     loadComponent: () => import('./shared/home/home')
-      .then(m => m.Home)
+      .then(m => m.Home),
+    canActivate: [StaffRedirectGuard]
   },
+  // Detalle de producto (pública)
   {
     path: 'product-detail/:id',
     loadComponent: () => import('./shared/producto-detalle/producto-detalle.component')
       .then(m => m.ProductoDetalleComponent)
   },
 
-  // Rutas de autenticación - CORREGIDAS
+  // Rutas de autenticación (públicas): bloqueadas si ya estás autenticado
   {
     path: 'login',
     loadComponent: () => import('./features/auth/components/login/login')
-      .then(m => m.Login)
+      .then(m => m.Login),
+    canActivate: [AlreadyAuthGuard]
   },
   {
     path: 'auth/worker/login',
     loadComponent: () => import('./features/auth/components/worker-login/worker-login')
-      .then(m => m.WorkerLoginComponent)
+      .then(m => m.WorkerLoginComponent),
+    canActivate: [AlreadyAuthGuard]
   },
   {
     path: 'register',
     loadComponent: () => import('./features/auth/components/register/register')
-      .then(m => m.Register)
+      .then(m => m.Register),
+    canActivate: [AlreadyAuthGuard]
   },
   {
     path: 'verify',
     loadComponent: () => import('./features/auth/components/verify/verify')
-      .then(m => m.Verify)
+      .then(m => m.Verify),
+    canActivate: [AlreadyAuthGuard]
   },
   {
     path: 'forgot-password',
     loadComponent: () => import('./features/auth/components/forgot-password/forgot-password')
-      .then(m => m.ForgotPasswordComponent)
+      .then(m => m.ForgotPasswordComponent),
+    canActivate: [AlreadyAuthGuard]
   },
   {
     path: 'reset-password',
     loadComponent: () => import('./features/auth/components/reset-password/reset-password')
-      .then(m => m.ResetPasswordComponent)
+      .then(m => m.ResetPasswordComponent),
+    canActivate: [AlreadyAuthGuard]
   },
   {
     path: 'code-password',
     loadComponent: () => import('./features/auth/components/code-password/code-password')
-      .then(m => m.CodePassword)
+      .then(m => m.CodePassword),
+    canActivate: [AlreadyAuthGuard]
   },
   {
     path: 'oauth-callback',
     loadComponent: () => import('./features/auth/components/oauth-callback/oauth-callback')
-      .then(m => m.OauthCallback)
+      .then(m => m.OauthCallback),
+    canActivate: [AlreadyAuthGuard]
   },
 
-  // Rutas de administrador
+  // Rutas de administrador (protegidas)
   {
     path: 'admin',
     loadComponent: () => import('./features/admin/proveedores/proveedores')
       .then(c => c.AdminProveedoresComponent),
-    canActivate: [AdminGuard]
+    canActivate: [AuthGuard],
+    data: { roles: ['ADMINISTRADOR', 'ADMIN'] }
+  },
+  {
+    path: 'admin/proveedores',
+    loadComponent: () => import('./features/admin/proveedores/proveedores')
+      .then(c => c.AdminProveedoresComponent),
+    canActivate: [AuthGuard],
+    data: { roles: ['ADMINISTRADOR', 'ADMIN'] }
   },
   {
     path: 'admin/:module',
     loadComponent: () => import('./features/admin/proveedores/proveedores')
       .then(c => c.AdminProveedoresComponent),
-    canActivate: [AdminGuard]
+    canActivate: [AuthGuard],
+    data: { roles: ['ADMINISTRADOR', 'ADMIN'] }
+  },
+  {
+    path: 'admin/dashboard',
+    loadComponent: () => import('./features/admin/proveedores/proveedores')
+      .then(c => c.AdminProveedoresComponent),
+    canActivate: [AuthGuard],
+    data: { roles: ['ADMINISTRADOR', 'ADMIN'] }
   },
 
-  // Rutas de auxiliar
+  // Rutas de auxiliar (protegidas)
   {
     path: 'auxiliar',
     loadComponent: () => import('./features/auxiliar/auxiliar-dashboard/auxiliar-dashboard')
       .then(c => c.AuxiliarDashboardComponent),
-    canActivate: [AuxiliarGuard]
+    canActivate: [AuthGuard],
+    data: { roles: ['AUXILIAR'] }
+  },
+  {
+    path: 'auxiliar/:module',
+    loadComponent: () => import('./features/auxiliar/auxiliar-dashboard/auxiliar-dashboard')
+      .then(c => c.AuxiliarDashboardComponent),
+    canActivate: [AuthGuard],
+    data: { roles: ['AUXILIAR'] }
   },
   {
     path: 'auxiliar/detalles-pedidos',
     loadComponent: () => import('./features/auxiliar/detalles-pedidos/detalles-pedidos.component')
       .then(c => c.DetallesPedidosComponent),
-    canActivate: [AuxiliarGuard]
+    canActivate: [AuthGuard],
+    data: { roles: ['AUXILIAR'] }
   },
   {
     path: 'auxiliar/pedidos-insumos',
     loadComponent: () => import('./features/auxiliar/pedidos-insumos/pedidos-insumos.component')
       .then(c => c.PedidosInsumosComponent),
-    canActivate: [AuxiliarGuard]
+    canActivate: [AuthGuard],
+    data: { roles: ['AUXILIAR'] }
   },
   {
     path: 'auxiliar/reportes-proveedores',
     loadComponent: () => import('./features/auxiliar/reportes-proveedores/reportes-proveedores.component')
       .then(c => c.ReportesProveedoresComponent),
-    canActivate: [AuxiliarGuard]
+    canActivate: [AuthGuard],
+    data: { roles: ['AUXILIAR'] }
   },
 
-  // Ruta de pedidos del usuario (protegida, solo para clientes)
+  // Rutas de cliente (protegidas)
   {
     path: 'mis-pedidos',
     loadComponent: () => import('./features/mis-pedidos/mis-pedidos.component')
       .then(m => m.MisPedidosComponent),
-    canActivate: [ClienteGuard]
+    canActivate: [AuthGuard],
+    data: { roles: ['CLIENTE'] }
   },
-  // Detalle de pedido por external_reference
   {
     path: 'mis-pedidos/detalle-pedido/:external_reference',
     loadComponent: () => import('./features/mis-pedidos/detalle-pedido')
       .then(m => m.PedidoDetalleComponent),
-    canActivate: [ClienteGuard]
+    canActivate: [AuthGuard],
+    data: { roles: ['CLIENTE'] }
   },
   {
     path: 'mi-perfil',
     loadComponent: () => import('./features/perfil/perfil.component')
       .then(m => m.PerfilComponent),
-    canActivate: [ClienteGuard]
+    canActivate: [AuthGuard],
+    data: { roles: ['CLIENTE'] }
   },
 
-  // Ruta por defecto para rutas no encontradas
+  // Wildcard: componente de redirect inteligente
   {
     path: '**',
-    redirectTo: ''
+    loadComponent: () => import('./shared/route-redirect/route-redirect.component')
+      .then(m => m.RouteRedirectComponent)
   }
 ];
