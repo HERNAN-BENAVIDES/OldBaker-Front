@@ -6,7 +6,7 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { ShoppingCartService, CartItem } from '../../shared/shopping-cart/shopping-cart.service';
 import { AuthService } from '../auth/services/auth.service';
 import { NotificationService } from '../../shared/notification/notification.service';
-import { environment } from '../../../environments/environment'; // usado para endpoint de checkout
+import { environment } from '../../../environments/environment'; // asegurar import
 
 interface DireccionResponseDTO {
   id: number;
@@ -251,7 +251,8 @@ export class CheckoutAddressComponent implements OnInit {
       billingAddress: billing
     };
 
-    this.http.post(`${environment.apiUrl}/api/orders/checkout`, payload, headers).subscribe({
+    const urlCheckout = `${environment.apiUrl}/api/orders/checkout`;
+    this.http.post(urlCheckout, payload, headers).subscribe({
       next: (resp: any) => {
         this.isLoading = false;
         if (resp?.initPoint) {

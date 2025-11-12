@@ -3,7 +3,6 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {environment} from '../../../../environments/environment';
-import { ShoppingCartService } from '../../../shared/shopping-cart/shopping-cart.service';
 
 @Injectable({
   providedIn: 'root'
@@ -15,10 +14,9 @@ export class AuthService {
   public isAuthenticated$ = this.currentUser$.pipe(map(u => !!u));
 
   constructor(
-    private http: HttpClient,
-    private shoppingCartService: ShoppingCartService
+    private http: HttpClient
+    // , private shoppingCartService: ShoppingCartService  // eliminado para romper ciclo
   ) {
-    // Inicializar estado desde localStorage si existe y el token es válido
     this.initializeAuthState();
   }
 
@@ -43,8 +41,7 @@ export class AuthService {
       if (token && raw) {
         // Verificar si el token está vencido
         if (this.isTokenExpired(token)) {
-          console.warn('[AuthService] Token expirado. Sincronizando carrito y limpiando sesión...');
-          try { this.shoppingCartService.syncToServer?.(); } catch {}
+          console.warn('[AuthService] Token expirado. Limpiando sesión...');
           this.clearLocalAuth();
         } else {
           // Token válido, restaurar usuario
@@ -201,8 +198,6 @@ export class AuthService {
 
   // logout: llama al backend y solo tras respuesta exitosa limpia el storage y emite null
   logout(): void {
-    // Sincronizar carrito antes de cerrar sesión
-    try { this.shoppingCartService.syncToServer?.(); } catch {}
     let email: string | null = null;
     try {
       const raw = localStorage.getItem('auth_user');
@@ -318,9 +313,7 @@ export class AuthService {
     try { localStorage.removeItem('refresh_token'); } catch (e) {}
     try { localStorage.removeItem('auth_role'); } catch (e) {}
     try { sessionStorage.removeItem('oauth_user_id'); } catch (e) {}
-
-    // Limpiar el carrito de compras
-    this.shoppingCartService.clearCart();
+    try { localStorage.removeItem('shopping_cart'); } catch (e) {} // limpiar carrito local
 
     this.currentUserSubj.next(null);
   }

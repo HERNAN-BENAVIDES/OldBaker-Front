@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, forkJoin, of } from 'rxjs';
+import { BehaviorSubject, forkJoin, of, Observable } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from '../../features/auth/services/auth.service';
 import { ProductosService } from '../../services/productos.service';
+import { environment } from '../../../environments/environment';
 
 export interface CartItem {
   id: number;           // idProducto
@@ -57,11 +58,35 @@ export class ShoppingCartService {
     return { headers: new HttpHeaders({ Authorization: `Bearer ${clean}` }) };
   }
 
+  // Enriquecer ítems sin imagen consultando detalles del producto
+  private enrichMissingImages(items: CartItem[]): Observable<CartItem[]> {
+    const missing = items.filter(i => !i.image || String(i.image).trim() === '');
+    if (missing.length === 0) return of(items);
+
+    const lookups = missing.map(m => this.productos.getProductoDetalle(m.id).pipe(
+      map(det => ({ id: m.id, url: det.url ?? '' })),
+      catchError(() => of({ id: m.id, url: '' }))
+    ));
+
+    return forkJoin(lookups).pipe(
+      map(results => {
+        const byId = new Map<number, string>(results.map(r => [r.id, r.url]));
+        return items.map(it => {
+          if (!it.image || String(it.image).trim() === '') {
+            const url = byId.get(it.id) || it.image || '';
+            return { ...it, image: url } as CartItem;
+          }
+          return it;
+        });
+      })
+    );
+  }
+
   private loadCart() {
     const user = this.getUser();
     if (user?.id) {
       // Cargar desde backend
-      const url = `/api/user/${encodeURIComponent(user.id)}/cart`;
+      const url = `${environment.apiUrl}/api/user/${encodeURIComponent(user.id)}/cart`;
       const headers = this.getAuthHeaders();
       this.http.get<CartDTO>(url, headers).pipe(
         switchMap((cart: CartDTO | any) => {
@@ -72,26 +97,39 @@ export class ShoppingCartService {
           const enrich$ = cart.items.map((ci: CartItemDTO) =>
             this.productos.getProductoDetalle(ci.idProducto).pipe(
               map(det => ({ id: ci.idProducto, name: det.nombre, price: det.costoUnitario, quantity: ci.cantidad, image: det.url, selected: ci.selected ?? true } as CartItem)),
-              catchError(() => of({ id: ci.idProducto, name: `Producto ${ci.idProducto}`, price: 0, quantity: ci.cantidad, selected: ci.selected ?? true } as CartItem))
+              catchError(() => of<CartItem>({ id: ci.idProducto, name: `Producto ${ci.idProducto}`, price: 0, quantity: ci.cantidad, selected: ci.selected ?? true }))
             )
           );
-          return forkJoin(enrich$);
+          return forkJoin<CartItem[]>(enrich$);
         }),
         catchError(err => {
           console.warn('[ShoppingCart] Error cargando carrito desde backend, usando fallback local:', err);
           try {
             const saved = localStorage.getItem('shopping_cart');
-            return of(saved ? JSON.parse(saved) : []);
-          } catch { return of([]); }
+            return of<CartItem[]>(saved ? (JSON.parse(saved) as CartItem[]) : []);
+          } catch { return of<CartItem[]>([]); }
         })
-      ).subscribe(items => {
-        this.cartItems.next(items);
+      ).subscribe((items: CartItem[]) => {
+        const needsEnrich = items.some(i => !i.image || String(i.image).trim() === '');
+        if (needsEnrich) {
+          this.enrichMissingImages(items).subscribe(filled => this.cartItems.next(filled));
+        } else {
+          this.cartItems.next(items);
+        }
       });
     } else {
       // Fallback local si no hay usuario
       try {
         const saved = localStorage.getItem('shopping_cart');
-        if (saved) this.cartItems.next(JSON.parse(saved));
+        if (saved) {
+          const parsed = JSON.parse(saved) as CartItem[];
+          const needsEnrich = parsed.some(i => !i.image || String(i.image).trim() === '');
+          if (needsEnrich) {
+            this.enrichMissingImages(parsed).subscribe(filled => this.cartItems.next(filled));
+          } else {
+            this.cartItems.next(parsed);
+          }
+        }
       } catch (e) {
         console.error('Error al cargar el carrito local:', e);
       }
@@ -107,7 +145,7 @@ export class ShoppingCartService {
         userId: user.id,
         items: items.map(it => ({ idProducto: it.id, cantidad: it.quantity, selected: it.selected ?? true }))
       };
-      const url = `/api/user/${encodeURIComponent(user.id)}/cart`;
+      const url = `${environment.apiUrl}/api/user/${encodeURIComponent(user.id)}/cart`;
       const headers = this.getAuthHeaders();
       this.http.put<CartDTO>(url, payload, headers).pipe(catchError(err => {
         console.warn('[ShoppingCart] Error actualizando carrito en backend, conservando en memoria:', err);
@@ -205,13 +243,13 @@ export class ShoppingCartService {
   reloadFromServer(mergeLocal = false) {
     const user = this.getUser();
     if (!user?.id) return;
-    const url = `/api/user/${encodeURIComponent(user.id)}/cart`;
+    const url = `${environment.apiUrl}/api/user/${encodeURIComponent(user.id)}/cart`;
     const headers = this.getAuthHeaders();
     let localBackup: CartItem[] = [];
     if (mergeLocal) {
       try {
         const saved = localStorage.getItem('shopping_cart');
-        localBackup = saved ? JSON.parse(saved) : [];
+        localBackup = saved ? (JSON.parse(saved) as CartItem[]) : [];
       } catch {}
     }
     this.http.get<CartDTO>(url, headers).pipe(
@@ -223,29 +261,32 @@ export class ShoppingCartService {
         const enrich$ = cart.items.map((ci: CartItemDTO) =>
           this.productos.getProductoDetalle(ci.idProducto).pipe(
             map(det => ({ id: ci.idProducto, name: det.nombre, price: det.costoUnitario, quantity: ci.cantidad, image: det.url, selected: ci.selected ?? true } as CartItem)),
-            catchError(() => of({ id: ci.idProducto, name: `Producto ${ci.idProducto}`, price: 0, quantity: ci.cantidad, selected: ci.selected ?? true } as CartItem))
+            catchError(() => of<CartItem>({ id: ci.idProducto, name: `Producto ${ci.idProducto}`, price: 0, quantity: ci.cantidad, selected: ci.selected ?? true }))
           )
         );
-        return forkJoin(enrich$).pipe(map(remoteItems => {
-          if (mergeLocal && localBackup.length > 0) {
-            const idsRemote = new Set(remoteItems.map(r => r.id));
-            const toAdd = localBackup.filter(lb => !idsRemote.has(lb.id));
-            if (toAdd.length > 0) {
-              remoteItems = remoteItems.concat(toAdd.map(t => ({ ...t, selected: t.selected ?? true })));
-              // Persistir fusión en servidor
-              this.cartItems.next(remoteItems);
-              this.persistCart();
-              try { localStorage.removeItem('shopping_cart'); } catch {}
+        return forkJoin<CartItem[]>(enrich$).pipe(
+          map((remoteItems: CartItem[]) => {
+            if (mergeLocal && localBackup.length > 0) {
+              const idsRemote = new Set(remoteItems.map(r => r.id));
+              const toAdd = localBackup.filter(lb => !idsRemote.has(lb.id));
+              if (toAdd.length > 0) {
+                remoteItems = remoteItems.concat(toAdd.map(t => ({ ...t, selected: t.selected ?? true })));
+                // Persistir fusión en servidor
+                this.cartItems.next(remoteItems as CartItem[]);
+                this.persistCart();
+                try { localStorage.removeItem('shopping_cart'); } catch {}
+              }
             }
-          }
-          return remoteItems;
-        }));
+            return remoteItems as CartItem[];
+          }),
+          switchMap((allItems: CartItem[]) => this.enrichMissingImages(allItems))
+        );
       }),
       catchError(err => {
         console.warn('[ShoppingCart] Error recargando carrito (reloadFromServer):', err);
-        return of([]);
+        return of<CartItem[]>([]);
       })
-    ).subscribe(items => {
+    ).subscribe((items: CartItem[]) => {
       this.cartItems.next(items);
     });
   }
@@ -259,7 +300,7 @@ export class ShoppingCartService {
       userId: user.id,
       items: this.cartItems.value.map(it => ({ idProducto: it.id, cantidad: it.quantity, selected: it.selected ?? true }))
     };
-    const url = `/api/user/${encodeURIComponent(user.id)}/cart`;
+    const url = `${environment.apiUrl}/api/user/${encodeURIComponent(user.id)}/cart`;
     const headers = this.getAuthHeaders();
     this.http.put<CartDTO>(url, payload, headers).pipe(catchError(err => { console.warn('[ShoppingCart] syncToServer error:', err); return of(payload); })).subscribe(res => {
       this.serverCartId = res?.id ?? this.serverCartId;

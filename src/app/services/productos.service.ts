@@ -30,6 +30,7 @@ export interface ProductoDetalle {
   categoriaNombre: string;
   receta: RecetaItem[];
   pedidoMinimo?: number; // Agregar campo pedido mínimo
+  url?: string; // URL de imagen opcional
 }
 
 @Injectable({
@@ -46,5 +47,10 @@ export class ProductosService {
 
   getProductoById(id: number): Observable<ProductoDetalle> {
     return this.http.get<ProductoDetalle>(`${this.apiUrl}/${id}`);
+  }
+
+  // Alias de compatibilidad
+  getProductoDetalle(id: number): Observable<ProductoDetalle> {
+    return this.getProductoById(id);
   }
 }
