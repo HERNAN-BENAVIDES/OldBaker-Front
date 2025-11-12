@@ -1,5 +1,6 @@
-import { Component, OnInit, OnDestroy, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { animate, state, style, transition, trigger } from '@angular/animations';
 import { ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
@@ -26,6 +27,8 @@ import { ProveedoresService, ProveedorApi } from './proveedores.service';
 import { MatMenuModule } from '@angular/material/menu';
 import { Router, ActivatedRoute } from '@angular/router';
 import { NotificationService } from '../../../shared/notification/notification.service';
+import { forkJoin, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 
 // Importar diálogos (los crearemos por separado)
 import { ProveedorDialogComponent } from './dialogs/proveedor-dialog.component';
@@ -39,6 +42,10 @@ import { InsumosProveedorService } from './insumos-proveedor.service';
 import { PedidosService } from './pedidos.service';
 import { ProductosService } from '../../../services/productos.service';
 import { InsumosService } from './insumos.service';
+import { DetallesProveedorPedidoService } from './detalles-proveedor-pedido.service';
+import { ReportesProveedorService } from './reportes-proveedor.service';
+import { DevolucionDialogComponent } from './dialogs/devolucion-dialog.component';
+import { ReporteManualDialogComponent } from './dialogs/reporte-manual-dialog.component';
 
 // Exportar componentes de diálogo para uso en tests
 export {
@@ -190,7 +197,14 @@ type DialogType = 'proveedor' | 'insumo' | 'producto' | 'insumo-proveedor' | 're
     MatMenuModule
   ],
   templateUrl: './proveedores.html',
-  styleUrls: ['./proveedores.css']
+  styleUrls: ['./proveedores.css'],
+  animations: [
+    trigger('detailExpand', [
+      state('collapsed', style({height: '0px', minHeight: '0'})),
+      state('expanded', style({height: '*'})),
+      transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
+    ]),
+  ]
 })
 export class AdminProveedoresComponent implements OnInit, OnDestroy, AfterViewInit {
 
@@ -245,8 +259,10 @@ export class AdminProveedoresComponent implements OnInit, OnDestroy, AfterViewIn
   insumosProveedorColumns: string[] = ['id_insumo', 'nombre', 'descripcion', 'costo_unitario', 'fecha_vencimiento', 'cantidad_disponible', 'nombre_proveedor', 'acciones'];
   pedidosColumns: string[] = ['id_pedido', 'nombre', 'descripcion', 'nombre_proveedor', 'cantidad_items', 'costo_total', 'fecha_pedido', 'fecha_entrega_estimada','estado',
 'es_pagable', 'acciones'];
-  detallesColumns: string[] = ['id_detalle', 'cantidad_insumo', 'costo_subtotal', 'es_devuelto', 'nombre_insumo', 'id_pedido', 'acciones'];
-  reportesColumns: string[] = ['id_devolucion', 'razon', 'es_devolucion', 'fecha_devolucion', 'id_detalle', 'acciones'];
+  detallesColumns: string[] = ['expand', 'id_pedido', 'nombre', 'descripcion', 'costo_total', 'estado', 'fecha_pedido', 'acciones'];
+  expandedElement: any | null = null;
+  reportesColumns: string[] = ['expand', 'idDevolucion', 'razon', 'tipo', 'fechaDevolucion', 'detalleId', 'proveedor', 'acciones'];
+  expandedReporte: any | null = null;
   recetasColumns: string[] = ['id_receta', 'nombre', 'descripcion', 'cantidad_insumo', 'nombre_insumo', 'nombre_producto', 'acciones'];
   insumosColumns: string[] = ['id_insumo', 'nombre', 'descripcion', 'costo_unitario', 'cantidad_actual', 'acciones'];
   productosColumns: string[] = ['id_producto', 'nombre', 'descripcion', 'costo_unitario', 'vida_util_dias', 'pedido_minimo', 'categoria'];
@@ -265,7 +281,10 @@ export class AdminProveedoresComponent implements OnInit, OnDestroy, AfterViewIn
     private insumosProveedorService: InsumosProveedorService
     , private pedidosService: PedidosService,
     private productosService: ProductosService,
-    private insumosService: InsumosService
+    private insumosService: InsumosService,
+    private detallesProveedorPedidoService: DetallesProveedorPedidoService,
+    private reportesProveedorService: ReportesProveedorService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -350,6 +369,7 @@ export class AdminProveedoresComponent implements OnInit, OnDestroy, AfterViewIn
   }
 
   setActiveModule(module: string, navigate: boolean = true): void {
+    console.log('🎯 Cambiando a módulo:', module);
     this.activeModule = module;
     // Navegar para reflejar en la barra de direcciones
     try {
@@ -871,35 +891,162 @@ export class AdminProveedoresComponent implements OnInit, OnDestroy, AfterViewIn
 }
 
   private loadDetalles(): void {
-    const mockData: DetallePedido[] = [
-      {
-        id_detalle: 1,
-        cantidad_insumo: 10,
-        costo_subtotal: 25000,
-        es_devuelto: false,
-        id_insumo: 1,
-        id_pedido: 1,
-        nombre_insumo: 'Harina de Trigo'
+    console.log('🔍 loadDetalles() iniciado - Cargando PEDIDOS desde backend...');
+    // Cargar pedidos principales (sin expandir)
+    this.pedidosService.list().subscribe({
+      next: (pedidos) => {
+        console.log('✅ Pedidos recibidos desde API:', pedidos);
+        
+        // Mapear pedidos a la estructura de la tabla principal
+        const pedidosMapeados = pedidos.map(pedido => ({
+          id_pedido: pedido.id,
+          nombre: pedido.nombre,
+          descripcion: pedido.descripcion,
+          costo_total: pedido.costoTotal,
+          estado: pedido.estado, // PENDIENTE, APROBADO, RECHAZADO, PAGADO
+          fecha_pedido: pedido.fechaPedido,
+          detalles: pedido.detalles || [] // Mantener detalles para expansión
+        }));
+        
+        console.log('🔄 Pedidos mapeados:', pedidosMapeados);
+        this.allDetalles = pedidosMapeados as any;
+        this.detallesTotal = this.allDetalles.length;
+        this.detallesDataSource.data = this.allDetalles.slice(0, this.detallesPageSize || 10);
+        console.log('📊 DataSource actualizado. Total pedidos:', this.detallesTotal);
+      },
+      error: (err) => {
+        console.warn('❌ Error cargando pedidos desde API, usando mock fallback', err);
+        console.error('Detalles del error:', err);
+        // Fallback a mock data de pedidos principales
+        const mockData = [
+          {
+            id_pedido: 1001,
+            nombre: 'Pedido Semanal Harinas',
+            descripcion: 'Pedido semanal de insumos básicos',
+            costo_total: 75000,
+            estado: 'PENDIENTE',
+            fecha_pedido: '2024-11-10',
+            detalles: [
+              {
+                id: 1,
+                cantidadInsumo: 10,
+                costoSubtotal: 25000,
+                esDevuelto: false,
+                insumo: { id: 1, nombre: 'Harina de Trigo Premium' }
+              },
+              {
+                id: 2,
+                cantidadInsumo: 20,
+                costoSubtotal: 50000,
+                esDevuelto: false,
+                insumo: { id: 2, nombre: 'Azúcar Refinada' }
+              }
+            ]
+          },
+          {
+            id_pedido: 1002,
+            nombre: 'Pedido Urgente Lácteos',
+            descripcion: 'Reposición urgente de lácteos',
+            costo_total: 15000,
+            estado: 'APROBADO',
+            fecha_pedido: '2024-11-09',
+            detalles: [
+              {
+                id: 3,
+                cantidadInsumo: 5,
+                costoSubtotal: 15000,
+                esDevuelto: true,
+                insumo: { id: 3, nombre: 'Mantequilla Premium' }
+              }
+            ]
+          }
+        ];
+        this.allDetalles = mockData as any;
+        this.detallesTotal = this.allDetalles.length;
+        this.detallesDataSource.data = this.allDetalles.slice(0, this.detallesPageSize || 10);
+        console.log('📊 Fallback mock aplicado. Total pedidos:', this.detallesTotal);
       }
-    ];
-    this.allDetalles = mockData;
-    this.detallesTotal = this.allDetalles.length;
-    this.detallesDataSource.data = this.allDetalles.slice(0, this.detallesPageSize || 10);
+    });
   }
 
   private loadReportes(): void {
-    const mockData: Reporte[] = [
-      {
-        id_devolucion: 1,
-        razon: 'Producto defectuoso',
-        es_devolucion: true,
-        fecha_devolucion: new Date(),
-        id_detalle: 1
+    this.reportesProveedorService.list().subscribe({
+      next: (reportes) => {
+        console.log('✅ Reportes recibidos desde API:', reportes);
+        
+        // Enriquecer reportes con información del proveedor
+        const reportesConProveedor$ = reportes.map(reporte => {
+          if (reporte.idProveedor) {
+            // Obtener información del proveedor usando el endpoint
+            return this.proveedoresService.get(reporte.idProveedor).pipe(
+              map((proveedor: ProveedorApi) => ({
+                ...reporte,
+                proveedorNombre: proveedor.nombre
+              })),
+              catchError(err => {
+                console.warn(`⚠️ No se pudo obtener proveedor ${reporte.idProveedor}:`, err);
+                return of({
+                  ...reporte,
+                  proveedorNombre: 'Proveedor no disponible'
+                });
+              })
+            );
+          } else {
+            return of({
+              ...reporte,
+              proveedorNombre: '-'
+            });
+          }
+        });
+
+        // Esperar a que todos los reportes estén enriquecidos
+        forkJoin(reportesConProveedor$).subscribe({
+          next: (reportesEnriquecidos) => {
+            console.log('✅ Reportes enriquecidos con proveedores:', reportesEnriquecidos);
+            this.allReportes = reportesEnriquecidos as any;
+            this.reportesTotal = this.allReportes.length;
+            this.reportesDataSource.data = this.allReportes.slice(0, this.reportesPageSize || 10);
+            console.log('📊 Reportes cargados. Total:', this.reportesTotal);
+          },
+          error: (err) => {
+            console.error('❌ Error enriqueciendo reportes:', err);
+            // Usar reportes sin enriquecer como fallback
+            this.allReportes = reportes as any;
+            this.reportesTotal = this.allReportes.length;
+            this.reportesDataSource.data = this.allReportes.slice(0, this.reportesPageSize || 10);
+          }
+        });
+      },
+      error: (err) => {
+        console.warn('❌ Error cargando reportes desde API, usando mock fallback', err);
+        const mockData = [
+          {
+            idDevolucion: 1,
+            razon: 'Producto defectuoso encontrado en el lote',
+            esDevolucion: true,
+            fechaDevolucion: '2024-11-10',
+            detalleId: 21,
+            insumoNombre: 'Harina de Trigo Premium',
+            cantidadDevuelta: 5,
+            proveedorNombre: 'Distribuidora Central'
+          },
+          {
+            idDevolucion: 2,
+            razon: 'Reporte de calidad rutinario',
+            esDevolucion: false,
+            fechaDevolucion: '2024-11-09',
+            detalleId: null,
+            insumoNombre: null,
+            cantidadDevuelta: null,
+            proveedorNombre: 'Lácteos del Valle'
+          }
+        ];
+        this.allReportes = mockData as any;
+        this.reportesTotal = this.allReportes.length;
+        this.reportesDataSource.data = this.allReportes.slice(0, this.reportesPageSize || 10);
+        console.log('📊 Mock reportes cargados. Total:', this.reportesTotal);
       }
-    ];
-    this.allReportes = mockData;
-    this.reportesTotal = this.allReportes.length;
-    this.reportesDataSource.data = this.allReportes.slice(0, this.reportesPageSize || 10);
+    });
   }
 
 
@@ -951,8 +1098,31 @@ private loadRecetas(): void {
   }
 
   getDetallesPedidosCountByStatus(estado: string): number {
-  return this.detallesPedidosDataSource.data.filter(p => p.estado === estado).length;
-}
+    return this.detallesPedidosDataSource.data.filter(p => p.estado === estado).length;
+  }
+
+  getDetallesCountByStatus(esDevuelto: boolean): number {
+    return this.detallesDataSource.data.filter(d => (d as any).es_devuelto === esDevuelto).length;
+  }
+
+  getDetallesByEstadoPedido(estado: string): number {
+    return this.detallesDataSource.data.filter(d => (d as any).estado === estado).length;
+  }
+
+  // Función para contar insumos devueltos
+  getTotalDevueltos(): number {
+    let count = 0;
+    this.detallesDataSource.data.forEach((pedido: any) => {
+      if (pedido.detalles && pedido.detalles.length > 0) {
+        count += pedido.detalles.filter((detalle: any) => detalle.esDevuelto === true).length;
+      }
+    });
+    return count;
+  }
+
+  getTotalCostoDetalles(): number {
+    return this.detallesDataSource.data.reduce((total, d) => total + ((d as any).costo_subtotal || 0), 0);
+  }
 
   // método para abrir el diálogo de detalles
 openDetallePedidoDialog(pedido: PedidoDetalle): void {
@@ -1669,8 +1839,400 @@ getEstadoPedidoColor(estado: string): string {
   }
 
   /**
+   * Ver el pedido completo (abrir diálogo con todos los detalles)
+   */
+  verDetallePedido(item: any): void {
+    // Buscar todos los detalles del mismo pedido
+    const detallesDelPedido = this.detallesDataSource.data.filter(d => (d as any).id_pedido === item.id_pedido);
+    
+    // Construir objeto pedido para el diálogo
+    const pedidoCompleto = {
+      id: item.id_pedido,
+      proveedor: item.nombre_proveedor,
+      fechaPedido: item.fecha_pedido,
+      fechaEntrega: item.fecha_pedido, // Usar la misma fecha por ahora
+      estado: item.estado_pedido,
+      items: detallesDelPedido.map(d => ({
+        id: (d as any).id_detalle,
+        insumo: (d as any).nombre_insumo,
+        cantidadPedida: (d as any).cantidad_insumo,
+        cantidadRecibida: (d as any).cantidad_insumo,
+        precioUnitario: (d as any).costo_unitario,
+        estado: (d as any).es_devuelto ? 'devuelto' : 'completo'
+      })),
+      total: detallesDelPedido.reduce((sum, d) => sum + ((d as any).costo_subtotal || 0), 0)
+    } as any;
+    
+    this.openDetallePedidoDialog(pedidoCompleto);
+  }
+
+  /**
+   * Aprobar un pedido (PENDIENTE → APROBADO)
+   */
+  aprobarPedido(idPedido: number): void {
+    if (confirm(`¿Está seguro de aprobar el pedido #${idPedido}?`)) {
+      this.pedidosService.aprobar(idPedido).subscribe({
+        next: (updated) => {
+          // Actualizar todos los detalles de este pedido en el dataSource
+          this.detallesDataSource.data = this.detallesDataSource.data.map(d => {
+            if ((d as any).id_pedido === idPedido) {
+              (d as any).estado_pedido = 'APROBADO';
+            }
+            return d;
+          });
+          this.detallesDataSource.data = [...this.detallesDataSource.data];
+          this.snackBar.open('Pedido aprobado exitosamente', 'Cerrar', {
+            duration: 3000,
+            panelClass: 'snackbar-success'
+          });
+        },
+        error: (err) => {
+          console.warn('Error aprobando pedido, fallback local', err);
+          // Fallback local
+          this.detallesDataSource.data = this.detallesDataSource.data.map(d => {
+            if ((d as any).id_pedido === idPedido) {
+              (d as any).estado_pedido = 'APROBADO';
+            }
+            return d;
+          });
+          this.detallesDataSource.data = [...this.detallesDataSource.data];
+          this.snackBar.open('Pedido aprobado (modo offline)', 'Cerrar', {
+            duration: 3000,
+            panelClass: 'snackbar-warning'
+          });
+        }
+      });
+    }
+  }
+
+  /**
+   * Marcar pedido como pagado (APROBADO → PAGADO)
+   */
+  pagarPedido(idPedido: number): void {
+    if (confirm(`¿Está seguro de marcar como pagado el pedido #${idPedido}?`)) {
+      this.pedidosService.pagar(idPedido).subscribe({
+        next: (updated) => {
+          // Actualizar todos los detalles de este pedido
+          this.detallesDataSource.data = this.detallesDataSource.data.map(d => {
+            if ((d as any).id_pedido === idPedido) {
+              (d as any).estado_pedido = 'PAGADO';
+            }
+            return d;
+          });
+          this.detallesDataSource.data = [...this.detallesDataSource.data];
+          this.snackBar.open('Pedido marcado como pagado', 'Cerrar', {
+            duration: 3000,
+            panelClass: 'snackbar-success'
+          });
+        },
+        error: (err) => {
+          console.warn('Error marcando como pagado, fallback local', err);
+          // Fallback local
+          this.detallesDataSource.data = this.detallesDataSource.data.map(d => {
+            if ((d as any).id_pedido === idPedido) {
+              (d as any).estado_pedido = 'PAGADO';
+            }
+            return d;
+          });
+          this.detallesDataSource.data = [...this.detallesDataSource.data];
+          this.snackBar.open('Pedido marcado como pagado (modo offline)', 'Cerrar', {
+            duration: 3000,
+            panelClass: 'snackbar-warning'
+          });
+        }
+      });
+    }
+  }
+
+  /**
+   * Marca un detalle como devuelto usando el servicio de devoluciones
+   */
+  marcarComoDevuelto(item: any): void {
+    if (confirm(`¿Está seguro de marcar como devuelto el detalle "${item.nombre_insumo}"?`)) {
+      // Usar el endpoint de devoluciones del pedido
+      const payload = {
+        detalleId: item.id_detalle,
+        motivo: 'Producto defectuoso o no conforme',
+        cantidadDevuelta: item.cantidad_insumo
+      };
+      
+      this.pedidosService.crearDevolucion(item.id_pedido, payload).subscribe({
+        next: (result) => {
+          // Actualizar el detalle en el dataSource
+          const idx = this.detallesDataSource.data.findIndex(d => (d as any).id_detalle === item.id_detalle);
+          if (idx !== -1) {
+            (this.detallesDataSource.data[idx] as any).es_devuelto = true;
+            this.detallesDataSource.data = [...this.detallesDataSource.data];
+          }
+          this.snackBar.open('Detalle marcado como devuelto', 'Cerrar', {
+            duration: 3000,
+            panelClass: 'snackbar-success'
+          });
+        },
+        error: (err) => {
+          console.warn('Error creando devolución, fallback local', err);
+          // Fallback local
+          const idx = this.detallesDataSource.data.findIndex(d => (d as any).id_detalle === item.id_detalle);
+          if (idx !== -1) {
+            (this.detallesDataSource.data[idx] as any).es_devuelto = true;
+            this.detallesDataSource.data = [...this.detallesDataSource.data];
+          }
+          this.snackBar.open('Detalle marcado como devuelto (modo offline)', 'Cerrar', {
+            duration: 3000,
+            panelClass: 'snackbar-warning'
+          });
+        }
+      });
+    }
+  }
+
+  /**
    * Cierra la sesión del usuario
    */
+  // Función para expandir/colapsar filas
+  toggleRow(element: any): void {
+    this.expandedElement = this.expandedElement === element ? null : element;
+  }
+
+  // Función para expandir/colapsar filas de reportes
+  toggleReporteRow(element: any): void {
+    this.expandedReporte = this.expandedReporte === element ? null : element;
+  }
+
+  // Función para devolver un insumo individual
+  devolverInsumo(pedido: any, detalle: any): void {
+    // Validar que el pedido esté en estado PENDIENTE
+    if (pedido.estado !== 'PENDIENTE') {
+      this.snackBar.open('Solo se pueden devolver insumos de pedidos pendientes (no validados)', 'Cerrar', {
+        duration: 4000,
+        panelClass: 'snackbar-error'
+      });
+      return;
+    }
+
+    // Validar que el detalle no esté ya devuelto
+    if (detalle.esDevuelto) {
+      this.snackBar.open('Este insumo ya está marcado como devuelto', 'Cerrar', {
+        duration: 3000,
+        panelClass: 'snackbar-warning'
+      });
+      return;
+    }
+
+    // Abrir diálogo para capturar la razón de devolución
+    const dialogRef = this.dialog.open(DevolucionDialogComponent, {
+      width: '600px',
+      maxWidth: '90vw',
+      data: { pedido, detalle },
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe((reporteData) => {
+      if (reporteData) {
+        console.log('📝 Procesando devolución de detalle:', detalle.id, 'con razón:', reporteData.razon);
+        console.log('🔍 Datos del reporte a crear:', reporteData);
+        console.log('� Proveedor del pedido:', pedido.proveedor);
+        console.log('�🌐 URL que se llamará:', `${this.detallesProveedorPedidoService['baseUrl']}/${detalle.id}/devolver`);
+        
+        // PASO 1: Marcar el detalle como devuelto en la base de datos
+        // Usar el endpoint correcto: /api/detalles-proveedor-pedido/{id}/devolver
+        console.log('🚀 Llamando a marcarComoDevuelto para detalle ID:', detalle.id);
+        this.detallesProveedorPedidoService.marcarComoDevuelto(detalle.id).subscribe({
+          next: (detalleActualizado: any) => {
+            console.log('✅ Detalle marcado como devuelto en BD:', detalleActualizado);
+            
+            // PASO 2: Preparar datos completos del reporte (incluyendo idProveedor)
+            const reporteCompleto = {
+              detalleId: reporteData.detalleId,
+              razon: reporteData.razon,
+              idProveedor: pedido.proveedor?.idProveedor || pedido.proveedor?.id || pedido.idProveedor
+            };
+            
+            console.log('� Creando reporte de devolución con datos completos:', reporteCompleto);
+            console.log('🔍 JSON que se enviará:', JSON.stringify(reporteCompleto, null, 2));
+            console.log('🌐 URL del reporte:', `${this.reportesProveedorService['baseUrl']}`);
+            this.reportesProveedorService.create(reporteCompleto).subscribe({
+              next: (reporte) => {
+                console.log('✅ Reporte de devolución creado exitosamente:', reporte);
+                
+                // PASO 3: Actualizar la UI localmente
+                detalle.esDevuelto = true;
+                
+                this.snackBar.open('Devolución procesada y guardada exitosamente', 'Cerrar', {
+                  duration: 3000,
+                  panelClass: 'snackbar-success'
+                });
+
+                // PASO 4: Recargar datos para actualizar contadores y estados
+                console.log('🔄 Recargando detalles para actualizar contadores...');
+                this.loadDetalles(); // Recargar pedidos con detalles actualizados
+                
+                // PASO 5: Forzar detección de cambios para actualizar contadores
+                setTimeout(() => {
+                  this.cdr.detectChanges();
+                  console.log('🔄 Contador actualizado:', this.getTotalDevueltos());
+                }, 100);
+                
+                if (this.activeModule === 'reportes') {
+                  this.loadReportes();
+                }
+              },
+              error: (reporteErr: any) => {
+                console.error('❌ Error creando reporte de devolución:', reporteErr);
+                console.error('📊 Detalles del error del reporte:', {
+                  status: reporteErr.status,
+                  statusText: reporteErr.statusText,
+                  message: reporteErr.message,
+                  error: reporteErr.error,
+                  url: reporteErr.url
+                });
+                
+                // Mostrar el error específico del backend si existe
+                if (reporteErr.error) {
+                  console.error('🔥 Error del backend:', reporteErr.error);
+                  if (reporteErr.error.message) {
+                    console.error('💬 Mensaje del backend:', reporteErr.error.message);
+                  }
+                  if (reporteErr.error.trace) {
+                    console.error('📋 Stack trace del backend:', reporteErr.error.trace);
+                  }
+                }
+                
+                // El detalle YA está marcado como devuelto en BD, solo falló el reporte
+                detalle.esDevuelto = true;
+                
+                // Recargar datos para reflejar cambios en BD
+                console.log('🔄 Recargando detalles tras error en reporte...');
+                this.loadDetalles();
+                
+                // Forzar detección de cambios para actualizar contadores
+                setTimeout(() => {
+                  this.cdr.detectChanges();
+                  console.log('🔄 Contador actualizado tras error:', this.getTotalDevueltos());
+                }, 100);
+                
+                this.snackBar.open('Devolución guardada, pero error creando reporte', 'Cerrar', {
+                  duration: 4000,
+                  panelClass: 'snackbar-warning'
+                });
+              }
+            });
+          },
+          error: (detalleErr: any) => {
+            console.error('❌ Error marcando detalle como devuelto en BD:', detalleErr);
+            console.error('📊 Detalles del error:', {
+              status: detalleErr.status,
+              statusText: detalleErr.statusText,
+              message: detalleErr.message,
+              error: detalleErr.error,
+              url: detalleErr.url
+            });
+            
+            // Si falla marcar en BD, intentar método alternativo o mostrar error
+            if (detalleErr.status === 0) {
+              // Error de CORS o conectividad
+              this.snackBar.open('Error de conexión. Verifique que el backend esté disponible.', 'Cerrar', {
+                duration: 5000,
+                panelClass: 'snackbar-error'
+              });
+            } else if (detalleErr.status === 404) {
+              // Detalle no encontrado
+              this.snackBar.open('El detalle no fue encontrado en el servidor.', 'Cerrar', {
+                duration: 4000,
+                panelClass: 'snackbar-error'
+              });
+            } else if (detalleErr.status >= 500) {
+              // Error del servidor
+              this.snackBar.open('Error del servidor. Contacte al administrador.', 'Cerrar', {
+                duration: 5000,
+                panelClass: 'snackbar-error'
+              });
+            } else {
+              // Otros errores
+              this.snackBar.open(`Error al procesar devolución: ${detalleErr.message || 'Error desconocido'}`, 'Cerrar', {
+                duration: 5000,
+                panelClass: 'snackbar-error'
+              });
+            }
+          }
+        });
+      }
+    });
+  }
+
+  // ================= FUNCIONES DE REPORTES =================
+  
+  abrirDialogoReporte(reporte?: any): void {
+    const dialogRef = this.dialog.open(ReporteManualDialogComponent, {
+      width: '600px',
+      maxWidth: '90vw',
+      data: { reporte, isEdit: !!reporte },
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe((reporteData) => {
+      if (reporteData) {
+        if (reporte) {
+          // Editar reporte existente (no implementado en backend aún)
+          this.snackBar.open('Funcionalidad de edición pendiente', 'Cerrar', {
+            duration: 3000,
+            panelClass: 'snackbar-warning'
+          });
+        } else {
+          // Crear nuevo reporte
+          this.reportesProveedorService.create(reporteData).subscribe({
+            next: (nuevoReporte) => {
+              this.snackBar.open('Reporte creado exitosamente', 'Cerrar', {
+                duration: 3000,
+                panelClass: 'snackbar-success'
+              });
+              this.loadReportes();
+            },
+            error: (err) => {
+              console.error('Error creando reporte:', err);
+              this.snackBar.open('Error al crear el reporte', 'Cerrar', {
+                duration: 3000,
+                panelClass: 'snackbar-error'
+              });
+            }
+          });
+        }
+      }
+    });
+  }
+
+  eliminarReporte(reporte: any): void {
+    if (reporte.esDevolucion) {
+      this.snackBar.open('No se pueden eliminar reportes de devolución', 'Cerrar', {
+        duration: 3000,
+        panelClass: 'snackbar-warning'
+      });
+      return;
+    }
+
+    this.notifications.showConfirm(
+      `¿Está seguro de que desea eliminar el reporte "${reporte.razon}"?`,
+      () => {
+        this.reportesProveedorService.delete(reporte.idDevolucion).subscribe({
+          next: () => {
+            this.snackBar.open('Reporte eliminado exitosamente', 'Cerrar', {
+              duration: 3000,
+              panelClass: 'snackbar-success'
+            });
+            this.loadReportes();
+          },
+          error: (err) => {
+            console.error('Error eliminando reporte:', err);
+            this.snackBar.open('Error al eliminar el reporte', 'Cerrar', {
+              duration: 3000,
+              panelClass: 'snackbar-error'
+            });
+          }
+        });
+      }
+    );
+  }
+
   logout(): void {
     this.notifications.showConfirm(
       '¿Está seguro de que desea cerrar sesión?',

@@ -62,4 +62,29 @@ export class PedidosService {
   delete(id: number): Observable<any> {
     return this.http.delete(`${this.baseUrl}/${id}`, { headers: this.headers() });
   }
+
+  // PUT /api/admin/pedidos-insumos/{id}/aprobar
+  aprobar(id: number): Observable<PedidoInsumoResponse> {
+    return this.http.put<PedidoInsumoResponse>(`${this.baseUrl}/${id}/aprobar`, {}, { headers: this.headers() });
+  }
+
+  // PUT /api/admin/pedidos-insumos/{id}/pagar
+  pagar(id: number): Observable<PedidoInsumoResponse> {
+    return this.http.put<PedidoInsumoResponse>(`${this.baseUrl}/${id}/pagar`, {}, { headers: this.headers() });
+  }
+
+  // GET /api/admin/pedidos-insumos/{id}/proveedor
+  getProveedor(id: number): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/${id}/proveedor`, { headers: this.headers() });
+  }
+
+  // POST /api/admin/pedidos-insumos/{id}/devoluciones
+  crearDevolucion(id: number, payload: any): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/${id}/devoluciones`, payload, { headers: this.headers() });
+  }
+
+  // PATCH /api/admin/pedidos-insumos/{id}/devolver - Marcar detalle como devuelto
+  marcarDetalleComoDevuelto(id: number): Observable<any> {
+    return this.http.patch<any>(`${this.baseUrl}/${id}/devolver`, {}, { headers: this.headers() });
+  }
 }
