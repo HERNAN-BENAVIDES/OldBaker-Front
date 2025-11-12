@@ -84,6 +84,7 @@ export const routes: Routes = [
       .then(m => m.OauthCallback),
     canActivate: [AlreadyAuthGuard]
   },
+  { path: 'forgot', redirectTo: 'forgot-password' },
 
   // Rutas de administrador (protegidas)
   {

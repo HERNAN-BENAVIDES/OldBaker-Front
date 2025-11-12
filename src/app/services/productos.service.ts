@@ -33,6 +33,18 @@ export interface ProductoDetalle {
   url?: string; // URL de imagen opcional
 }
 
+export interface ProductoResponse {
+  idProducto: number;
+  nombre: string;
+  descripcion: string;
+  costoUnitario: number;
+  vidaUtilDias: number;
+  pedidoMinimo?: number;
+  categoriaNombre: string;
+  receta?: RecetaItem[];
+  url?: string; // Campo opcional para URL de imagen si backend lo envía
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -52,5 +64,10 @@ export class ProductosService {
   // Alias de compatibilidad
   getProductoDetalle(id: number): Observable<ProductoDetalle> {
     return this.getProductoById(id);
+  }
+
+  // Nuevo: obtener ProductoResponse (mismo endpoint, tipado flexible para incluir url)
+  getProductoResponse(id: number): Observable<ProductoResponse> {
+    return this.http.get<ProductoResponse>(`${this.apiUrl}/${id}`);
   }
 }

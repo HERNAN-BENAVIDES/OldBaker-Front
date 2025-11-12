@@ -63,8 +63,8 @@ export class ShoppingCartService {
     const missing = items.filter(i => !i.image || String(i.image).trim() === '');
     if (missing.length === 0) return of(items);
 
-    const lookups = missing.map(m => this.productos.getProductoDetalle(m.id).pipe(
-      map(det => ({ id: m.id, url: det.url ?? '' })),
+    const lookups = missing.map(m => this.productos.getProductoResponse(m.id).pipe(
+      map(det => ({ id: m.id, url: (det as any).url ?? '' })),
       catchError(() => of({ id: m.id, url: '' }))
     ));
 
@@ -95,8 +95,8 @@ export class ShoppingCartService {
           }
           this.serverCartId = cart.id;
           const enrich$ = cart.items.map((ci: CartItemDTO) =>
-            this.productos.getProductoDetalle(ci.idProducto).pipe(
-              map(det => ({ id: ci.idProducto, name: det.nombre, price: det.costoUnitario, quantity: ci.cantidad, image: det.url, selected: ci.selected ?? true } as CartItem)),
+            this.productos.getProductoResponse(ci.idProducto).pipe(
+              map(det => ({ id: ci.idProducto, name: det.nombre, price: det.costoUnitario, quantity: ci.cantidad, image: (det as any).url ?? '', selected: ci.selected ?? true } as CartItem)),
               catchError(() => of<CartItem>({ id: ci.idProducto, name: `Producto ${ci.idProducto}`, price: 0, quantity: ci.cantidad, selected: ci.selected ?? true }))
             )
           );
@@ -259,8 +259,8 @@ export class ShoppingCartService {
         }
         this.serverCartId = cart.id;
         const enrich$ = cart.items.map((ci: CartItemDTO) =>
-          this.productos.getProductoDetalle(ci.idProducto).pipe(
-            map(det => ({ id: ci.idProducto, name: det.nombre, price: det.costoUnitario, quantity: ci.cantidad, image: det.url, selected: ci.selected ?? true } as CartItem)),
+          this.productos.getProductoResponse(ci.idProducto).pipe(
+            map(det => ({ id: ci.idProducto, name: det.nombre, price: det.costoUnitario, quantity: ci.cantidad, image: (det as any).url ?? '', selected: ci.selected ?? true } as CartItem)),
             catchError(() => of<CartItem>({ id: ci.idProducto, name: `Producto ${ci.idProducto}`, price: 0, quantity: ci.cantidad, selected: ci.selected ?? true }))
           )
         );
