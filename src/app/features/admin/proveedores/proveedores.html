@@ -63,20 +63,7 @@
         </mat-card-content>
       </mat-card>
 
-      <!-- Pedidos de Insumos -->
-      <mat-card class="module-card" (click)="setActiveModule('pedidos')">
-        <mat-card-header>
-          <mat-icon class="module-icon">shopping_cart</mat-icon>
-          <mat-card-title>Pedidos de Insumos</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <p>Crear y gestionar pedidos de insumos faltantes a proveedores.</p>
-          <div class="card-stats">
-            <span class="stat-number">{{ pedidosTotal }}</span>
-            <span class="stat-label">Pedidos</span>
-          </div>
-        </mat-card-content>
-      </mat-card>
+      <!-- MÓDULO ELIMINADO: Pedidos de Insumos - Migrado a Detalles de Pedidos -->
 
       <!-- Detalles de Pedidos - NUEVA VERSIÓN -->
       <mat-card class="module-card" (click)="setActiveModule('detalles-pedidos')">
@@ -85,10 +72,10 @@
           <mat-card-title>Detalles de Pedidos</mat-card-title>
         </mat-card-header>
         <mat-card-content>
-          <p>Ver y gestionar detalles específicos de cada pedido realizado a proveedores con verificación de items.</p>
+          <p>Crear pedidos de insumos y gestionar todos los detalles específicos de cada pedido realizado a proveedores.</p>
           <div class="card-stats">
-            <span class="stat-number">{{ detallesPedidosTotal }}</span>
-            <span class="stat-label">Pedidos Detallados</span>
+            <span class="stat-number">{{ detallesTotal }}</span>
+            <span class="stat-label">Detalles de Pedidos</span>
           </div>
         </mat-card-content>
       </mat-card>
@@ -338,161 +325,8 @@
     </div>
   </div>
 
-<!-- ================= MÓDULO DE PEDIDOS DE INSUMOS (MEJORADO) ================= -->
-<div class="module-content" *ngIf="activeModule === 'pedidos'">
-  <div class="module-header">
-    <h2 class="module-title">
-      <mat-icon>shopping_cart</mat-icon>
-      Gestión de Pedidos de Insumos
-    </h2>
-    <button mat-raised-button class="add-btn" (click)="openAddDialog('pedido')">
-      <mat-icon>add</mat-icon>
-      Hacer Pedido de Insumos
-    </button>
-  </div>
-
-  <div class="search-container">
-    <mat-form-field appearance="outline" class="search-field">
-      <mat-label>Buscar pedidos...</mat-label>
-      <input matInput (keyup)="applyFilter($event, pedidosDataSource)" placeholder="Nombre, proveedor o descripción">
-      <mat-icon matSuffix>search</mat-icon>
-    </mat-form-field>
-  </div>
-
-  <div class="table-container">
-    <mat-table [dataSource]="pedidosDataSource" class="data-table">
-
-      <!-- Columna: ID -->
-      <ng-container matColumnDef="id_pedido">
-        <mat-header-cell *matHeaderCellDef>ID</mat-header-cell>
-        <mat-cell *matCellDef="let item">
-          <span class="id-badge">#{{ item.id_pedido }}</span>
-        </mat-cell>
-      </ng-container>
-
-      <!-- Columna: Nombre -->
-      <ng-container matColumnDef="nombre">
-        <mat-header-cell *matHeaderCellDef>Nombre</mat-header-cell>
-        <mat-cell *matCellDef="let item">
-          <strong>{{ item.nombre }}</strong>
-        </mat-cell>
-      </ng-container>
-
-      <!-- Columna: Descripción -->
-      <ng-container matColumnDef="descripcion">
-        <mat-header-cell *matHeaderCellDef>Descripción</mat-header-cell>
-        <mat-cell *matCellDef="let item">
-          <span class="descripcion-text">{{ item.descripcion }}</span>
-        </mat-cell>
-      </ng-container>
-
-      <!-- Columna: Proveedor -->
-      <ng-container matColumnDef="nombre_proveedor">
-        <mat-header-cell *matHeaderCellDef>Proveedor</mat-header-cell>
-        <mat-cell *matCellDef="let item">
-          <div class="proveedor-cell">
-            <mat-icon class="cell-icon">business</mat-icon>
-            <span>{{ item.nombre_proveedor }}</span>
-          </div>
-        </mat-cell>
-      </ng-container>
-
-      <!-- Columna: Cantidad de Items (NUEVO) -->
-      <ng-container matColumnDef="cantidad_items">
-        <mat-header-cell *matHeaderCellDef>Items</mat-header-cell>
-        <mat-cell *matCellDef="let item">
-          <mat-chip class="items-chip">
-            <mat-icon matChipAvatar>shopping_basket</mat-icon>
-            {{ getCantidadItemsPedido(item) }}
-          </mat-chip>
-        </mat-cell>
-      </ng-container>
-
-      <!-- Columna: Costo Total -->
-      <ng-container matColumnDef="costo_total">
-        <mat-header-cell *matHeaderCellDef>Total</mat-header-cell>
-        <mat-cell *matCellDef="let item">
-          <span class="price total">${{ item.costo_total | number:'1.2-2' }}</span>
-        </mat-cell>
-      </ng-container>
-
-      <!-- Columna: Fecha Pedido -->
-      <ng-container matColumnDef="fecha_pedido">
-        <mat-header-cell *matHeaderCellDef>Fecha Pedido</mat-header-cell>
-        <mat-cell *matCellDef="let item">
-          <div class="fecha-cell">
-            <mat-icon class="cell-icon">event</mat-icon>
-            <span>{{ item.fecha_pedido | date:'dd/MM/yyyy' }}</span>
-          </div>
-        </mat-cell>
-      </ng-container>
-
-      <!-- Columna: Fecha Entrega (NUEVO) -->
-      <ng-container matColumnDef="fecha_entrega_estimada">
-        <mat-header-cell *matHeaderCellDef>Entrega</mat-header-cell>
-        <mat-cell *matCellDef="let item">
-          <div class="fecha-cell" *ngIf="item.fecha_entrega_estimada">
-            <mat-icon class="cell-icon">local_shipping</mat-icon>
-            <span>{{ item.fecha_entrega_estimada | date:'dd/MM/yyyy' }}</span>
-          </div>
-          <span *ngIf="!item.fecha_entrega_estimada" class="text-muted">Sin fecha</span>
-        </mat-cell>
-      </ng-container>
-
-      <!-- Columna: Estado (NUEVO) -->
-      <ng-container matColumnDef="estado">
-        <mat-header-cell *matHeaderCellDef>Estado</mat-header-cell>
-        <mat-cell *matCellDef="let item">
-          <mat-chip [color]="getEstadoPedidoColor(item.estado || 'pendiente')" selected>
-            {{ (item.estado || 'pendiente') | uppercase }}
-          </mat-chip>
-        </mat-cell>
-      </ng-container>
-
-      <!-- Columna: Estado Pago -->
-      <ng-container matColumnDef="es_pagable">
-        <mat-header-cell *matHeaderCellDef>Pago</mat-header-cell>
-        <mat-cell *matCellDef="let item">
-          <span class="status" [ngClass]="item.es_pagable ? 'paid' : 'unpaid'">
-            {{ item.es_pagable ? 'Pagable' : 'No Pagable' }}
-          </span>
-        </mat-cell>
-      </ng-container>
-
-      <!-- Columna: Acciones -->
-      <ng-container matColumnDef="acciones">
-        <mat-header-cell *matHeaderCellDef class="actions-header">Acciones</mat-header-cell>
-        <mat-cell *matCellDef="let item" class="actions-cell">
-          <div class="actions-container">
-            <button mat-mini-fab
-                    class="action-btn view-btn"
-                    (click)="openEditDialog('pedido', item)"
-                    matTooltip="Ver/Editar Pedido">
-              <mat-icon>visibility</mat-icon>
-            </button>
-            <button mat-mini-fab
-                    class="action-btn edit-btn"
-                    (click)="openEditDialog('pedido', item)"
-                    matTooltip="Editar">
-              <mat-icon>edit</mat-icon>
-            </button>
-            <button mat-mini-fab
-                    class="action-btn delete-btn"
-                    (click)="deleteItem('pedido', item)"
-                    matTooltip="Eliminar">
-              <mat-icon>delete</mat-icon>
-            </button>
-          </div>
-        </mat-cell>
-      </ng-container>
-
-      <mat-header-row *matHeaderRowDef="pedidosColumns"></mat-header-row>
-      <mat-row *matRowDef="let row; columns: pedidosColumns;"></mat-row>
-    </mat-table>
-
-    <mat-paginator #pedidosPaginator [length]="pedidosTotal" [pageSize]="pedidosPageSize" [pageIndex]="pedidosPageIndex" [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons (page)="onPedidosPage($event)"></mat-paginator>
-  </div>
-</div>
+<!-- ================= MÓDULO ELIMINADO: PEDIDOS DE INSUMOS ================= -->
+<!-- Funcionalidad migrada al módulo "Gestión de Detalles de Pedidos" -->
 
   <!-- ================= MÓDULO DE DETALLES DE PEDIDOS ================= -->
   <div class="module-content" *ngIf="activeModule === 'detalles-pedidos'">
@@ -501,6 +335,10 @@
         <mat-icon>receipt_long</mat-icon>
         Gestión de Detalles de Pedidos
       </h2>
+      <button mat-raised-button class="add-btn" (click)="openAddDialog('pedido')">
+        <mat-icon>add</mat-icon>
+        Hacer Pedido de Insumos
+      </button>
     </div>
 
     <!-- Estadísticas -->
@@ -508,103 +346,185 @@
       <mat-card class="stat-card pendiente">
         <mat-card-content>
           <h3>Pendientes</h3>
-          <div class="stat-number">{{ getDetallesPedidosCountByStatus('pendiente') }}</div>
+          <div class="stat-number">{{ getDetallesByEstadoPedido('PENDIENTE') }}</div>
         </mat-card-content>
       </mat-card>
 
-      <mat-card class="stat-card recibido">
+      <mat-card class="stat-card aprobado">
         <mat-card-content>
-          <h3>Recibidos</h3>
-          <div class="stat-number">{{ getDetallesPedidosCountByStatus('recibido') }}</div>
+          <h3>Aprobados</h3>
+          <div class="stat-number">{{ getDetallesByEstadoPedido('APROBADO') }}</div>
         </mat-card-content>
       </mat-card>
 
-      <mat-card class="stat-card verificado">
+      <mat-card class="stat-card pagado">
         <mat-card-content>
-          <h3>Verificados</h3>
-          <div class="stat-number">{{ getDetallesPedidosCountByStatus('verificado') }}</div>
+          <h3>Pagados</h3>
+          <div class="stat-number">{{ getDetallesByEstadoPedido('PAGADO') }}</div>
         </mat-card-content>
       </mat-card>
 
-      <mat-card class="stat-card incompleto">
+      <mat-card class="stat-card devuelto">
         <mat-card-content>
-          <h3>Incompletos</h3>
-          <div class="stat-number">{{ getDetallesPedidosCountByStatus('incompleto') }}</div>
+          <h3>Devueltos</h3>
+          <div class="stat-number">{{ getTotalDevueltos() }}</div>
         </mat-card-content>
       </mat-card>
     </div>
 
     <div class="search-container">
       <mat-form-field appearance="outline" class="search-field">
-        <mat-label>Buscar pedidos...</mat-label>
-        <input matInput (keyup)="applyFilter($event, detallesPedidosDataSource)" placeholder="Proveedor, ID o estado">
+        <mat-label>Buscar detalles...</mat-label>
+        <input matInput (keyup)="applyFilter($event, detallesDataSource)" placeholder="Insumo, pedido o estado">
         <mat-icon matSuffix>search</mat-icon>
       </mat-form-field>
     </div>
 
     <div class="table-container">
-      <mat-table [dataSource]="detallesPedidosDataSource" class="data-table">
+      <mat-table [dataSource]="detallesDataSource" class="data-table" multiTemplateDataRows>
 
-        <ng-container matColumnDef="id">
-          <mat-header-cell *matHeaderCellDef>ID Pedido</mat-header-cell>
-          <mat-cell *matCellDef="let item">
-            <span class="id-badge">#{{ item.id }}</span>
+        <!-- Columna de expansión -->
+        <ng-container matColumnDef="expand">
+          <mat-header-cell *matHeaderCellDef aria-label="row">&nbsp;</mat-header-cell>
+          <mat-cell *matCellDef="let element">
+            <button mat-icon-button aria-label="expand row" (click)="toggleRow(element)" [attr.aria-expanded]="expandedElement === element" [attr.aria-label]="'expand row'">
+              <mat-icon *ngIf="expandedElement !== element">keyboard_arrow_down</mat-icon>
+              <mat-icon *ngIf="expandedElement === element">keyboard_arrow_up</mat-icon>
+            </button>
           </mat-cell>
         </ng-container>
 
-        <ng-container matColumnDef="proveedor">
-          <mat-header-cell *matHeaderCellDef>Proveedor</mat-header-cell>
-          <mat-cell *matCellDef="let item">{{ item.proveedor }}</mat-cell>
+        <!-- Columnas de pedido principal -->
+        <ng-container matColumnDef="id_pedido">
+          <mat-header-cell *matHeaderCellDef>ID Pedido</mat-header-cell>
+          <mat-cell *matCellDef="let pedido">
+            <span class="pedido-badge">P#{{ pedido.id_pedido }}</span>
+          </mat-cell>
         </ng-container>
 
-        <ng-container matColumnDef="fechaPedido">
-          <mat-header-cell *matHeaderCellDef>Fecha Pedido</mat-header-cell>
-          <mat-cell *matCellDef="let item">{{ item.fechaPedido }}</mat-cell>
+        <ng-container matColumnDef="nombre">
+          <mat-header-cell *matHeaderCellDef>Nombre</mat-header-cell>
+          <mat-cell *matCellDef="let pedido">
+            <strong>{{ pedido.nombre }}</strong>
+          </mat-cell>
         </ng-container>
 
-        <ng-container matColumnDef="fechaEntrega">
-          <mat-header-cell *matHeaderCellDef>Fecha Entrega</mat-header-cell>
-          <mat-cell *matCellDef="let item">{{ item.fechaEntrega }}</mat-cell>
+        <ng-container matColumnDef="descripcion">
+          <mat-header-cell *matHeaderCellDef>Descripción</mat-header-cell>
+          <mat-cell *matCellDef="let pedido">
+            <span>{{ pedido.descripcion }}</span>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="costo_total">
+          <mat-header-cell *matHeaderCellDef>Costo Total</mat-header-cell>
+          <mat-cell *matCellDef="let pedido">
+            <span class="price">${{ pedido.costo_total | number:'1.2-2' }}</span>
+          </mat-cell>
         </ng-container>
 
         <ng-container matColumnDef="estado">
           <mat-header-cell *matHeaderCellDef>Estado</mat-header-cell>
-          <mat-cell *matCellDef="let item">
-            <mat-chip [ngClass]="'status-' + item.estado" class="status-chip">
-              {{ item.estado | uppercase }}
+          <mat-cell *matCellDef="let pedido">
+            <mat-chip [ngClass]="'status-' + (pedido.estado || 'pendiente').toLowerCase()" class="status-chip">
+              {{ pedido.estado || 'PENDIENTE' }}
             </mat-chip>
           </mat-cell>
         </ng-container>
 
-        <ng-container matColumnDef="total">
-          <mat-header-cell *matHeaderCellDef>Total</mat-header-cell>
-          <mat-cell *matCellDef="let item">
-            <span class="price total">${{ item.total | number:'1.2-2' }}</span>
+        <ng-container matColumnDef="fecha_pedido">
+          <mat-header-cell *matHeaderCellDef>Fecha Pedido</mat-header-cell>
+          <mat-cell *matCellDef="let pedido">
+            <div class="fecha-cell">
+              <mat-icon class="cell-icon">event</mat-icon>
+              <span>{{ pedido.fecha_pedido | date:'dd/MM/yyyy' }}</span>
+            </div>
           </mat-cell>
         </ng-container>
 
         <ng-container matColumnDef="acciones">
           <mat-header-cell *matHeaderCellDef class="actions-header">Acciones</mat-header-cell>
-          <mat-cell *matCellDef="let item" class="actions-cell">
+          <mat-cell *matCellDef="let pedido" class="actions-cell">
             <div class="actions-container">
               <button mat-mini-fab
-                      class="action-btn view-btn"
-                      (click)="openDetallePedidoDialog(item)"
-                      matTooltip="Ver/Editar Detalles">
-                <mat-icon>visibility</mat-icon>
+                      *ngIf="pedido.estado === 'PENDIENTE'"
+                      class="action-btn success-btn"
+                      (click)="aprobarPedido(pedido.id_pedido)"
+                      matTooltip="Aprobar Pedido">
+                <mat-icon>check</mat-icon>
               </button>
+              
               <button mat-mini-fab
-                      class="action-btn edit-btn"
-                      (click)="openDetallePedidoDialog(item)"
-                      matTooltip="Gestionar Pedido">
-                <mat-icon>edit</mat-icon>
+                      *ngIf="pedido.estado === 'APROBADO'"
+                      class="action-btn primary-btn"
+                      (click)="pagarPedido(pedido.id_pedido)"
+                      matTooltip="Marcar como Pagado">
+                <mat-icon>payment</mat-icon>
               </button>
             </div>
           </mat-cell>
         </ng-container>
 
-        <mat-header-row *matHeaderRowDef="detallesPedidosColumns"></mat-header-row>
-        <mat-row *matRowDef="let row; columns: detallesPedidosColumns;"></mat-row>
+        <!-- Fila expandida para mostrar insumos -->
+        <ng-container matColumnDef="expandedDetail">
+          <mat-cell *matCellDef="let pedido" [attr.colspan]="detallesColumns.length">
+            <div class="example-element-detail" [@detailExpand]="pedido == expandedElement ? 'expanded' : 'collapsed'">
+              <div class="expanded-content">
+                <h4>Insumos del Pedido</h4>
+                <mat-table [dataSource]="pedido.detalles" class="inner-table">
+                  <ng-container matColumnDef="id_detalle">
+                    <mat-header-cell *matHeaderCellDef>ID Detalle</mat-header-cell>
+                    <mat-cell *matCellDef="let detalle">{{ detalle.id }}</mat-cell>
+                  </ng-container>
+
+                  <ng-container matColumnDef="nombre_insumo">
+                    <mat-header-cell *matHeaderCellDef>Insumo</mat-header-cell>
+                    <mat-cell *matCellDef="let detalle">{{ detalle.insumo.nombre }}</mat-cell>
+                  </ng-container>
+
+                  <ng-container matColumnDef="cantidad">
+                    <mat-header-cell *matHeaderCellDef>Cantidad</mat-header-cell>
+                    <mat-cell *matCellDef="let detalle">{{ detalle.cantidadInsumo }}</mat-cell>
+                  </ng-container>
+
+                  <ng-container matColumnDef="costo_subtotal">
+                    <mat-header-cell *matHeaderCellDef>Subtotal</mat-header-cell>
+                    <mat-cell *matCellDef="let detalle">${{ detalle.costoSubtotal | number:'1.2-2' }}</mat-cell>
+                  </ng-container>
+
+                  <ng-container matColumnDef="es_devuelto">
+                    <mat-header-cell *matHeaderCellDef>Estado</mat-header-cell>
+                    <mat-cell *matCellDef="let detalle">
+                      <mat-chip [ngClass]="detalle.esDevuelto ? 'status-devuelto' : 'status-normal'" class="status-chip">
+                        {{ detalle.esDevuelto ? 'DEVUELTO' : 'NORMAL' }}
+                      </mat-chip>
+                    </mat-cell>
+                  </ng-container>
+
+                  <ng-container matColumnDef="acciones_detalle">
+                    <mat-header-cell *matHeaderCellDef>Acciones</mat-header-cell>
+                    <mat-cell *matCellDef="let detalle">
+                      <button mat-mini-fab
+                              *ngIf="!detalle.esDevuelto && pedido.estado === 'PENDIENTE'"
+                              class="action-btn warning-btn"
+                              (click)="devolverInsumo(pedido, detalle)"
+                              matTooltip="Marcar como Devuelto (Solo pedidos pendientes)">
+                        <mat-icon>undo</mat-icon>
+                      </button>
+                    </mat-cell>
+                  </ng-container>
+
+                  <mat-header-row *matHeaderRowDef="['id_detalle', 'nombre_insumo', 'cantidad', 'costo_subtotal', 'es_devuelto', 'acciones_detalle']"></mat-header-row>
+                  <mat-row *matRowDef="let row; columns: ['id_detalle', 'nombre_insumo', 'cantidad', 'costo_subtotal', 'es_devuelto', 'acciones_detalle'];"></mat-row>
+                </mat-table>
+              </div>
+            </div>
+          </mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="detallesColumns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: detallesColumns;" class="example-element-row" [class.example-expanded-row]="expandedElement === row" (click)="toggleRow(row)"></mat-row>
+        <mat-row *matRowDef="let row; columns: ['expandedDetail']" class="example-detail-row"></mat-row>
       </mat-table>
 
       <mat-paginator #detallesPaginator [length]="detallesTotal" [pageSize]="detallesPageSize" [pageIndex]="detallesPageIndex" [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons (page)="onDetallesPage($event)"></mat-paginator>
@@ -618,70 +538,168 @@
         <mat-icon>report_problem</mat-icon>
         Gestión de Reportes a Proveedores
       </h2>
-      <button mat-raised-button class="add-btn" (click)="openAddDialog('reporte')">
+      <button mat-raised-button class="add-btn" (click)="abrirDialogoReporte()">
         <mat-icon>add</mat-icon>
-        Crear Reporte
+        Crear Reporte Manual
       </button>
     </div>
 
     <div class="search-container">
       <mat-form-field appearance="outline" class="search-field">
         <mat-label>Buscar reportes...</mat-label>
-        <input matInput (keyup)="applyFilter($event, reportesDataSource)" placeholder="Razón o ID detalle">
+        <input matInput (keyup)="applyFilter($event, reportesDataSource)" placeholder="Razón, ID o proveedor">
         <mat-icon matSuffix>search</mat-icon>
       </mat-form-field>
     </div>
 
     <div class="table-container">
-      <mat-table [dataSource]="reportesDataSource" class="data-table">
-        <ng-container matColumnDef="id_devolucion">
-          <mat-header-cell *matHeaderCellDef>ID</mat-header-cell>
-          <mat-cell *matCellDef="let item"><span class="id-badge">{{ item.id_devolucion }}</span></mat-cell>
+      <mat-table [dataSource]="reportesDataSource" class="data-table" multiTemplateDataRows>
+
+        <!-- Columna de expansión -->
+        <ng-container matColumnDef="expand">
+          <mat-header-cell *matHeaderCellDef aria-label="row">&nbsp;</mat-header-cell>
+          <mat-cell *matCellDef="let element">
+            <button mat-icon-button aria-label="expand row" (click)="toggleReporteRow(element)" [attr.aria-expanded]="expandedReporte === element">
+              <mat-icon *ngIf="expandedReporte !== element">keyboard_arrow_down</mat-icon>
+              <mat-icon *ngIf="expandedReporte === element">keyboard_arrow_up</mat-icon>
+            </button>
+          </mat-cell>
+        </ng-container>
+
+        <!-- Columnas principales -->
+        <ng-container matColumnDef="idDevolucion">
+          <mat-header-cell *matHeaderCellDef>ID Reporte</mat-header-cell>
+          <mat-cell *matCellDef="let reporte">
+            <span class="id-badge">R#{{ reporte.idDevolucion }}</span>
+          </mat-cell>
         </ng-container>
 
         <ng-container matColumnDef="razon">
           <mat-header-cell *matHeaderCellDef>Razón</mat-header-cell>
-          <mat-cell *matCellDef="let item">{{ item.razon }}</mat-cell>
-        </ng-container>
-
-        <ng-container matColumnDef="es_devolucion">
-          <mat-header-cell *matHeaderCellDef>Tipo</mat-header-cell>
-          <mat-cell *matCellDef="let item">
-            <span class="report-type" [ngClass]="item.es_devolucion ? 'return' : 'complaint'">
-              {{ item.es_devolucion ? 'Devolución' : 'Queja' }}
-            </span>
+          <mat-cell *matCellDef="let reporte">
+            <div class="razon-cell">
+              <span class="razon-text">{{ reporte.razon | slice:0:50 }}{{ reporte.razon.length > 50 ? '...' : '' }}</span>
+            </div>
           </mat-cell>
         </ng-container>
 
-        <ng-container matColumnDef="fecha_devolucion">
-          <mat-header-cell *matHeaderCellDef>Fecha</mat-header-cell>
-          <mat-cell *matCellDef="let item">{{ item.fecha_devolucion | date:'dd/MM/yyyy' }}</mat-cell>
+        <ng-container matColumnDef="tipo">
+          <mat-header-cell *matHeaderCellDef>Tipo</mat-header-cell>
+          <mat-cell *matCellDef="let reporte">
+            <mat-chip [ngClass]="reporte.esDevolucion ? 'tipo-devolucion' : 'tipo-normal'" class="tipo-chip">
+              {{ reporte.esDevolucion ? 'DEVOLUCIÓN' : 'NORMAL' }}
+            </mat-chip>
+          </mat-cell>
         </ng-container>
 
-        <ng-container matColumnDef="id_detalle">
+        <ng-container matColumnDef="fechaDevolucion">
+          <mat-header-cell *matHeaderCellDef>Fecha</mat-header-cell>
+          <mat-cell *matCellDef="let reporte">
+            <div class="fecha-cell">
+              <span>{{ reporte.fechaDevolucion | date:'dd/MM/yyyy' }}</span>
+            </div>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="detalleId">
           <mat-header-cell *matHeaderCellDef>ID Detalle</mat-header-cell>
-          <mat-cell *matCellDef="let item">{{ item.id_detalle }}</mat-cell>
+          <mat-cell *matCellDef="let reporte">
+            <span class="detalle-id">{{ reporte.detalleId || '-' }}</span>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="proveedor">
+          <mat-header-cell *matHeaderCellDef>Proveedor</mat-header-cell>
+          <mat-cell *matCellDef="let reporte">
+            <span class="proveedor-name">{{ reporte.proveedorNombre || '-' }}</span>
+          </mat-cell>
         </ng-container>
 
         <ng-container matColumnDef="acciones">
           <mat-header-cell *matHeaderCellDef class="actions-header">Acciones</mat-header-cell>
-          <mat-cell *matCellDef="let item" class="actions-cell">
+          <mat-cell *matCellDef="let reporte" class="actions-cell">
             <div class="actions-container">
-              <button mat-mini-fab class="action-btn view-btn" (click)="openEditDialog('reporte', item)" matTooltip="Ver">
-                <mat-icon>visibility</mat-icon>
-              </button>
-              <button mat-mini-fab class="action-btn edit-btn" (click)="openEditDialog('reporte', item)" matTooltip="Editar">
+              <button mat-mini-fab 
+                      class="action-btn edit-btn"
+                      *ngIf="!reporte.esDevolucion"
+                      (click)="abrirDialogoReporte(reporte)" 
+                      matTooltip="Editar Reporte">
                 <mat-icon>edit</mat-icon>
               </button>
-              <button mat-mini-fab class="action-btn delete-btn" (click)="deleteItem('reporte', item)" matTooltip="Eliminar">
+              <button mat-mini-fab 
+                      class="action-btn delete-btn"
+                      *ngIf="!reporte.esDevolucion"
+                      (click)="eliminarReporte(reporte)" 
+                      matTooltip="Eliminar Reporte">
                 <mat-icon>delete</mat-icon>
               </button>
+              <span *ngIf="reporte.esDevolucion" class="no-actions-text">
+                <mat-icon>lock</mat-icon>
+                No editable
+              </span>
+            </div>
+          </mat-cell>
+        </ng-container>
+
+        <!-- Fila expandida para mostrar detalles -->
+        <ng-container matColumnDef="expandedDetail">
+          <mat-cell *matCellDef="let reporte" [attr.colspan]="reportesColumns.length">
+            <div class="example-element-detail" [@detailExpand]="reporte == expandedReporte ? 'expanded' : 'collapsed'">
+              <div class="expanded-content">
+                <h4>Detalles del Reporte</h4>
+                
+                <div class="reporte-details-grid">
+                  <div class="detail-section">
+                    <h5>Información General</h5>
+                    <div class="detail-item">
+                      <label>ID Reporte:</label>
+                      <span>R#{{ reporte.idDevolucion }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <label>Tipo:</label>
+                      <span>{{ reporte.esDevolucion ? 'Reporte de Devolución' : 'Reporte Manual' }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <label>Fecha:</label>
+                      <span>{{ reporte.fechaDevolucion | date:'dd/MM/yyyy HH:mm' }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <label>Proveedor:</label>
+                      <span>{{ reporte.proveedorNombre || '-' }}</span>
+                    </div>
+                  </div>
+
+                  <div class="detail-section" *ngIf="reporte.esDevolucion && reporte.detalleId">
+                    <h5>Información del Insumo Devuelto</h5>
+                    <div class="detail-item">
+                      <label>ID Detalle:</label>
+                      <span>{{ reporte.detalleId }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <label>Insumo:</label>
+                      <span>{{ reporte.insumoNombre || '-' }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <label>Cantidad Devuelta:</label>
+                      <span>{{ reporte.cantidadDevuelta || '-' }} unidades</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="razon-completa">
+                  <h5>Razón Completa</h5>
+                  <div class="razon-content">
+                    {{ reporte.razon }}
+                  </div>
+                </div>
+              </div>
             </div>
           </mat-cell>
         </ng-container>
 
         <mat-header-row *matHeaderRowDef="reportesColumns"></mat-header-row>
-        <mat-row *matRowDef="let row; columns: reportesColumns;"></mat-row>
+        <mat-row *matRowDef="let row; columns: reportesColumns;" class="example-element-row" [class.example-expanded-row]="expandedReporte === row" (click)="toggleReporteRow(row)"></mat-row>
+        <mat-row *matRowDef="let row; columns: ['expandedDetail']" class="example-detail-row"></mat-row>
       </mat-table>
 
       <mat-paginator #reportesPaginator [length]="reportesTotal" [pageSize]="reportesPageSize" [pageIndex]="reportesPageIndex" [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons (page)="onReportesPage($event)"></mat-paginator>
