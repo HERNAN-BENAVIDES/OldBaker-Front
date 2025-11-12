@@ -1,0 +1,116 @@
+<section class="checkout-page">
+  <h1>Selecciona Direcciones</h1>
+  <div class="checkout-container">
+    <div class="order-summary">
+      <h2>Resumen del Pedido</h2>
+      <div class="summary-items">
+        <div class="summary-item" *ngFor="let item of selectedItems">
+          <img [src]="item.image" [alt]="item.name" class="item-thumb" />
+          <div class="item-info">
+            <strong>{{ item.name }}</strong>
+            <span>{{ item.quantity }} x {{ item.price | currency:'COP':'symbol':'1.0-0' }}</span>
+          </div>
+          <div class="item-total">{{ (item.price * item.quantity) | currency:'COP':'symbol':'1.0-0' }}</div>
+        </div>
+      </div>
+      <div class="summary-total">
+        <strong>Total:</strong>
+        <strong>{{ total | currency:'COP':'symbol':'1.0-0' }}</strong>
+      </div>
+    </div>
+
+    <div class="address-select" *ngIf="!isLoading; else loadingTpl">
+      <h2>Dirección de Entrega</h2>
+      <div *ngIf="addresses.length === 0 && !showNewAddressForm" class="no-addresses">
+        <p>No tienes direcciones. Crea una para continuar.</p>
+        <button class="btn btn-primary" (click)="openNewAddressForm()">Crear dirección</button>
+      </div>
+
+      <ul class="address-list" *ngIf="addresses.length > 0">
+        <li *ngFor="let dir of addresses" class="address-item" [class.selected]="dir.id === selectedDeliveryAddressId">
+          <label>
+            <input type="radio" name="delivery" [value]="dir.id" [(ngModel)]="selectedDeliveryAddressId" (change)="useSameAddress && (selectedBillingAddressId = selectedDeliveryAddressId)" />
+            <div class="addr-body">
+              <p><strong>{{ dir.ciudad }}</strong> - {{ dir.barrio }}</p>
+              <p>Carrera {{ dir.carrera }} # {{ dir.calle }} - {{ dir.numero }}</p>
+              <p>Tel: {{ dir.numeroTelefono }}</p>
+            </div>
+          </label>
+        </li>
+      </ul>
+
+      <div class="same-address-check" *ngIf="addresses.length > 0">
+        <label>
+          <input type="checkbox" [(ngModel)]="useSameAddress" (change)="toggleUseSameAddress()" />
+          <span>Usar la misma dirección para facturación</span>
+        </label>
+      </div>
+
+      <div *ngIf="!useSameAddress && addresses.length > 0">
+        <h2>Dirección de Facturación</h2>
+        <ul class="address-list">
+          <li *ngFor="let dir of addresses" class="address-item" [class.selected]="dir.id === selectedBillingAddressId">
+            <label>
+              <input type="radio" name="billing" [value]="dir.id" [(ngModel)]="selectedBillingAddressId" />
+              <div class="addr-body">
+                <p><strong>{{ dir.ciudad }}</strong> - {{ dir.barrio }}</p>
+                <p>Carrera {{ dir.carrera }} # {{ dir.calle }} - {{ dir.numero }}</p>
+                <p>Tel: {{ dir.numeroTelefono }}</p>
+              </div>
+            </label>
+          </li>
+        </ul>
+      </div>
+
+      <div *ngIf="showNewAddressForm" class="new-address-form">
+        <h3>Nueva Dirección</h3>
+        <div class="form-grid">
+          <div class="form-field">
+            <label>Ciudad</label>
+            <input [(ngModel)]="newAddress.ciudad" type="text" />
+          </div>
+          <div class="form-field">
+            <label>Barrio</label>
+            <input [(ngModel)]="newAddress.barrio" type="text" />
+          </div>
+          <div class="form-field">
+            <label>Carrera</label>
+            <input [(ngModel)]="newAddress.carrera" type="text" />
+          </div>
+          <div class="form-field">
+            <label>Calle</label>
+            <input [(ngModel)]="newAddress.calle" type="text" />
+          </div>
+          <div class="form-field">
+            <label>Número</label>
+            <input [(ngModel)]="newAddress.numero" type="text" />
+          </div>
+          <div class="form-field">
+            <label>Teléfono</label>
+            <input [(ngModel)]="newAddress.numeroTelefono" type="tel" />
+          </div>
+        </div>
+        <div class="action-buttons">
+          <button class="btn btn-outline" (click)="cancelNewAddress()" [disabled]="creatingAddress">Cancelar</button>
+            <button class="btn btn-primary" (click)="createAddress()" [disabled]="creatingAddress || !canCreateAddress()">
+              {{ creatingAddress ? 'Creando...' : 'Guardar dirección' }}
+            </button>
+        </div>
+      </div>
+
+      <div class="action-buttons" *ngIf="addresses.length > 0 || showNewAddressForm">
+        <button class="btn btn-outline" (click)="goBack()" [disabled]="isLoading">Volver al carrito</button>
+        <button class="btn btn-primary" (click)="proceedToPayment()" [disabled]="isLoading || !selectedDeliveryAddressId || (!useSameAddress && !selectedBillingAddressId)">
+          {{ isLoading ? 'Procesando...' : 'Proceder al pago' }}
+        </button>
+      </div>
+    </div>
+
+    <ng-template #loadingTpl>
+      <div class="loading-box">
+        <div class="spinner"></div>
+        <p>Cargando direcciones...</p>
+      </div>
+    </ng-template>
+  </div>
+</section>

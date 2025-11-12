@@ -1,0 +1,26 @@
+/* Vista simple del carrito */
+.cart-page { padding: 24px; max-width: 800px; margin: 0 auto; }
+.subtitle { color: #6b7280; }
+.cart-panel { border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; background: #fff; }
+.bulk-actions { display:flex; gap:8px; margin-bottom:12px; }
+.cart-items { display: flex; flex-direction: column; gap: 12px; }
+.cart-item { display:flex; gap: 12px; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; background: #f9fafb; align-items:flex-start; }
+.quantity-controls { display: flex; gap: 8px; align-items: center; }
+.quantity-controls button { width: 28px; height: 28px; }
+.btn { background:#2563eb; color:#fff; border:none; padding:8px 14px; border-radius:6px; font-size:0.875rem; cursor:pointer; transition:.15s; }
+.btn:hover { background:#1d4ed8; }
+.btn:disabled { opacity:.5; cursor:not-allowed; }
+.btn-outline { background:#f3f4f6; color:#374151; }
+.btn-outline:hover { background:#e5e7eb; }
+.btn-primary { background:linear-gradient(135deg,#3b82f6 0%,#2563eb 100%); }
+.btn-primary:hover { background:linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%); }
+.btn-qty { background:#fff; border:1px solid #d1d5db; border-radius:6px; width:28px; height:28px; cursor:pointer; }
+.btn-qty:hover:not(:disabled) { background:#3b82f6; color:#fff; border-color:#3b82f6; }
+.btn-sm { padding:6px 12px; font-size:0.8125rem; }
+.remove { display:flex; align-items:center; justify-content:center; color: #dc2626; border: 1px solid #fecaca; background: #fee2e2; border-radius: 6px; }
+.footer { margin-top: 12px; display:flex; justify-content: space-between; align-items:center; border-top: 1px solid #e5e7eb; padding-top: 12px; }
+.select-box { display:flex; align-items:center; }
+.select-box input { width:16px; height:16px; }
+.thumb { width:64px; height:64px; border-radius:8px; overflow:hidden; background:#fff; flex-shrink:0; display:flex; align-items:center; justify-content:center; border:1px solid #e5e7eb; }
+.thumb img { width:100%; height:100%; object-fit:cover; }
+.details { flex:1; }

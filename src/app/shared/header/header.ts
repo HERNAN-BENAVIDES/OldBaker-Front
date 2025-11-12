@@ -4,11 +4,14 @@ import { CommonModule } from '@angular/common';
 import { Observable, Subscription, filter } from 'rxjs';
 import { AuthService } from '../../features/auth/services/auth.service';
 import { NotificationService } from '../notification/notification.service';
+import { ShoppingCartService } from '../shopping-cart/shopping-cart.service';
+import { ShoppingCart } from 'lucide-angular';
+import { LucideAngularModule } from 'lucide-angular';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, LucideAngularModule],
   templateUrl: './header.html',
   styleUrls: ['./header.css']
 })
@@ -17,14 +20,18 @@ export class Header implements OnInit, OnDestroy {
   currentUser$!: Observable<any>;
   showMenu = false;
   isAuthRoute = false;
+  cartCount = 0;
+  readonly ShoppingCart = ShoppingCart;
 
   private userSub: Subscription | null = null;
   private routeSub: Subscription | null = null;
+  private cartSub: Subscription | null = null;
 
   constructor(
     private authService: AuthService,
     private router: Router,
-    private notifications: NotificationService
+    private notifications: NotificationService,
+    private cartService: ShoppingCartService
   ) {
     this.isAuthenticated$ = this.authService.isAuthenticated$;
     this.currentUser$ = this.authService.currentUser$;
@@ -37,6 +44,11 @@ export class Header implements OnInit, OnDestroy {
         // Si el usuario fue limpiado (logout o token inválido), cerrar menú inmediatamente
         this.showMenu = false;
       }
+    });
+
+    // Suscripción al carrito para contador
+    this.cartSub = this.cartService.cartItems$.subscribe(items => {
+      this.cartCount = items.reduce((acc, it) => acc + (it.quantity || 0), 0);
     });
 
     // Detectar si estamos en una ruta de autenticación para ocultar el menú de usuario
@@ -67,6 +79,8 @@ export class Header implements OnInit, OnDestroy {
     this.userSub = null;
     this.routeSub?.unsubscribe();
     this.routeSub = null;
+    this.cartSub?.unsubscribe();
+    this.cartSub = null;
   }
 
   private isOnAuthRoute(url: string): boolean {

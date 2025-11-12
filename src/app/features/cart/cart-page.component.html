@@ -1,0 +1,44 @@
+<section class="cart-page">
+  <h1>Tu Carrito</h1>
+  <p class="subtitle" *ngIf="cartItems.length === 0">No has agregado productos todavía.</p>
+
+  <div class="cart-panel" *ngIf="cartItems.length > 0" aria-label="Resumen del carrito">
+    <div class="bulk-actions">
+      <button class="btn btn-sm" (click)="selectAll()">Seleccionar todos</button>
+      <button class="btn btn-sm btn-outline" (click)="deselectAll()">Deseleccionar todos</button>
+      <button class="btn btn-sm" (click)="removeSelectedCartItems()">Eliminar seleccionados</button>
+      <button class="btn btn-sm btn-outline" (click)="clearCart()">Vaciar carrito</button>
+    </div>
+
+    <div class="cart-items">
+      <div class="cart-item" *ngFor="let item of cartItems">
+        <label class="select-box">
+          <input type="checkbox" [checked]="selectedCartIds.has(item.id)" (change)="toggleSelectCartItem(item)" />
+          <span></span>
+        </label>
+        <div class="thumb">
+          <img [src]="item.image" [alt]="item.name" (error)="item.image='https://via.placeholder.com/64?text=%20'" />
+        </div>
+        <div class="details">
+          <h4>{{ item.name }}</h4>
+          <p class="unit">{{ item.price | currency:'COP':'symbol':'1.0-0' }} c/u</p>
+          <div class="quantity-controls">
+            <button class="btn-qty" (click)="decreaseQuantity(item)" [disabled]="item.quantity <= 1">-</button>
+            <span>{{ item.quantity }}</span>
+            <button class="btn-qty" (click)="increaseQuantity(item)">+</button>
+            <button class="remove" (click)="removeItem(item.id)" title="Eliminar">✕</button>
+          </div>
+          <div class="stock-warning" *ngIf="item.stockWarning">{{ item.stockWarning }}</div>
+          <p class="subtotal">Subtotal: {{ (item.price * item.quantity) | currency:'COP':'symbol':'1.0-0' }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="total">Total seleccionados: <strong>{{ total | currency:'COP':'symbol':'1.0-0' }}</strong></div>
+      <div class="actions">
+        <button class="btn btn-primary" (click)="continueToCheckout()">Continuar</button>
+      </div>
+    </div>
+  </div>
+</section>

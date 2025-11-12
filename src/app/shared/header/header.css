@@ -374,3 +374,56 @@
     height: 32px;
   }
 }
+
+/* ==========================================
+   CARRITO - Estilos para el ícono y badge
+   ========================================== */
+
+.cart-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  text-decoration: none;
+  color: #374151;
+}
+
+.cart-link:hover {
+  background: #f3f4f6;
+}
+
+.cart-link .cart-icon {
+  width: 22px;
+  height: 22px;
+  stroke-width: 2.4;
+}
+
+.cart-link .badge {
+  background: #dc2626;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  padding: 0 4px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Ocultar elementos para accesibilidad */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}

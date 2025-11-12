@@ -4,9 +4,12 @@ import { StaffRedirectGuard } from './features/auth/services/staff-redirect.guar
 import { AlreadyAuthGuard } from './features/auth/services/already-auth.guard';
 
 export const routes: Routes = [
+  // Redirección a /home como ruta por defecto
+  { path: '', pathMatch: 'full', redirectTo: 'home' },
+
   // Ruta principal - Home (pública con redirección para staff)
   {
-    path: '',
+    path: 'home',
     loadComponent: () => import('./shared/home/home')
       .then(m => m.Home),
     canActivate: [StaffRedirectGuard]
@@ -16,6 +19,20 @@ export const routes: Routes = [
     path: 'product-detail/:id',
     loadComponent: () => import('./shared/producto-detalle/producto-detalle.component')
       .then(m => m.ProductoDetalleComponent)
+  },
+
+  // Página de Carrito (pública)
+  {
+    path: 'cart',
+    loadComponent: () => import('./features/cart/cart-page.component')
+      .then(m => m.CartPageComponent)
+  },
+
+  // Checkout - Dirección (accesible; validación de login ocurre en el componente antes de pagar)
+  {
+    path: 'checkout/address',
+    loadComponent: () => import('./features/checkout/checkout-address.component')
+      .then(m => m.CheckoutAddressComponent)
   },
 
   // Rutas de autenticación (públicas): bloqueadas si ya estás autenticado

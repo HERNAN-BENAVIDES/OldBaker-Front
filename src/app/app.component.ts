@@ -4,7 +4,6 @@ import { Router, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AccessibilityService } from './shared/accessibility/accessibility.service';
 import { AccessibilityPanelComponent } from './shared/accessibility/accessibility-panel.component';
-import { ShoppingCartComponent } from './shared/shopping-cart/shopping-cart.component';
 import { AuthService } from './features/auth/services/auth.service';
 import { Header } from './shared/header/header';
 import { Footer } from './shared/footer/footer';
@@ -15,7 +14,7 @@ import { filter } from 'rxjs/operators';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, AccessibilityPanelComponent, ShoppingCartComponent, Header, Footer, NotificationComponent],
+  imports: [CommonModule, RouterOutlet, AccessibilityPanelComponent, Header, Footer, NotificationComponent],
   template: `
     <app-header *ngIf="showClientHeader"></app-header>
     <main class="main-content">
@@ -23,7 +22,6 @@ import { filter } from 'rxjs/operators';
     </main>
     <app-footer *ngIf="showClientFooter"></app-footer>
     <app-accessibility-panel></app-accessibility-panel>
-    <app-shopping-cart *ngIf="showCart"></app-shopping-cart>
     <app-notification></app-notification>
   `,
   styles: [`
@@ -41,7 +39,7 @@ import { filter } from 'rxjs/operators';
 export class AppComponent implements OnInit, OnDestroy {
   private tokenCheckSubscription?: Subscription;
   private routerSubscription?: Subscription;
-  showCart = true;
+  showCart = false;
   showClientHeader = true;
   showClientFooter = true;
 
@@ -64,12 +62,10 @@ export class AppComponent implements OnInit, OnDestroy {
     });
 
     // Escuchar cambios de ruta para mostrar/ocultar el carrito, header y footer
-    this.updateCartVisibility(this.router.url);
     this.updateHeaderFooterVisibility(this.router.url);
     this.routerSubscription = this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe((event: any) => {
-        this.updateCartVisibility(event.url);
         this.updateHeaderFooterVisibility(event.url);
       });
   }
@@ -81,12 +77,6 @@ export class AppComponent implements OnInit, OnDestroy {
     if (this.routerSubscription) {
       this.routerSubscription.unsubscribe();
     }
-  }
-
-  private updateCartVisibility(url: string) {
-    // Ocultar el carrito en rutas de auxiliar, admin y worker-login
-    const hideCartRoutes = ['/auxiliar', '/admin', '/auth/worker/login'];
-    this.showCart = !hideCartRoutes.some(route => url.startsWith(route));
   }
 
   private updateHeaderFooterVisibility(url: string) {

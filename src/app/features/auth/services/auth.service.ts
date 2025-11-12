@@ -43,7 +43,8 @@ export class AuthService {
       if (token && raw) {
         // Verificar si el token está vencido
         if (this.isTokenExpired(token)) {
-          console.warn('[AuthService] Token expirado. Limpiando sesión...');
+          console.warn('[AuthService] Token expirado. Sincronizando carrito y limpiando sesión...');
+          try { this.shoppingCartService.syncToServer?.(); } catch {}
           this.clearLocalAuth();
         } else {
           // Token válido, restaurar usuario
@@ -200,6 +201,8 @@ export class AuthService {
 
   // logout: llama al backend y solo tras respuesta exitosa limpia el storage y emite null
   logout(): void {
+    // Sincronizar carrito antes de cerrar sesión
+    try { this.shoppingCartService.syncToServer?.(); } catch {}
     let email: string | null = null;
     try {
       const raw = localStorage.getItem('auth_user');

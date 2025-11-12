@@ -98,6 +98,7 @@ export class Home implements OnInit {
   }
 
   addToCart(product: any) {
+    console.log('[Home] Agregando producto al carrito:', product.nombre);
     const quantity = product.minimumOrder || 1;
     // Agregar la cantidad mínima requerida al carrito
     for (let i = 0; i < quantity; i++) {
@@ -108,6 +109,7 @@ export class Home implements OnInit {
         image: product.image
       });
     }
+    console.log('[Home] Producto agregado. Items en localStorage:', localStorage.getItem('shopping_cart'));
   }
 
   onImageError(event: Event) {
