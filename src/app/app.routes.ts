@@ -85,6 +85,11 @@ export const routes: Routes = [
     canActivate: [AlreadyAuthGuard]
   },
   { path: 'forgot', redirectTo: 'forgot-password' },
+  { path: 'worker', pathMatch: 'full', redirectTo: 'auth/worker/login' },
+  { path: 'workers', pathMatch: 'full', redirectTo: 'auth/worker/login' },
+  { path: 'worker/login', pathMatch: 'full', redirectTo: 'auth/worker/login' },
+  { path: 'workers/login', pathMatch: 'full', redirectTo: 'auth/worker/login' },
+  { path: 'workers/auth/login', pathMatch: 'full', redirectTo: 'auth/worker/login' },
 
   // Rutas de administrador (protegidas)
   {
