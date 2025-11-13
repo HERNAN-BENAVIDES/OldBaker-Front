@@ -34,9 +34,10 @@
    BOTÓN VOLVER
    ============================================ */
 .btn-back {
-  background: rgba(255, 255, 255, 0.2);
+  background: linear-gradient(135deg,#1e3a8a,#2563eb);
+  color:#fff;
+  box-shadow:0 4px 14px rgba(0,0,0,.25);
   border: none;
-  color: var(--color-white);
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
   font-size: 1rem;
@@ -47,8 +48,7 @@
 }
 
 .btn-back:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: translateX(-5px);
+  background: linear-gradient(135deg,#2563eb,#1e3a8a);
 }
 
 /* ============================================
@@ -262,23 +262,36 @@
 }
 
 .btn-link {
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
-  color: var(--color-white);
+  background: linear-gradient(90deg, #2563eb 0%, #1d4ed8 50%, #2563eb 100%);
+  background-size: 200% 100%;
+  color: #fff;
   border: none;
   padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-size: 0.875rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background-position .4s ease, transform .25s ease, box-shadow .25s ease;
   text-decoration: none;
   white-space: nowrap;
+  letter-spacing:.5px;
 }
 
 .btn-link:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(43, 75, 160, 0.3);
+  background-position: 100% 0;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(29,78,216,.35);
 }
+
+/* Chips de estado de entrega dentro de listado */
+.pedido-delivery span.delivery-chip-list {
+  display:inline-block; margin-top:.35rem; padding:0.25rem 0.6rem; border-radius:999px; font-size:.625rem; font-weight:700; letter-spacing:.5px; text-transform:uppercase; box-shadow:0 1px 3px rgba(0,0,0,.15);
+}
+.delivery-chip-list.confirmed { background:#6366f1; color:#fff; }
+.delivery-chip-list.preparing { background:#f59e0b; color:#fff; }
+.delivery-chip-list.ready { background:#10b981; color:#fff; }
+.delivery-chip-list.dispatched { background:#0ea5e9; color:#fff; }
+.delivery-chip-list.delivered { background:#16a34a; color:#fff; }
 
 /* ============================================
    ESTADO VACÍO

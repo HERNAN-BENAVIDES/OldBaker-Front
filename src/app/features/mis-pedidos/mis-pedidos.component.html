@@ -24,6 +24,9 @@
             <p class="pedido-reference" *ngIf="pedido.externalReference">
               Ref: {{ pedido.externalReference }}
             </p>
+            <p class="pedido-delivery" *ngIf="pedido.deliveryStatus">
+              Entrega: <span [ngClass]="getDeliveryStatusClass(pedido.deliveryStatus)">{{ getDeliveryStatusTexto(pedido.deliveryStatus) }}</span>
+            </p>
           </div>
           <span class="pedido-estado" [ngClass]="getEstadoClass(pedido.status)">
             {{ getEstadoTexto(pedido.status) }}

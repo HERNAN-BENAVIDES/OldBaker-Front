@@ -15,34 +15,41 @@
 
     <!-- Detalle del Pedido -->
     <div *ngIf="!loading && !error && pedido" class="pedido-detalle-container">
-      
+
       <!-- Encabezado del pedido -->
       <div class="pedido-header-section">
         <h1 class="page-title">Detalle del pedido</h1>
-        
+
         <div class="pedido-info-grid">
           <div class="info-item">
             <span class="info-label">Referencia:</span>
             <span class="info-value reference">{{ pedido.externalReference }}</span>
           </div>
-          
+
           <div class="info-item">
             <span class="info-label">Estado de pago:</span>
             <span class="pedido-estado" [ngClass]="getEstadoClass(pedido.status)">
               {{ getEstadoTexto(pedido.status) }}
             </span>
           </div>
-          
+
           <div class="info-item">
             <span class="info-label">Fecha:</span>
             <span class="info-value">{{ formatearFecha(pedido.fechaCreacion) }}</span>
           </div>
-          
+
           <div class="info-item">
             <span class="info-label">Total:</span>
             <span class="info-value total-amount">{{ pedido.total | currency:'COP':'symbol':'1.0-0' }}</span>
           </div>
-          
+
+          <div class="info-item">
+            <span class="info-label">Estado de entrega:</span>
+            <span class="info-value delivery-chip" [ngClass]="deliveryChipClass(pedido.deliveryStatus)">
+              {{ deliveryChipText(pedido.deliveryStatus) }}
+            </span>
+          </div>
+
           <div class="info-item full-width">
             <span class="info-label">Email:</span>
             <span class="info-value">{{ pedido.payerEmail }}</span>
@@ -53,17 +60,18 @@
       <!-- Seguimiento de Entrega -->
       <div class="seguimiento-section">
         <h2 class="section-title">Seguimiento de entrega</h2>
-        
+
         <div class="tracking-timeline">
-          <div 
-            class="timeline-step" 
+          <div
+            class="timeline-step"
             *ngFor="let estado of estadosEntrega; let i = index"
             [ngClass]="{
               'completado': estado.completado,
               'activo': estado.activo,
-              'pendiente': !estado.completado && !estado.activo
+              'pendiente': !estado.completado && !estado.activo,
+              'delivered-final': estado.codigo === 'DELIVERED' && estado.activo
             }">
-            
+
             <div class="step-indicator">
               <div class="step-circle">
                 <svg *ngIf="estado.completado" class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
@@ -73,7 +81,7 @@
               </div>
               <div class="step-line" *ngIf="i < estadosEntrega.length - 1"></div>
             </div>
-            
+
             <div class="step-content">
               <h3 class="step-title">{{ estado.nombre }}</h3>
               <p class="step-description">{{ estado.descripcion }}</p>
@@ -134,7 +142,7 @@
             <span class="producto-subtotal">{{ item.subtotal | currency:'COP':'symbol':'1.0-0' }}</span>
           </div>
         </div>
-        
+
         <div class="total-section">
           <div class="total-row">
             <span class="total-label">Total</span>

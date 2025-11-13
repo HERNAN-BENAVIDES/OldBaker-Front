@@ -18,12 +18,14 @@ interface PedidoItem {
 interface Pedido {
   id: number;
   externalReference: string;
-  status: string;
+  status: string; // estado de pago
   paymentId: string | null;
   total: number;
   fechaCreacion: string;
   payerEmail: string;
   items: PedidoItem[];
+  deliveryStatus?: string; // nuevo estado de entrega del backend (CONFIRMED, PREPARING, READY_FOR_DISPATCH, DISPATCHED, DELIVERED)
+  trackingCode?: string;
 }
 
 @Component({
@@ -131,7 +133,10 @@ export class MisPedidosComponent implements OnInit {
 
     this.http.get<Pedido[]>(url, { headers }).subscribe({
       next: (response) => {
-        this.pedidos = response || [];
+        this.pedidos = (response || []).map(p => ({
+          ...p,
+          deliveryStatus: p.deliveryStatus ? String(p.deliveryStatus).toUpperCase() : undefined
+        }));
         this.loading = false;
       },
       error: (err) => {
@@ -160,6 +165,32 @@ export class MisPedidosComponent implements OnInit {
       'FAILED': 'Fallido'
     };
     return statusText[estado] || estado;
+  }
+
+  getDeliveryStatusClass(estado?: string): string {
+    if (!estado) return 'delivery-pendiente';
+    const e = estado.toUpperCase();
+    const map: Record<string,string> = {
+      'CONFIRMED':'delivery-confirmed',
+      'PREPARING':'delivery-preparing',
+      'READY_FOR_DISPATCH':'delivery-ready',
+      'DISPATCHED':'delivery-dispatched',
+      'DELIVERED':'delivery-delivered'
+    };
+    return map[e] || 'delivery-pendiente';
+  }
+
+  getDeliveryStatusTexto(estado?: string): string {
+    if (!estado) return 'Estado no disponible';
+    const e = estado.toUpperCase();
+    const map: Record<string,string> = {
+      'CONFIRMED':'Confirmado',
+      'PREPARING':'En preparación',
+      'READY_FOR_DISPATCH':'Listo para despacho',
+      'DISPATCHED':'En camino',
+      'DELIVERED':'Entregado'
+    };
+    return map[e] || estado;
   }
 
   formatearFecha(fecha: string): string {

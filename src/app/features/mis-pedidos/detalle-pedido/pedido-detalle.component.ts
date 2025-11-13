@@ -18,7 +18,7 @@ interface PedidoItem {
 interface Direccion {
   barrio: string;
   numero: string;
-  ciudad: string; 
+  ciudad: string;
   calle: string;
   carrera: string;
   numeroTelefono: string;
@@ -40,7 +40,7 @@ interface Pedido {
   items: PedidoItem[];
   deliveryStatus?: string;
   trackingCode?: string;
-  direccion?: Direccion;  
+  direccion?: Direccion;
   repartidor?: Repartidor;
 }
 
@@ -66,6 +66,7 @@ export class PedidoDetalleComponent implements OnInit {
   estadosEntrega: EstadoEntrega[] = [];
 
   private externalRef: string | null = null;
+  private originalDeliveryStatus: string | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -123,13 +124,17 @@ export class PedidoDetalleComponent implements OnInit {
       next: (lista) => {
         const ref = (this.externalRef || '').trim();
         this.pedido = (lista || []).find(p => String(p.externalReference).trim() === ref) || null;
-        
+        if (this.pedido) {
+          this.originalDeliveryStatus = this.pedido.deliveryStatus || null;
+          this.pedido.deliveryStatus = this.normalizeDelivery(this.pedido.deliveryStatus);
+        }
+
         // 🔍 DEBUG: Verifica qué datos está recibiendo
         console.log('📦 Pedido recibido:', this.pedido);
         console.log('👤 Repartidor:', this.pedido?.repartidor);
         console.log('📍 Dirección:', this.pedido?.direccion);
         console.log('📊 Estado de entrega:', this.pedido?.deliveryStatus);
-        
+
         if (!this.pedido) {
           this.error = 'No se encontró el pedido solicitado.';
         } else {
@@ -145,25 +150,86 @@ export class PedidoDetalleComponent implements OnInit {
     });
   }
 
+  private normalizeDelivery(raw?: string): string {
+    if (!raw) return 'CONFIRMED';
+    const s = raw.trim().toUpperCase();
+    const map: Record<string,string> = {
+      'EN_PREPARACION': 'PREPARING',
+      'LISTO_PARA_ENTREGAR': 'READY_FOR_DISPATCH',
+      'ENTREGADO_A_REPARTIDOR': 'DISPATCHED',
+      'EN_CAMINO': 'DISPATCHED',
+      'IN_TRANSIT': 'DISPATCHED',
+      'ENTREGADO': 'DELIVERED',
+      'ENTREGADO_CLIENTE': 'DELIVERED',
+      'DELIVERED_TO_CLIENT': 'DELIVERED'
+    };
+    return map[s] || s;
+  }
+
   private inicializarEstadosEntrega() {
     if (!this.pedido) return;
 
     const todosLosEstados = [
-      { codigo: 'EN_PREPARACION', nombre: 'En preparación', descripcion: 'Tu pedido está siendo preparado' },
-      { codigo: 'LISTO_PARA_ENTREGAR', nombre: 'Listo para entregar', descripcion: 'Tu pedido está listo' },
-      { codigo: 'ENTREGADO_A_REPARTIDOR', nombre: 'Entregado al repartidor', descripcion: 'El repartidor tiene tu pedido' },
-      { codigo: 'EN_CAMINO', nombre: 'En camino', descripcion: 'Tu pedido está en camino' },
-      { codigo: 'ENTREGADO', nombre: 'Entregado', descripcion: 'Tu pedido fue entregado' }
+      { codigo: 'CONFIRMED', nombre: 'Confirmado', descripcion: 'Pedido confirmado para producción/entrega futura' },
+      { codigo: 'PREPARING', nombre: 'En preparación', descripcion: 'Tu pedido está siendo preparado' },
+      { codigo: 'READY_FOR_DISPATCH', nombre: 'Listo para despacho', descripcion: 'Listo para que el repartidor lo recoja' },
+      { codigo: 'DISPATCHED', nombre: 'En camino', descripcion: 'Pedido despachado y en ruta de entrega' },
+      { codigo: 'DELIVERED', nombre: 'Entregado', descripcion: 'Pedido entregado al cliente' }
     ];
 
-    const estadoActual = this.pedido.deliveryStatus || 'EN_PREPARACION';
-    const indiceActual = todosLosEstados.findIndex(e => e.codigo === estadoActual);
+    const raw = this.originalDeliveryStatus || this.pedido.deliveryStatus || 'CONFIRMED';
+    const estadoActual = this.normalizeDelivery(raw);
+    let indiceActual = todosLosEstados.findIndex(e => e.codigo === estadoActual);
+
+    if ((/ENTREG/.test(raw.toUpperCase()) || /DELIVERED/.test(raw.toUpperCase())) && indiceActual < todosLosEstados.length - 1) {
+      indiceActual = todosLosEstados.length - 1;
+    }
+
+    const idx = indiceActual === -1 ? todosLosEstados.length - 1 : indiceActual;
 
     this.estadosEntrega = todosLosEstados.map((estado, index) => ({
       ...estado,
-      completado: index < indiceActual,
-      activo: index === indiceActual
+      completado: index < idx,
+      activo: index === idx
     }));
+
+    // Si está en DISPATCHED marcamos ese paso también como completado (visual verde)
+    if (estadoActual === 'DISPATCHED') {
+      this.estadosEntrega = this.estadosEntrega.map(e => e.codigo === 'DISPATCHED' ? { ...e, completado: true, activo: true } : e);
+    }
+
+    // Si está en DELIVERED marcamos ambos pasos DISPATCHED y DELIVERED como completados.
+    if (estadoActual === 'DELIVERED') {
+      this.estadosEntrega = this.estadosEntrega.map(e =>
+        e.codigo === 'DISPATCHED' ? { ...e, completado: true, activo: false } :
+        e.codigo === 'DELIVERED' ? { ...e, completado: true, activo: true } : e
+      );
+    }
+
+    this.ensureTimelineConsistency(estadoActual);
+    console.log('[Timeline Debug] Raw:', raw, 'Normalizado:', estadoActual, 'Índice:', idx, 'Estados:', this.estadosEntrega);
+  }
+
+  private ensureTimelineConsistency(finalCode: string) {
+    // Si por alguna razón faltan pasos o el activo no coincide con DELIVERED, reconstruir.
+    if (finalCode === 'DELIVERED') {
+      const hasDeliveredStep = this.estadosEntrega.some(e => e.codigo === 'DELIVERED');
+      if (!hasDeliveredStep || !this.estadosEntrega.some(e => e.codigo === 'DELIVERED' && e.activo)) {
+        const todosLosEstados = [
+          { codigo: 'CONFIRMED', nombre: 'Confirmado', descripcion: 'Pedido confirmado para producción/entrega futura' },
+          { codigo: 'PREPARING', nombre: 'En preparación', descripcion: 'Tu pedido está siendo preparado' },
+          { codigo: 'READY_FOR_DISPATCH', nombre: 'Listo para despacho', descripcion: 'Listo para que el repartidor lo recoja' },
+          { codigo: 'DISPATCHED', nombre: 'En camino', descripcion: 'Pedido despachado y en ruta de entrega' },
+          { codigo: 'DELIVERED', nombre: 'Entregado', descripcion: 'Pedido entregado al cliente' }
+        ];
+        this.estadosEntrega = todosLosEstados.map((estado, index) => ({
+          ...estado,
+          completado: index < todosLosEstados.length - 1,
+          activo: index === todosLosEstados.length - 1
+        }));
+        console.warn('[Timeline Fix] Forzado paso DELIVERED como activo.');
+      }
+    }
   }
 
   handlePaymentReturn(status: string) {
@@ -212,5 +278,29 @@ export class PedidoDetalleComponent implements OnInit {
 
   goBack() {
     this.router.navigate(['/mis-pedidos']);
+  }
+
+  deliveryChipClass(raw?: string): string {
+    const norm = this.normalizeDelivery(raw);
+    const map: Record<string,string> = {
+      'CONFIRMED': 'delivery-chip--confirmed',
+      'PREPARING': 'delivery-chip--preparing',
+      'READY_FOR_DISPATCH': 'delivery-chip--ready',
+      'DISPATCHED': 'delivery-chip--dispatched',
+      'DELIVERED': 'delivery-chip--delivered'
+    };
+    return map[norm] || 'delivery-chip--nd';
+  }
+
+  deliveryChipText(raw?: string): string {
+    const norm = this.normalizeDelivery(raw);
+    const map: Record<string,string> = {
+      'CONFIRMED': 'Confirmado',
+      'PREPARING': 'En preparación',
+      'READY_FOR_DISPATCH': 'Listo para despacho',
+      'DISPATCHED': 'En camino',
+      'DELIVERED': 'Entregado'
+    };
+    return map[norm] || 'N/D';
   }
 }
