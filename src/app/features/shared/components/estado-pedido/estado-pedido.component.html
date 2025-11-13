@@ -1,0 +1,49 @@
+<div class="estado-pedido-container" [class]="obtenerClaseTamanio()">
+      
+  <!-- Descripción del estado actual -->
+  <div class="descripcion-estado" *ngIf="mostrarTexto">
+    <p class="descripcion-text">{{ obtenerDescripcionActual() }}</p>
+  </div>
+
+  <!-- Timeline horizontal -->
+  <div class="progreso-timeline">
+    <div *ngFor="let est of estados; let i = index; let last = last" 
+         class="timeline-step" 
+         [class.completado]="estaCompletado(est.key)"
+         [class.actual]="esEstadoActual(est.key)">
+      
+      <!-- Círculo del estado -->
+      <div class="step-circle">
+        <div class="circle-inner">
+          <span class="step-icon">{{ est.icon }}</span>
+        </div>
+        
+        <!-- Marca de check para estados completados -->
+        <div class="check-mark" *ngIf="estaCompletado(est.key) && !esEstadoActual(est.key)">
+          ✓
+        </div>
+      </div>
+      
+      <!-- Etiqueta del estado -->
+      <div class="step-label" *ngIf="mostrarTexto">
+        <p class="label-text">{{ est.label }}</p>
+      </div>
+      
+      <!-- Línea conectora (excepto en el último) -->
+      <div *ngIf="!last" 
+           class="step-line" 
+           [class.completada]="estaCompletado(estados[i + 1].key)">
+      </div>
+    </div>
+  </div>
+
+  <!-- Barra de progreso alternativa (visual simple) -->
+  <div class="progress-bar-simple">
+    <div class="progress-fill" [style.width.%]="obtenerProgreso()"></div>
+  </div>
+
+  <!-- Texto de porcentaje -->
+  <div class="progress-percentage" *ngIf="mostrarTexto">
+    <span>{{ obtenerProgreso() | number:'1.0-0' }}% completado</span>
+  </div>
+</div>

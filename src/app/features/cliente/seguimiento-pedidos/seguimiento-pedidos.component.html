@@ -1,0 +1,154 @@
+<div class="seguimiento-container">
+  <!-- Header -->
+  <div class="header">
+    <div class="title-section">
+      <h1>🚚 Mis Pedidos</h1>
+      <p class="subtitle">Rastrea tus pedidos en tiempo real</p>
+    </div>
+    
+    <div class="header-actions">
+      <button class="btn-refresh" (click)="refrescar()" [disabled]="cargando">
+        <span class="icon">🔄</span>
+        Actualizar
+      </button>
+      <button 
+        class="btn-toggle-polling" 
+        (click)="togglePolling()"
+        [class.active]="pollingActivo">
+        <span class="icon">{{ pollingActivo ? '⏸️' : '▶️' }}</span>
+        {{ pollingActivo ? 'Pausar' : 'Auto-actualizar' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Barra de búsqueda -->
+  <div class="search-bar">
+    <input 
+      type="text" 
+      placeholder="Buscar por código de seguimiento o número de orden..." 
+      [(ngModel)]="busquedaTracking"
+      (input)="buscarPorTracking()"
+      class="search-input">
+    <button class="btn-clear" *ngIf="busquedaTracking" (click)="busquedaTracking = ''; buscarPorTracking()">
+      ✕
+    </button>
+  </div>
+
+  <!-- Filtros de estado -->
+  <div class="filtros">
+    <button 
+      (click)="filtrarPorEstado('TODOS')" 
+      [class.active]="filtroEstado === 'TODOS'"
+      class="filtro-btn">
+      <span class="badge">{{ contarPorEstado('TODOS') }}</span>
+      Todos
+    </button>
+    <button 
+      (click)="filtrarPorEstado('PREPARING')" 
+      [class.active]="filtroEstado === 'PREPARING'"
+      class="filtro-btn">
+      <span class="badge preparing">{{ contarPorEstado('PREPARING') }}</span>
+      En preparación
+    </button>
+    <button 
+      (click)="filtrarPorEstado('READY')" 
+      [class.active]="filtroEstado === 'READY'"
+      class="filtro-btn">
+      <span class="badge ready">{{ contarPorEstado('READY') }}</span>
+      Listo
+    </button>
+    <button 
+      (click)="filtrarPorEstado('IN_TRANSIT')" 
+      [class.active]="filtroEstado === 'IN_TRANSIT'"
+      class="filtro-btn">
+      <span class="badge in-transit">{{ contarPorEstado('IN_TRANSIT') }}</span>
+      En camino
+    </button>
+    <button 
+      (click)="filtrarPorEstado('DELIVERED')" 
+      [class.active]="filtroEstado === 'DELIVERED'"
+      class="filtro-btn">
+      <span class="badge delivered">{{ contarPorEstado('DELIVERED') }}</span>
+      Entregados
+    </button>
+  </div>
+
+  <!-- Loader -->
+  <div *ngIf="cargando" class="loader-container">
+    <div class="loader"></div>
+    <p>Cargando tus pedidos...</p>
+  </div>
+
+  <!-- Lista de pedidos -->
+  <div *ngIf="!cargando && pedidosFiltrados.length > 0" class="pedidos-lista">
+    <div *ngFor="let pedido of pedidosFiltrados" class="pedido-card" (click)="verDetalle(pedido)">
+      
+      <!-- Header del card -->
+      <div class="pedido-header">
+        <div class="header-left">
+          <span class="icono-estado">{{ obtenerIconoEstado(pedido.deliveryStatus) }}</span>
+          <div class="info-principal">
+            <h3>Pedido #{{ pedido.trackingCode }}</h3>
+            <span class="order-number">ID: {{ pedido.orderId }}</span>
+          </div>
+        </div>
+        <span 
+          class="estado-badge" 
+          [style.background-color]="obtenerColorEstado(pedido.deliveryStatus)">
+          {{ obtenerEstadoTexto(pedido.deliveryStatus) }}
+        </span>
+      </div>
+      
+      <!-- Información del pedido -->
+      <div class="pedido-body">
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="label">💰 Total:</span>
+            <span class="value">${{ pedido.total | number:'1.0-0' }} COP</span>
+          </div>
+          <div class="info-item">
+            <span class="label">📅 Fecha:</span>
+            <span class="value">{{ pedido.fechaCreacion | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="info-item" *ngIf="pedido.fechaEntregaEstimada">
+            <span class="label">🕐 Entrega estimada:</span>
+            <span class="value">{{ pedido.fechaEntregaEstimada | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+          <div class="info-item" *ngIf="pedido.direccionEntrega">
+            <span class="label">📍 Dirección:</span>
+            <span class="value">{{ pedido.direccionEntrega }}</span>
+          </div>
+        </div>
+
+        <!-- Componente de progreso visual -->
+        <div class="progreso-container">
+            <app-estado-pedido [estado]="pedido.deliveryStatus || 'PREPARING'"></app-estado-pedido>
+        </div>
+      </div>
+
+      <!-- Footer del card -->
+      <div class="pedido-footer">
+        <button class="btn-ver-detalle" (click)="verDetalle(pedido); $event.stopPropagation()">
+          Ver detalles completos →
+        </button>   
+      </div>
+    </div>
+  </div>
+
+  <!-- Sin pedidos -->
+  <div *ngIf="!cargando && pedidosFiltrados.length === 0" class="sin-pedidos">
+    <div class="empty-state">
+      <span class="empty-icon">📦</span>
+      <h2>No hay pedidos {{ filtroEstado !== 'TODOS' ? 'con este estado' : '' }}</h2>
+      <p *ngIf="busquedaTracking">No se encontraron pedidos con el código "{{ busquedaTracking }}"</p>
+      <p *ngIf="!busquedaTracking && filtroEstado !== 'TODOS'">
+        Intenta seleccionar otro filtro o ver todos los pedidos
+      </p>
+      <button *ngIf="filtroEstado !== 'TODOS' || busquedaTracking" 
+              class="btn-limpiar" 
+              (click)="limpiarFiltros()">
+        Ver todos los pedidos
+      </button>
+    </div>
+  </div>
+</div>

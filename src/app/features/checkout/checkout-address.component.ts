@@ -100,47 +100,26 @@ export class CheckoutAddressComponent implements OnInit {
     }
   }
 
-  private normalizeAddresses(res: any): DireccionResponseDTO[] {
-    if (!res) return [];
-    // Log bruto para diagnóstico
-    try { console.log('[CheckoutAddress] Respuesta cruda direcciones:', JSON.stringify(res)); } catch {}
+  normalizeAddresses(response: any[]): DireccionResponseDTO[] {
+  return response
+    .map(item => {
+      const dir = item.direccion;
+      if (!dir) return null; // <- si no hay dirección, retorna null temporalmente
+      return {
+        id: item.orderId ?? 0,
+        ciudad: dir.ciudad,
+        barrio: dir.barrio,
+        carrera: dir.carrera,
+        calle: dir.calle,
+        numero: dir.numero,
+        numeroTelefono: dir.numeroTelefono
+      } as DireccionResponseDTO;
+    })
+    .filter((d): d is DireccionResponseDTO => d !== null); // <- elimina los null
+}
 
-    // Si ya es array directamente
-    if (Array.isArray(res)) {
-      return res.filter(r => r && typeof r === 'object');
-    }
 
-    // Si viene envuelta en data
-    if (res.data) {
-      const d = res.data;
-      if (Array.isArray(d)) return d as DireccionResponseDTO[];
-      if (Array.isArray(d.direcciones)) return d.direcciones as DireccionResponseDTO[];
-      if (Array.isArray(d.direccion)) return d.direccion as DireccionResponseDTO[];
-      if (d.direcciones && typeof d.direcciones === 'object') {
-        // Puede ser objeto cuyos valores son direcciones
-        return Object.values(d.direcciones).filter(v => v && typeof v === 'object') as DireccionResponseDTO[];
-      }
-      if (d.direccion && typeof d.direccion === 'object') return [d.direccion] as DireccionResponseDTO[];
-    }
 
-    // Propiedades alternativas en raíz
-    if (Array.isArray(res.direcciones)) return res.direcciones as DireccionResponseDTO[];
-    if (Array.isArray(res.direccion)) return res.direccion as DireccionResponseDTO[];
-
-    // Objeto cuyos valores parecen direcciones (sin idUsuario pero con campos de dirección)
-    const values = Object.values(res);
-    if (values.every(v => typeof v === 'object')) {
-      const candidates = values.filter((v: any) => v && (v.ciudad || v.barrio || v.carrera));
-      if (candidates.length > 1) return candidates as DireccionResponseDTO[];
-    }
-
-    // Caso objeto único de dirección (tiene ciudad / barrio / calle / id)
-    if (res.ciudad || res.barrio || res.calle || res.carrera) {
-      return [res as DireccionResponseDTO];
-    }
-
-    return [];
-  }
 
   private loadUserAddresses() {
     const user = this.getUserFromStorage();
@@ -198,8 +177,15 @@ export class CheckoutAddressComponent implements OnInit {
   }
 
   canCreateAddress(): boolean {
-    return !!this.newAddress.ciudad && !!this.newAddress.barrio && !!this.newAddress.carrera && !!this.newAddress.calle && !!this.newAddress.numero && !!this.newAddress.numeroTelefono;
-  }
+  return !!this.newAddress.ciudad &&
+         !!this.newAddress.barrio &&
+         !!this.newAddress.carrera &&
+         !!this.newAddress.calle &&
+         !!this.newAddress.numero &&
+         !!this.newAddress.numeroTelefono;
+}
+
+  
 
   createAddress() {
     if (!this.canCreateAddress()) {

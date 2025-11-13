@@ -15,6 +15,20 @@ interface PedidoItem {
   subtotal: number;
 }
 
+interface Direccion {
+  barrio: string;
+  numero: string;
+  ciudad: string; 
+  calle: string;
+  carrera: string;
+  numeroTelefono: string;
+}
+
+interface Repartidor {
+  nombre: string;
+  telefono: string;
+}
+
 interface Pedido {
   id: number;
   externalReference: string;
@@ -24,6 +38,18 @@ interface Pedido {
   fechaCreacion: string;
   payerEmail: string;
   items: PedidoItem[];
+  deliveryStatus?: string;
+  trackingCode?: string;
+  direccion?: Direccion;  
+  repartidor?: Repartidor;
+}
+
+interface EstadoEntrega {
+  codigo: string;
+  nombre: string;
+  descripcion: string;
+  completado: boolean;
+  activo: boolean;
 }
 
 @Component({
@@ -37,6 +63,7 @@ export class PedidoDetalleComponent implements OnInit {
   pedido: Pedido | null = null;
   loading = true;
   error: string | null = null;
+  estadosEntrega: EstadoEntrega[] = [];
 
   private externalRef: string | null = null;
 
@@ -50,14 +77,11 @@ export class PedidoDetalleComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Leer parámetro de ruta y query params (status)
     this.externalRef = this.route.snapshot.paramMap.get('external_reference');
     const status = this.route.snapshot.queryParamMap.get('status') || undefined;
 
-    // Si hay status desde el retorno de pago, mostrar mensaje y limpiar carrito si aplica
     if (status) {
       this.handlePaymentReturn(status);
-      // Limpiar query param status de la URL (opcional)
       this.router.navigate(['./'], {
         relativeTo: this.route,
         queryParams: {},
@@ -65,7 +89,6 @@ export class PedidoDetalleComponent implements OnInit {
       });
     }
 
-    // Validar autenticación
     const isAuthenticated = this.authService.isLoggedIn() || this.authService.isTokenValid();
     if (!isAuthenticated) {
       this.loading = false;
@@ -74,7 +97,6 @@ export class PedidoDetalleComponent implements OnInit {
       return;
     }
 
-    // Cargar el pedido por externalReference
     this.cargarPedido();
   }
 
@@ -101,8 +123,17 @@ export class PedidoDetalleComponent implements OnInit {
       next: (lista) => {
         const ref = (this.externalRef || '').trim();
         this.pedido = (lista || []).find(p => String(p.externalReference).trim() === ref) || null;
+        
+        // 🔍 DEBUG: Verifica qué datos está recibiendo
+        console.log('📦 Pedido recibido:', this.pedido);
+        console.log('👤 Repartidor:', this.pedido?.repartidor);
+        console.log('📍 Dirección:', this.pedido?.direccion);
+        console.log('📊 Estado de entrega:', this.pedido?.deliveryStatus);
+        
         if (!this.pedido) {
           this.error = 'No se encontró el pedido solicitado.';
+        } else {
+          this.inicializarEstadosEntrega();
         }
         this.loading = false;
       },
@@ -112,6 +143,27 @@ export class PedidoDetalleComponent implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  private inicializarEstadosEntrega() {
+    if (!this.pedido) return;
+
+    const todosLosEstados = [
+      { codigo: 'EN_PREPARACION', nombre: 'En preparación', descripcion: 'Tu pedido está siendo preparado' },
+      { codigo: 'LISTO_PARA_ENTREGAR', nombre: 'Listo para entregar', descripcion: 'Tu pedido está listo' },
+      { codigo: 'ENTREGADO_A_REPARTIDOR', nombre: 'Entregado al repartidor', descripcion: 'El repartidor tiene tu pedido' },
+      { codigo: 'EN_CAMINO', nombre: 'En camino', descripcion: 'Tu pedido está en camino' },
+      { codigo: 'ENTREGADO', nombre: 'Entregado', descripcion: 'Tu pedido fue entregado' }
+    ];
+
+    const estadoActual = this.pedido.deliveryStatus || 'EN_PREPARACION';
+    const indiceActual = todosLosEstados.findIndex(e => e.codigo === estadoActual);
+
+    this.estadosEntrega = todosLosEstados.map((estado, index) => ({
+      ...estado,
+      completado: index < indiceActual,
+      activo: index === indiceActual
+    }));
   }
 
   handlePaymentReturn(status: string) {
@@ -141,6 +193,16 @@ export class PedidoDetalleComponent implements OnInit {
     return map[estado] || estado;
   }
 
+  getEstadoClass(estado: string): string {
+    const map: Record<string, string> = {
+      'PAID': 'estado-completado',
+      'PENDING': 'estado-pendiente',
+      'CANCELLED': 'estado-cancelado',
+      'FAILED': 'estado-cancelado'
+    };
+    return map[estado] || 'estado-pendiente';
+  }
+
   formatearFecha(fecha: string): string {
     const date = new Date(fecha);
     return date.toLocaleDateString('es-ES', {
@@ -152,4 +214,3 @@ export class PedidoDetalleComponent implements OnInit {
     this.router.navigate(['/mis-pedidos']);
   }
 }
-

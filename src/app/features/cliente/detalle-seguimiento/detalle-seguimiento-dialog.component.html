@@ -1,0 +1,166 @@
+<div class="dialog-container">
+  <!-- Header -->
+  <div class="dialog-header">
+    <div class="header-content">
+      <h2>📦 Detalle del Pedido</h2>
+      <p class="tracking-code">{{ pedido.trackingCode }}</p>
+    </div>
+    <button class="btn-close" (click)="cerrar()">✕</button>
+  </div>
+
+  <!-- Body -->
+  <div class="dialog-body">
+    
+    <!-- Timeline de estados -->
+    <div class="timeline-section">
+      <h3>Estado del pedido</h3>
+      <div class="timeline">
+        <div *ngFor="let item of timeline; let last = last" class="timeline-item" [class.completado]="item.completado">
+          <div class="timeline-dot">
+            <span class="icon">{{ item.icon }}</span>
+          </div>
+          <div class="timeline-content">
+            <p class="timeline-label">{{ item.label }}</p>
+          </div>
+          <div *ngIf="!last" class="timeline-line" [class.completada]="item.completado"></div>
+        </div>
+      </div>
+      
+      <!-- Barra de progreso -->
+      <div class="progress-bar-container">
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="obtenerProgreso()"></div>
+        </div>
+        <p class="progress-text">{{ obtenerProgreso() | number:'1.0-0' }}% completado</p>
+      </div>
+    </div>
+
+    <!-- Información principal -->
+    <div class="info-section">
+      <h3>Información del pedido</h3>
+      
+      <div class="info-grid">
+        <div class="info-card">
+          <span class="info-label">📋 Número de orden</span>
+          <span class="info-value">#{{ pedido.orderId }}</span>
+        </div>
+        
+        <div class="info-card">
+          <span class="info-label">📅 Fecha del pedido</span>
+          <span class="info-value">{{ formatearFecha(pedido.fechaCreacion) }}</span>
+        </div>
+        
+        <div class="info-card">
+          <span class="info-label">💰 Total</span>
+          <span class="info-value total">${{ pedido.total | number:'1.0-0' }} COP</span>
+        </div>
+        
+        <div class="info-card">
+          <span class="info-label">💳 Estado del pago</span>
+          <span class="info-value" [style.color]="obtenerColorPago(pedido.paymentStatus)">
+            {{ obtenerTextoPago(pedido.paymentStatus) }}
+          </span>
+        </div>
+        
+        <div class="info-card" *ngIf="pedido.fechaEntregaEstimada">
+          <span class="info-label">🕐 Entrega estimada</span>
+          <span class="info-value">{{ formatearFecha(pedido.fechaEntregaEstimada) }}</span>
+        </div>
+        
+        <div class="info-card" *ngIf="pedido.fechaEntregaEstimada">
+          <span class="info-label">⏱️ Tiempo restante</span>
+          <span class="info-value">{{ obtenerTiempoRestante() }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dirección de entrega -->
+    <div class="direccion-section" *ngIf="pedido.direccionEntrega">
+      <h3>📍 Dirección de entrega</h3>
+      <div class="direccion-card">
+        <p class="direccion-text">{{ pedido.direccionEntrega }}</p>
+        <button class="btn-mapa" onclick="alert('Funcionalidad de mapa próximamente')">
+          Ver en mapa 🗺️
+        </button>
+      </div>
+    </div>
+
+    <!-- Información del repartidor -->
+    <div class="repartidor-section" *ngIf="pedido.repartidor && pedido.deliveryStatus === 'IN_TRANSIT'">
+      <h3>🚚 Tu repartidor</h3>
+      <div class="repartidor-card">
+        <div class="repartidor-avatar">
+          <span>👤</span>
+        </div>
+        <div class="repartidor-info">
+          <p class="repartidor-nombre">{{ pedido.repartidor.nombre }}</p>
+          <p class="repartidor-telefono" *ngIf="pedido.repartidor.telefono">
+            📞 {{ pedido.repartidor.telefono }}
+          </p>
+        </div>
+        <button class="btn-contactar" *ngIf="pedido.repartidor.telefono">
+          Contactar
+        </button>
+      </div>
+    </div>
+
+    <!-- Items del pedido -->
+    <div class="items-section" *ngIf="detallesCompletos?.items && detallesCompletos.items.length > 0">
+      <h3>🛒 Productos</h3>
+      <div class="items-list">
+        <div *ngFor="let item of detallesCompletos.items" class="item-card">
+          <img *ngIf="item.imagen" [src]="item.imagen" [alt]="item.nombre" class="item-imagen">
+          <div class="item-placeholder" *ngIf="!item.imagen">📦</div>
+          <div class="item-info">
+            <p class="item-nombre">{{ item.nombre }}</p>
+            <p class="item-cantidad">Cantidad: {{ item.cantidad }}</p>
+          </div>
+          <div class="item-precio">
+            <p class="precio-unitario">${{ item.precioUnitario | number:'1.0-0' }}</p>
+            <p class="subtotal">${{ item.subtotal | number:'1.0-0' }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tracking code -->
+    <div class="tracking-section">
+      <h3>🔍 Código de seguimiento</h3>
+      <div class="tracking-card">
+        <code class="tracking-code-display">{{ pedido.trackingCode }}</code>
+        <div class="tracking-actions">
+          <button class="btn-copiar" (click)="copiarTracking()">
+            📋 Copiar
+          </button>
+          <button class="btn-compartir" (click)="compartirWhatsApp()">
+            💬 Compartir
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loader para detalles -->
+    <div *ngIf="cargandoDetalles" class="loading-overlay">
+      <div class="loader"></div>
+      <p>Cargando detalles...</p>
+    </div>
+  </div>
+
+  <!-- Footer con acciones -->
+  <div class="dialog-footer">
+    <button class="btn-secondary" (click)="refrescar()" [disabled]="cargandoDetalles">
+      🔄 Actualizar
+    </button>
+    
+    <button 
+      *ngIf="puedeCancelar()" 
+      class="btn-cancelar" 
+      (click)="cancelarPedido()">
+      ❌ Cancelar pedido
+    </button>
+    
+    <button class="btn-primary" (click)="cerrar()">
+      Cerrar
+    </button>
+  </div>
+</div>  

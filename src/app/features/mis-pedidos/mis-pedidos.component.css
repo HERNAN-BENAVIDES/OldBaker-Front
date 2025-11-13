@@ -1,305 +1,400 @@
-/* Estilos para la página de Mis Pedidos */
+/* ============================================
+   VARIABLES DE COLORES - OldBaker Brand
+   ============================================ */
+:root {
+  --color-primary: #2B4BA0;
+  --color-primary-dark: #1e3a7a;
+  --color-primary-light: #e8edf7;
+  --color-secondary: #FDB913;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-text-dark: #1f2937;
+  --color-text-medium: #4b5563;
+  --color-text-light: #6b7280;
+  --color-background: #f9fafb;
+  --color-white: #ffffff;
+}
+
+/* ============================================
+   PÁGINA PRINCIPAL
+   ============================================ */
 .mis-pedidos-page {
-  min-height: calc(100vh - 12rem);
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
   padding: 2rem 1rem;
-  background: linear-gradient(180deg, #f8fafc 0%, #e0e7ff 50%, #f8fafc 100%);
 }
 
 .container {
-  max-width: 900px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
+/* ============================================
+   BOTÓN VOLVER
+   ============================================ */
 .btn-back {
-  background: transparent;
-  border: 2px solid #e2e8f0;
-  color: #2563eb;
-  padding: 0.625rem 1.25rem;
-  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: var(--color-white);
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
   cursor: pointer;
-  font-size: 0.875rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin-bottom: 1.5rem;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
 }
 
 .btn-back:hover {
-  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-  border-color: #3b82f6;
-  transform: translateX(-4px);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateX(-5px);
 }
 
+/* ============================================
+   TÍTULO DE PÁGINA
+   ============================================ */
 .page-title {
-  font-size: 2rem;
+  font-size: 2.5rem;
   font-weight: 700;
-  color: #0f172a;
-  margin-bottom: 2rem;
+  color: var(--color-white);
+  margin: 0 0 2rem 0;
   text-align: center;
 }
 
-/* Loading */
-.loading-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 4rem 1rem;
+/* ============================================
+   LOADING Y ERROR
+   ============================================ */
+.loading-container,
+.error-container {
+  background: var(--color-white);
+  padding: 3rem;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
 }
 
 .spinner {
-  width: 48px;
-  height: 48px;
-  border: 4px solid #e2e8f0;
-  border-top-color: #2563eb;
+  border: 4px solid #f3f4f6;
+  border-top: 4px solid var(--color-primary);
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-.loading-container p {
-  margin-top: 1rem;
-  color: #64748b;
-  font-size: 0.95rem;
-}
-
-/* Error */
 .error-container {
   background: #fee;
-  border: 1px solid #fcc;
-  border-radius: 8px;
-  padding: 1rem;
-  color: #b91c1c;
-  text-align: center;
+  color: var(--color-danger);
 }
 
-/* Lista de pedidos */
+/* ============================================
+   LISTA DE PEDIDOS
+   ============================================ */
 .pedidos-lista {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: 1.5rem;
 }
 
+/* ============================================
+   TARJETA DE PEDIDO
+   ============================================ */
 .pedido-card {
-  background: #ffffff;
+  background: var(--color-white);
   border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-  padding: 1.5rem;
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
 }
 
 .pedido-card:hover {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-  transform: translateY(-2px);
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
 }
 
+/* ============================================
+   HEADER DEL PEDIDO
+   ============================================ */
 .pedido-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 1rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #e2e8f0;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, var(--color-primary-light) 0%, #f0f4ff 100%);
+  border-bottom: 2px solid var(--color-primary);
 }
 
 .pedido-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+  flex: 1;
 }
 
 .pedido-id {
-  font-size: 1.125rem;
+  font-size: 1.25rem;
   font-weight: 700;
-  color: #0f172a;
-  margin: 0;
+  color: var(--color-text-dark);
+  margin: 0 0 0.5rem 0;
 }
 
 .pedido-fecha {
   font-size: 0.875rem;
-  color: #64748b;
+  color: var(--color-text-light);
+  margin: 0 0 0.5rem 0;
+}
+
+.pedido-reference {
+  font-size: 0.75rem;
+  color: var(--color-text-medium);
+  font-family: 'Courier New', monospace;
+  background: var(--color-white);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  display: inline-block;
   margin: 0;
 }
 
+/* ============================================
+   ESTADOS DE PEDIDO
+   ============================================ */
 .pedido-estado {
-  padding: 0.375rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.8rem;
-  font-weight: 600;
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-.estado-pendiente {
-  background: #fef3c7;
-  color: #92400e;
-}
-
-.estado-en-proceso {
-  background: #dbeafe;
-  color: #1e40af;
-}
-
 .estado-completado {
-  background: #d1fae5;
-  color: #065f46;
+  background: var(--color-success);
+  color: var(--color-white);
+}
+
+.estado-pendiente {
+  background: var(--color-warning);
+  color: var(--color-white);
 }
 
 .estado-cancelado {
-  background: #fee2e2;
-  color: #991b1b;
+  background: var(--color-danger);
+  color: var(--color-white);
 }
 
-/* Productos del pedido */
+/* ============================================
+   PRODUCTOS DEL PEDIDO
+   ============================================ */
 .pedido-productos {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
+  padding: 1rem 1.5rem;
+  max-height: 200px;
+  overflow-y: auto;
 }
 
 .producto-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.5rem;
-  background: #f8fafc;
-  border-radius: 6px;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.producto-item:last-child {
+  border-bottom: none;
 }
 
 .producto-info {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  flex: 1;
 }
 
 .producto-nombre {
-  font-size: 0.95rem;
-  color: #334155;
-  font-weight: 500;
+  font-weight: 600;
+  color: var(--color-text-dark);
+  font-size: 0.9rem;
 }
 
 .producto-cantidad {
   font-size: 0.875rem;
-  color: #64748b;
-  background: #e2e8f0;
-  padding: 0.125rem 0.5rem;
+  color: var(--color-text-light);
+  background: var(--color-background);
+  padding: 0.25rem 0.5rem;
   border-radius: 4px;
 }
 
 .producto-precio {
-  font-size: 0.95rem;
-  color: #0f172a;
-  font-weight: 600;
+  font-weight: 700;
+  color: var(--color-primary);
+  font-size: 0.9rem;
 }
 
-/* Footer del pedido */
+/* ============================================
+   FOOTER DEL PEDIDO
+   ============================================ */
 .pedido-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 1rem;
-  border-top: 1px solid #e2e8f0;
+  padding: 1.5rem;
+  background: var(--color-background);
+  border-top: 1px solid #e5e7eb;
 }
 
 .pedido-total-label {
   font-size: 1rem;
-  color: #64748b;
-  font-weight: 500;
+  font-weight: 600;
+  color: var(--color-text-medium);
 }
 
 .pedido-total {
-  font-size: 1.25rem;
-  color: #0f172a;
+  font-size: 1.5rem;
   font-weight: 700;
+  color: var(--color-primary);
+  margin-right: auto;
+  margin-left: 0.5rem;
 }
 
-/* Estado vacío */
+.btn-link {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: var(--color-white);
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(43, 75, 160, 0.3);
+}
+
+/* ============================================
+   ESTADO VACÍO
+   ============================================ */
 .empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 4rem 1rem;
+  background: var(--color-white);
+  padding: 4rem 2rem;
+  border-radius: 12px;
   text-align: center;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
 }
 
 .empty-state svg {
   margin-bottom: 1.5rem;
-  opacity: 0.5;
 }
 
 .empty-state h2 {
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--color-text-dark);
   margin: 0 0 0.5rem 0;
 }
 
 .empty-state p {
   font-size: 1rem;
-  color: #64748b;
+  color: var(--color-text-light);
   margin: 0 0 2rem 0;
 }
 
 .btn-primary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.75rem 1.5rem;
-  background: linear-gradient(90deg, #2563eb, #1e40af);
-  color: white;
-  border: none;
+  display: inline-block;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: var(--color-white);
+  padding: 1rem 2rem;
   border-radius: 8px;
+  text-decoration: none;
   font-weight: 600;
   font-size: 1rem;
-  text-decoration: none;
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: all 0.3s ease;
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  box-shadow: 0 8px 24px rgba(43, 75, 160, 0.3);
 }
 
-/* Responsive */
-@media (max-width: 640px) {
+/* ============================================
+   SCROLLBAR PERSONALIZADA
+   ============================================ */
+.pedido-productos::-webkit-scrollbar {
+  width: 6px;
+}
+
+.pedido-productos::-webkit-scrollbar-track {
+  background: var(--color-background);
+  border-radius: 10px;
+}
+
+.pedido-productos::-webkit-scrollbar-thumb {
+  background: var(--color-primary-light);
+  border-radius: 10px;
+}
+
+.pedido-productos::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+@media (max-width: 768px) {
   .mis-pedidos-page {
     padding: 1rem 0.5rem;
   }
 
   .page-title {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
   }
 
-  .pedido-card {
-    padding: 1rem;
+  .pedidos-lista {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .pedido-footer {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .pedido-total {
+    margin: 0;
+    text-align: center;
+  }
+
+  .btn-link {
+    width: 100%;
+    text-align: center;
   }
 
   .pedido-header {
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 1rem;
   }
 
   .pedido-estado {
     align-self: flex-start;
   }
+}
 
-  .producto-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
+@media (max-width: 480px) {
+  .pedido-id {
+    font-size: 1.1rem;
   }
 
-  .producto-precio {
-    align-self: flex-end;
+  .pedido-total {
+    font-size: 1.25rem;
   }
 }

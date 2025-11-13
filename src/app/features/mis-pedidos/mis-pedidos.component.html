@@ -43,6 +43,9 @@
         <div class="pedido-footer">
           <span class="pedido-total-label">Total:</span>
           <span class="pedido-total">{{ pedido.total | currency:'COP':'symbol':'1.0-0' }}</span>
+          <button class="btn-link" [routerLink]="['/mis-pedidos/detalle-pedido', pedido.externalReference]">
+            Ver seguimiento
+          </button>
         </div>
       </div>
     </div>

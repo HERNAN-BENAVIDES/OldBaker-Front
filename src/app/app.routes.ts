@@ -3,6 +3,16 @@ import { AuthGuard } from './features/auth/services/auth.guard';
 import { StaffRedirectGuard } from './features/auth/services/staff-redirect.guard';
 import { AlreadyAuthGuard } from './features/auth/services/already-auth.guard';
 
+import { MatDialogModule } from '@angular/material/dialog';
+import { FormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
+
+import { SeguimientoPedidosComponent } from './features/cliente/seguimiento-pedidos/seguimiento-pedidos.component';
+import { DetalleSeguimientoDialogComponent } from './features/cliente/detalle-seguimiento/detalle-seguimiento-dialog.component';
+import { MisEntregasComponent } from './features/delivery/mis-entregas/mis-entregas.component';
+
+
+
 export const routes: Routes = [
   // Redirección a /home como ruta por defecto
   { path: '', pathMatch: 'full', redirectTo: 'home' },
@@ -174,6 +184,10 @@ export const routes: Routes = [
     data: { roles: ['CLIENTE'] }
   },
   {
+  path: 'mis-pedidos/detalle-pedido/:external_reference',
+  loadComponent: () => import('./features/mis-pedidos/detalle-pedido/pedido-detalle.component').then(m => m.PedidoDetalleComponent)
+  },
+  {
     path: 'mi-perfil',
     loadComponent: () => import('./features/perfil/perfil.component')
       .then(m => m.PerfilComponent),
@@ -202,5 +216,11 @@ export const routes: Routes = [
     path: '**',
     loadComponent: () => import('./shared/route-redirect/route-redirect.component')
       .then(m => m.RouteRedirectComponent)
-  }
+  },
+
+  {
+  path: 'cliente/seguimiento-pedidos',
+  loadComponent: () => import('./features/cliente/seguimiento-pedidos/seguimiento-pedidos.component')
+    .then(m => m.SeguimientoPedidosComponent)
+}
 ];
