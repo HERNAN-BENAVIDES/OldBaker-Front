@@ -232,6 +232,7 @@ export class CheckoutAddressComponent implements OnInit {
     }
 
     const url = `${environment.apiUrl}/api/user/agregar-direccion?idUsuario=${encodeURIComponent(idUsuario)}`;
+    try { console.log('[Checkout] POST crear dirección →', url, 'body:', dto); } catch {}
     this.http.post<DireccionResponseDTO | any>(url, dto as any, headers).subscribe({
       next: (resp: any) => {
         this.creatingAddress = false;

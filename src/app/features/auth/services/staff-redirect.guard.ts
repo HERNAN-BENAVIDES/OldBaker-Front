@@ -22,6 +22,9 @@ export class StaffRedirectGuard implements CanActivate {
     if (role === 'AUXILIAR') {
       return this.router.createUrlTree(['/auxiliar']);
     }
+    if (role === 'REPARTIDOR') {
+      return this.router.createUrlTree(['/repartidor']);
+    }
 
     // CLIENTE u otro: permitir Home
     return true;

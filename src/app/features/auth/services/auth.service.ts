@@ -27,6 +27,7 @@ export class AuthService {
     if (r === 'ADMIN' || r === 'ADMINISTRADOR' || r === 'ROLE_ADMIN' || r === 'ROLE_ADMINISTRADOR') return 'ADMINISTRADOR';
     if (r === 'AUX' || r === 'AUXILIAR' || r === 'ROLE_AUX' || r === 'ROLE_AUXILIAR') return 'AUXILIAR';
     if (r === 'CLIENT' || r === 'CLIENTE' || r === 'ROLE_CLIENT' || r === 'ROLE_CLIENTE') return 'CLIENTE';
+    if (r === 'REPARTIDOR' || r === 'TRABAJADOR' || r === 'DELIVERY' || r === 'ROLE_REPARTIDOR' || r === 'ROLE_TRABAJADOR') return 'REPARTIDOR';
     return r; // devolver tal cual en mayúsculas si no coincide
   }
 

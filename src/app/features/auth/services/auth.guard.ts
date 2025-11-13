@@ -41,6 +41,9 @@ export class AuthGuard implements CanActivate {
     if (userRole === 'AUXILIAR') {
       return this.router.createUrlTree(['/auxiliar']);
     }
+    if (userRole === 'REPARTIDOR') {
+      return this.router.createUrlTree(['/repartidor']);
+    }
     // Cliente u otro: enviar a home
     return this.router.createUrlTree(['/']);
   }

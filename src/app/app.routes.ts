@@ -181,6 +181,22 @@ export const routes: Routes = [
     data: { roles: ['CLIENTE'] }
   },
 
+  // Ruta de repartidor (protegida)
+  {
+    path: 'repartidor',
+    loadComponent: () => import('./features/repartidor/repartidor-dashboard/repartidor-dashboard')
+      .then(c => c.RepartidorDashboardComponent),
+    canActivate: [AuthGuard],
+    data: { roles: ['REPARTIDOR'] }
+  },
+  {
+    path: 'repartidor/:module',
+    loadComponent: () => import('./features/repartidor/repartidor-dashboard/repartidor-dashboard')
+      .then(c => c.RepartidorDashboardComponent),
+    canActivate: [AuthGuard],
+    data: { roles: ['REPARTIDOR'] }
+  },
+
   // Wildcard: componente de redirect inteligente
   {
     path: '**',
