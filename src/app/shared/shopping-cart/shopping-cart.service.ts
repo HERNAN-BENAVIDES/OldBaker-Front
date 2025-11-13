@@ -41,7 +41,9 @@ export class ShoppingCartService {
             // Usuario acaba de loguearse: recargar desde servidor y fusionar con carrito local previo si existe
             this.reloadFromServer(true);
           } else if (!u) {
-            // Usuario deslogueado: mantener items locales (se podrán usar como invitado)
+            // Usuario deslogueado: limpiar carrito para futuros clientes
+            this.cartItems.next([]);
+            try { localStorage.removeItem('shopping_cart'); } catch {}
           }
         });
       }
@@ -58,23 +60,28 @@ export class ShoppingCartService {
     return { headers: new HttpHeaders({ Authorization: `Bearer ${clean}` }) };
   }
 
-  // Enriquecer ítems sin imagen consultando detalles del producto
+  // Enriquecer ítems sin datos consultando detalles del producto
   private enrichMissingImages(items: CartItem[]): Observable<CartItem[]> {
-    const missing = items.filter(i => !i.image || String(i.image).trim() === '');
+    const missing = items.filter(i => !i.image || String(i.image).trim() === '' || !i.name || i.price == null || i.price === 0);
     if (missing.length === 0) return of(items);
 
     const lookups = missing.map(m => this.productos.getProductoResponse(m.id).pipe(
-      map(det => ({ id: m.id, url: (det as any).url ?? '' })),
-      catchError(() => of({ id: m.id, url: '' }))
+      map(det => ({ id: m.id, url: (det as any).url ?? '', nombre: det.nombre, precio: det.costoUnitario })),
+      catchError(() => of({ id: m.id, url: '', nombre: m.name || `Producto ${m.id}`, precio: m.price ?? 0 }))
     ));
 
     return forkJoin(lookups).pipe(
       map(results => {
-        const byId = new Map<number, string>(results.map(r => [r.id, r.url]));
+        const mapUrl = new Map<number, { url: string; nombre: string; precio: number }>(results.map(r => [r.id, { url: (r as any).url, nombre: (r as any).nombre, precio: (r as any).precio }]));
         return items.map(it => {
-          if (!it.image || String(it.image).trim() === '') {
-            const url = byId.get(it.id) || it.image || '';
-            return { ...it, image: url } as CartItem;
+          const r = mapUrl.get(it.id);
+          if (r) {
+            return {
+              ...it,
+              image: (it.image && it.image.trim() !== '') ? it.image : r.url,
+              name: it.name || r.nombre,
+              price: (it.price != null && it.price > 0) ? it.price : r.precio
+            } as CartItem;
           }
           return it;
         });

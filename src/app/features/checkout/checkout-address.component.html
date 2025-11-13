@@ -98,9 +98,19 @@
         </div>
       </div>
 
+      <div class="delivery-date-section" *ngIf="addresses.length > 0 || showNewAddressForm">
+        <h2>Fecha de entrega</h2>
+        <p class="help">Selecciona una fecha de entrega con al menos 2 días de anticipación. No se realizan entregas los domingos.</p>
+        <div class="date-row">
+          <label for="deliveryDate">Fecha</label>
+          <input id="deliveryDate" type="date" [min]="minSelectableDate" [(ngModel)]="selectedDeliveryDate" (ngModelChange)="onDateChange($event)" />
+        </div>
+        <p class="error" *ngIf="dateError">{{ dateError }}</p>
+      </div>
+
       <div class="action-buttons" *ngIf="addresses.length > 0 || showNewAddressForm">
         <button class="btn btn-outline" (click)="goBack()" [disabled]="isLoading">Volver al carrito</button>
-        <button class="btn btn-primary" (click)="proceedToPayment()" [disabled]="isLoading || !selectedDeliveryAddressId || (!useSameAddress && !selectedBillingAddressId)">
+        <button class="btn btn-primary" (click)="proceedToPayment()" [disabled]="isLoading || !selectedDeliveryAddressId || (!useSameAddress && !selectedBillingAddressId) || !selectedDeliveryDate || !!dateError">
           {{ isLoading ? 'Procesando...' : 'Proceder al pago' }}
         </button>
       </div>

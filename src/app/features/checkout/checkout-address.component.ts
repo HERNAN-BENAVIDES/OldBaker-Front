@@ -45,6 +45,10 @@ export class CheckoutAddressComponent implements OnInit {
   };
   creatingAddress = false;
 
+  selectedDeliveryDate: string | null = null; // yyyy-MM-dd
+  minSelectableDate: string = '';
+  dateError: string | null = null;
+
   constructor(
     private cartService: ShoppingCartService,
     private authService: AuthService,
@@ -61,6 +65,25 @@ export class CheckoutAddressComponent implements OnInit {
       return;
     }
     this.loadUserAddresses();
+    this.setupMinDate();
+  }
+
+  private setupMinDate() {
+    // Mínimo 2 días desde hoy, ajustando si cae en domingo
+    const min = new Date();
+    min.setDate(min.getDate() + 2);
+    // Evitar domingo (0)
+    if (min.getDay() === 0) {
+      min.setDate(min.getDate() + 1);
+    }
+    this.minSelectableDate = this.toInputDate(min);
+  }
+
+  private toInputDate(d: Date): string {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${dd}`;
   }
 
   private loadSelectedItems() {
@@ -183,25 +206,48 @@ export class CheckoutAddressComponent implements OnInit {
       this.notifications.showError('Completa todos los campos de la nueva dirección');
       return;
     }
-    const user = this.getUserFromStorage();
-    const idUsuario = user?.id;
-    if (!idUsuario) {
-      this.notifications.showError('Usuario no identificado');
-      return;
-    }
+    // Construir DTO con id null como solicita el backend
+    const dto = {
+      id: null,
+      ciudad: String(this.newAddress.ciudad || ''),
+      barrio: String(this.newAddress.barrio || ''),
+      carrera: String(this.newAddress.carrera || ''),
+      calle: String(this.newAddress.calle || ''),
+      numero: String(this.newAddress.numero || ''),
+      numeroTelefono: String(this.newAddress.numeroTelefono || '')
+    };
+
     this.creatingAddress = true;
     const token = this.authService.getToken();
     const cleanToken = token ? token.replace(/^Bearer\s+/i, '').trim() : '';
     const headers = token ? { headers: { Authorization: `Bearer ${cleanToken}` } } : {};
-    const payload = { idUsuario, ...this.newAddress };
-    this.http.post('/api/user/direccion', payload, headers).subscribe({
+
+    const url = `${environment.apiUrl}/api/productos/agregar-direccion`;
+    this.http.post<DireccionResponseDTO | any>(url, dto as any, headers).subscribe({
       next: (resp: any) => {
         this.creatingAddress = false;
-        // asumir que resp contiene la nueva dirección (o su id)
-        const created: DireccionResponseDTO = resp?.id ? resp : { id: resp.id, ciudad: this.newAddress.ciudad!, barrio: this.newAddress.barrio!, carrera: this.newAddress.carrera!, calle: this.newAddress.calle!, numero: this.newAddress.numero!, numeroTelefono: this.newAddress.numeroTelefono! } as DireccionResponseDTO;
+        // Si el backend retorna la dirección creada con id, usarla; de lo contrario, crear desde el dto
+        const created: DireccionResponseDTO = resp?.id
+          ? resp
+          : {
+              id: resp?.id ?? null,
+              ciudad: dto.ciudad,
+              barrio: dto.barrio,
+              carrera: dto.carrera,
+              calle: dto.calle,
+              numero: dto.numero,
+              numeroTelefono: dto.numeroTelefono
+            } as any;
+
+        if (!Array.isArray(this.addresses)) this.addresses = [];
         this.addresses.push(created);
-        this.selectedDeliveryAddressId = created.id;
-        if (this.useSameAddress) this.selectedBillingAddressId = created.id;
+        this.selectedDeliveryAddressId = created.id ?? this.selectedDeliveryAddressId;
+        if (this.selectedDeliveryAddressId == null) {
+          // Si el backend aún no retornó id, recargar direcciones para obtenerlo y seleccionar por coincidencia de campos
+          this.reloadAddressesSelecting(dto);
+        } else if (this.useSameAddress) {
+          this.selectedBillingAddressId = this.selectedDeliveryAddressId;
+        }
         this.showNewAddressForm = false;
         this.notifications.showSuccess('Dirección creada correctamente');
         this.resetNewAddress();
@@ -212,6 +258,47 @@ export class CheckoutAddressComponent implements OnInit {
         this.notifications.showError(msg);
       }
     });
+  }
+
+  private reloadAddressesSelecting(dto: { ciudad: string; barrio: string; carrera: string; calle: string; numero: string; numeroTelefono: string; }) {
+    this.isLoading = true;
+    const user = this.getUserFromStorage();
+    const idUsuario = user?.id;
+    if (!idUsuario) { this.isLoading = false; return; }
+    this.authService.getDireccionUsuario(idUsuario).subscribe({
+      next: (res: any) => {
+        this.isLoading = false;
+        const list = this.normalizeAddresses(res);
+        this.addresses = list;
+        // Buscar coincidencia exacta por campos básicos
+        const match = this.addresses.find(a => a.ciudad === dto.ciudad && a.barrio === dto.barrio && a.carrera === dto.carrera && a.calle === dto.calle && a.numero === dto.numero && a.numeroTelefono === dto.numeroTelefono);
+        if (match) {
+          this.selectedDeliveryAddressId = match.id;
+          if (this.useSameAddress) this.selectedBillingAddressId = match.id;
+        } else if (this.addresses.length > 0) {
+          // fallback: seleccionar la más reciente (última)
+          const last = this.addresses[this.addresses.length - 1];
+          this.selectedDeliveryAddressId = last.id;
+          if (this.useSameAddress) this.selectedBillingAddressId = last.id;
+        }
+      },
+      error: () => { this.isLoading = false; }
+    });
+  }
+
+  onDateChange(value: string) {
+    this.dateError = null;
+    if (!value) { this.dateError = 'Selecciona una fecha de entrega'; return; }
+    const chosen = new Date(value + 'T00:00:00');
+    const min = new Date(this.minSelectableDate + 'T00:00:00');
+    if (chosen < min) {
+      this.dateError = `La fecha debe ser al menos ${this.minSelectableDate}`;
+      return;
+    }
+    if (chosen.getDay() === 0) {
+      this.dateError = 'No se realizan entregas los domingos';
+      return;
+    }
   }
 
   proceedToPayment() {
@@ -235,20 +322,26 @@ export class CheckoutAddressComponent implements OnInit {
       this.notifications.showError('No se encontró email del usuario');
       return;
     }
-    const delivery = this.addresses.find(a => a.id === this.selectedDeliveryAddressId);
-    const billing = this.useSameAddress ? delivery : this.addresses.find(a => a.id === this.selectedBillingAddressId!);
-    if (!delivery || !billing) {
-      this.notifications.showError('Direcciones inválidas seleccionadas');
+
+    // Asegurar que contamos con un ID de dirección (si se creó recién y no tiene id, refrescar)
+    if (this.selectedDeliveryAddressId == null) {
+      this.notifications.showInfo('Actualizando tus direcciones...');
+      this.loadUserAddresses();
       return;
     }
+
+    // Construir CheckoutRequestDTO
+    const direccionId = this.selectedDeliveryAddressId as number;
+    const estimated = this.computeEstimatedDeliveryDateTime();
+
     this.isLoading = true;
     const cleanToken = String(token).replace(/^Bearer\s+/i, '').trim();
     const headers = { headers: { Authorization: `Bearer ${cleanToken}` } };
     const payload = {
       payerEmail,
-      items: this.selectedItems.map(item => ({ productId: item.id, quantity: item.quantity })),
-      deliveryAddress: delivery,
-      billingAddress: billing
+      direccionId,
+      fechadeEntregaEstimada: estimated,
+      items: this.selectedItems.map(item => ({ productId: item.id, quantity: item.quantity }))
     };
 
     const urlCheckout = `${environment.apiUrl}/api/orders/checkout`;
@@ -269,6 +362,17 @@ export class CheckoutAddressComponent implements OnInit {
         this.notifications.showError(msg);
       }
     });
+  }
+
+  private computeEstimatedDeliveryDateTime(): string {
+    // Si el usuario seleccionó una fecha, usar esa fecha a las 09:00 hora local; si no, fallback a +48h
+    if (this.selectedDeliveryDate && !this.dateError) {
+      const parts = this.selectedDeliveryDate.split('-');
+      const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 9, 0, 0);
+      return d.toISOString();
+    }
+    const d = new Date(Date.now() + 48 * 60 * 60 * 1000);
+    return d.toISOString();
   }
 
   private getUserFromStorage(): any {

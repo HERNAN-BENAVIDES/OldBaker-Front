@@ -175,6 +175,7 @@ export class PerfilComponent implements OnInit {
       numeroTelefono: ''
     }
   };
+  direcciones: any[] = []; // nuevo: lista completa de direcciones
 
   constructor(private auth: AuthService, private notifications: NotificationService, private router: Router) {}
 
@@ -203,15 +204,39 @@ export class PerfilComponent implements OnInit {
     this.auth.getDireccionUsuario(idUsuario).subscribe({
       next: (direccion: any) => {
         if (direccion) {
-          // Actualizar el objeto usuario con la dirección obtenida
-          if (!this.usuario) this.usuario = {};
-          this.usuario.direccion = direccion;
-          console.log('Dirección cargada:', direccion);
+          // Si retorna un arreglo, tomar la primera como principal y guardar todas
+          if (Array.isArray(direccion)) {
+            this.direcciones = direccion.filter(d => !!d && typeof d === 'object');
+            const primera = this.direcciones[0] || null;
+            if (!this.usuario) this.usuario = {};
+            this.usuario.direccion = primera; // asignar primera para compatibilidad con la plantilla existente
+          } else {
+            // Puede venir envuelto en data
+            if (direccion.data) {
+              const dataVal = direccion.data;
+              if (Array.isArray(dataVal)) {
+                this.direcciones = dataVal.filter(d => !!d && typeof d === 'object');
+                this.usuario.direccion = this.direcciones[0] || null;
+              } else if (Array.isArray(dataVal?.direcciones)) {
+                this.direcciones = dataVal.direcciones.filter((d: any) => !!d && typeof d === 'object');
+                this.usuario.direccion = this.direcciones[0] || null;
+              } else {
+                // Un solo objeto
+                this.direcciones = [dataVal];
+                this.usuario.direccion = dataVal;
+              }
+            } else {
+              // Objeto simple
+              if (!this.usuario) this.usuario = {};
+              this.usuario.direccion = direccion;
+              this.direcciones = [direccion];
+            }
+          }
+          console.log('[Perfil] Direcciones cargadas:', this.direcciones);
         }
       },
       error: (err: any) => {
         console.warn('Error al cargar dirección del usuario:', err);
-        // No mostrar error al usuario si no tiene dirección registrada
         if (err.status !== 404) {
           const msg = err?.error?.mensaje ?? err?.message ?? 'Error al cargar dirección';
           this.notifications.showError(msg);
@@ -223,15 +248,16 @@ export class PerfilComponent implements OnInit {
   enterEdit() {
     this.editMode = true;
     this.form.nombre = this.usuario?.nombre ?? '';
-    // Cargar dirección existente o inicializar vacía
-    if (this.usuario?.direccion) {
+    // Usar la dirección principal (primera) si hay lista
+    const baseDir = this.usuario?.direccion || this.direcciones[0] || null;
+    if (baseDir) {
       this.form.direccion = {
-        ciudad: this.usuario.direccion.ciudad ?? '',
-        barrio: this.usuario.direccion.barrio ?? '',
-        carrera: this.usuario.direccion.carrera ?? '',
-        calle: this.usuario.direccion.calle ?? '',
-        numero: this.usuario.direccion.numero ?? '',
-        numeroTelefono: this.usuario.direccion.numeroTelefono ?? ''
+        ciudad: baseDir.ciudad ?? '',
+        barrio: baseDir.barrio ?? '',
+        carrera: baseDir.carrera ?? '',
+        calle: baseDir.calle ?? '',
+        numero: baseDir.numero ?? '',
+        numeroTelefono: baseDir.numeroTelefono ?? ''
       };
     } else {
       this.form.direccion = {
