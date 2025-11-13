@@ -1,0 +1,317 @@
+.estado-pedido-container {
+  width: 100%;
+  padding: 20px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border-radius: 12px;
+}
+
+/* Descripción */
+.descripcion-estado {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.descripcion-text {
+  margin: 0;
+  font-size: 1rem;
+  color: #1a237e;
+  font-weight: 600;
+}
+
+/* Timeline */
+.progreso-timeline {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.timeline-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  position: relative;
+  z-index: 2;
+}
+
+/* Círculo del estado */
+.step-circle {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.circle-inner {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 3px solid #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 1;
+}
+
+.timeline-step.completado .circle-inner {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  transform: scale(1);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.timeline-step.actual .circle-inner {
+  background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
+  transform: scale(1.15);
+  animation: pulse-circle 2s infinite;
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.5);
+}
+
+@keyframes pulse-circle {
+  0%, 100% {
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.5);
+  }
+  50% {
+    box-shadow: 0 6px 30px rgba(76, 175, 80, 0.7);
+  }
+}
+
+.step-icon {
+  font-size: 28px;
+  transition: all 0.3s;
+}
+
+.timeline-step.actual .step-icon {
+  animation: bounce 1s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+/* Marca de check */
+.check-mark {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 24px;
+  height: 24px;
+  background: #4CAF50;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+  border: 2px solid white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  animation: check-appear 0.5s ease-out;
+}
+
+@keyframes check-appear {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Etiqueta */
+.step-label {
+  text-align: center;
+}
+
+.label-text {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #666;
+  transition: all 0.3s;
+}
+
+.timeline-step.completado .label-text {
+  color: #667eea;
+  font-weight: 700;
+}
+
+.timeline-step.actual .label-text {
+  color: #4CAF50;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+/* Línea conectora */
+.step-line {
+  position: absolute;
+  top: 30px;
+  left: 50%;
+  width: 100%;
+  height: 4px;
+  background: #e0e0e0;
+  z-index: 0;
+  transition: all 0.5s ease;
+}
+
+.step-line.completada {
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  animation: line-fill 0.8s ease-out;
+}
+
+@keyframes line-fill {
+  0% {
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+  100% {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+}
+
+/* Barra de progreso simple */
+.progress-bar-simple {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+}
+
+/* Porcentaje */
+.progress-percentage {
+  text-align: center;
+}
+
+.progress-percentage span {
+  font-size: 0.9rem;
+  color: #667eea;
+  font-weight: 700;
+}
+
+/* Tamaños */
+.size-small {
+  padding: 15px;
+}
+
+.size-small .circle-inner {
+  width: 40px;
+  height: 40px;
+}
+
+.size-small .step-icon {
+  font-size: 20px;
+}
+
+.size-small .label-text {
+  font-size: 0.75rem;
+}
+
+.size-small .step-line {
+  top: 20px;
+  height: 3px;
+}
+
+.size-large {
+  padding: 30px;
+}
+
+.size-large .circle-inner {
+  width: 80px;
+  height: 80px;
+}
+
+.size-large .step-icon {
+  font-size: 36px;
+}
+
+.size-large .label-text {
+  font-size: 1rem;
+}
+
+.size-large .step-line {
+  top: 40px;
+  height: 5px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .progreso-timeline {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .timeline-step {
+    flex-direction: row;
+    width: 100%;
+    align-items: center;
+  }
+
+  .step-circle {
+    margin-bottom: 0;
+    margin-right: 15px;
+  }
+
+  .step-label {
+    text-align: left;
+    flex: 1;
+  }
+
+  .step-line {
+    display: none;
+  }
+
+  /* Usar solo la barra de progreso en móvil */
+  .progress-bar-simple {
+    display: block;
+  }
+}
+
+@media (max-width: 480px) {
+  .circle-inner {
+    width: 45px;
+    height: 45px;
+  }
+
+  .step-icon {
+    font-size: 22px;
+  }
+
+  .descripcion-text {
+    font-size: 0.9rem;
+  }
+
+  .label-text {
+    font-size: 0.8rem;
+  }
+}
+
+/* Modo sin texto (solo íconos) */
+.estado-pedido-container:not(.mostrar-texto) .descripcion-estado,
+.estado-pedido-container:not(.mostrar-texto) .step-label,
+.estado-pedido-container:not(.mostrar-texto) .progress-percentage {
+  display: none;
+}

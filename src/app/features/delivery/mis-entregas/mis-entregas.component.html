@@ -1,0 +1,187 @@
+<div class="entregas-container">
+  <!-- Header con estadísticas -->
+  <div class="header">
+    <div class="title-section">
+      <h1>🚚 Mis Entregas</h1>
+      <p class="subtitle">Panel del repartidor</p>
+    </div>
+    
+    <button class="btn-refresh" (click)="refrescar()" [disabled]="cargando">
+      <span class="icon">🔄</span>
+      Actualizar
+    </button>
+  </div>
+
+  <!-- Estadísticas -->
+  <div class="estadisticas-grid">
+    <div class="stat-card pendientes">
+      <div class="stat-icon">📋</div>
+      <div class="stat-content">
+        <p class="stat-label">Pendientes</p>
+        <p class="stat-value">{{ estadisticas.pendientes }}</p>
+      </div>
+    </div>
+
+    <div class="stat-card en-camino">
+      <div class="stat-icon">🚚</div>
+      <div class="stat-content">
+        <p class="stat-label">En camino</p>
+        <p class="stat-value">{{ estadisticas.enCamino }}</p>
+      </div>
+    </div>
+
+    <div class="stat-card entregadas">
+      <div class="stat-icon">✅</div>
+      <div class="stat-content">
+        <p class="stat-label">Entregadas hoy</p>
+        <p class="stat-value">{{ estadisticas.entregadas }}</p>
+      </div>
+    </div>
+
+    <div class="stat-card total">
+      <div class="stat-icon">📊</div>
+      <div class="stat-content">
+        <p class="stat-label">Total hoy</p>
+        <p class="stat-value">{{ estadisticas.totalHoy }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filtros">
+    <button 
+      (click)="cambiarFiltro('ACTIVAS')" 
+      [class.active]="filtroActivo === 'ACTIVAS'"
+      class="filtro-btn">
+      🔥 Activas
+    </button>
+    <button 
+      (click)="cambiarFiltro('PREPARANDO')" 
+      [class.active]="filtroActivo === 'PREPARANDO'"
+      class="filtro-btn">
+      👨‍🍳 Por recoger
+    </button>
+    <button 
+      (click)="cambiarFiltro('EN_CAMINO')" 
+      [class.active]="filtroActivo === 'EN_CAMINO'"
+      class="filtro-btn">
+      🚚 En camino
+    </button>
+    <button 
+      (click)="cambiarFiltro('ENTREGADAS')" 
+      [class.active]="filtroActivo === 'ENTREGADAS'"
+      class="filtro-btn">
+      ✅ Entregadas
+    </button>
+  </div>
+
+  <!-- Loader -->
+  <div *ngIf="cargando" class="loader-container">
+    <div class="loader"></div>
+    <p>Cargando entregas...</p>
+  </div>
+
+  <!-- Lista de entregas -->
+  <div *ngIf="!cargando && entregasFiltradas.length > 0" class="entregas-lista">
+    <div *ngFor="let entrega of entregasFiltradas" class="entrega-card">
+      
+      <!-- Header -->
+      <div class="entrega-header">
+        <div class="header-left">
+          <span class="icono-estado">{{ obtenerIconoEstado(entrega.deliveryStatus) }}</span>
+          <div class="info-basica">
+            <h3>{{ entrega.trackingCode }}</h3>
+            <span class="order-id">Orden #{{ entrega.orderId }}</span>
+          </div>
+        </div>
+        <span 
+          class="estado-badge" 
+          [style.background-color]="obtenerColorEstado(entrega.deliveryStatus)">
+          {{ obtenerTextoEstado(entrega.deliveryStatus) }}
+        </span>
+      </div>
+
+      <!-- Información principal -->
+      <div class="entrega-body">
+        <div class="info-row">
+          <span class="label">💰 Total:</span>
+          <span class="value">${{ entrega.total | number:'1.0-0' }} COP</span>
+        </div>
+        
+        <div class="info-row">
+          <span class="label">📅 Asignado:</span>
+          <span class="value">{{ formatearFecha(entrega.fechaAsignacion) }}</span>
+        </div>
+
+        <div class="info-row" *ngIf="entrega.fechaEntregaEstimada">
+          <span class="label">🕐 Entrega estimada:</span>
+          <span class="value">{{ formatearFecha(entrega.fechaEntregaEstimada) }}</span>
+        </div>
+
+        <div class="info-row direccion" *ngIf="entrega.direccionEntrega">
+          <span class="label">📍 Dirección:</span>
+          <span class="value direccion-text">{{ entrega.direccionEntrega }}</span>
+        </div>
+      </div>
+
+      <!-- Acciones -->
+      <div class="entrega-footer">
+        
+        <!-- Botón de recoger -->
+        <button 
+          *ngIf="puedeRecoger(entrega)"
+          class="btn-action btn-recoger"
+          (click)="marcarComoRecogido(entrega)">
+          📦 Recoger pedido
+        </button>
+
+        <!-- Botón de entregar -->
+        <button 
+          *ngIf="puedeEntregar(entrega)"
+          class="btn-action btn-entregar"
+          (click)="marcarComoEntregado(entrega)">
+          ✅ Marcar como entregado
+        </button>
+
+        <!-- Acciones secundarias -->
+        <div class="acciones-secundarias">
+          <button 
+            class="btn-secondary btn-mapa"
+            (click)="abrirMapa(entrega)"
+            *ngIf="entrega.direccionEntrega">
+            🗺️ Ver mapa
+          </button>
+          
+          <button 
+            class="btn-secondary btn-llamar"
+            (click)="llamarCliente(entrega)">
+            📞 Llamar
+          </button>
+          
+          <button 
+            class="btn-secondary btn-problema"
+            (click)="reportarProblema(entrega)"
+            *ngIf="entrega.deliveryStatus !== 'DELIVERED'">
+            ⚠️ Reportar
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Sin entregas -->
+  <div *ngIf="!cargando && entregasFiltradas.length === 0" class="sin-entregas">
+    <div class="empty-state">
+      <span class="empty-icon">📦</span>
+      <h2>No hay entregas {{ filtroActivo !== 'TODAS' ? 'en esta categoría' : '' }}</h2>
+      <p>Cuando te asignen nuevos pedidos aparecerán aquí</p>
+    </div>
+  </div>
+
+  <!-- Indicador de actualización automática -->
+  <div class="polling-indicator" *ngIf="pollingActivo">
+    <div class="pulse"></div>
+    <span>Actualización automática activa</span>
+  </div>
+</div>
