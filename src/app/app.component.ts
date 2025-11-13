@@ -81,7 +81,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private updateHeaderFooterVisibility(url: string) {
     // Ocultar header y footer en rutas de workers (auxiliar, admin, repartidor y worker-login)
-    const workerRoutes = ['/auxiliar', '/admin', '/repartidor', '/auth/worker/login'];
+    const workerRoutes = ['/auxiliar', '/admin', '/repartidor', '/auth/worker/login', '/workers/auth/login'];
     const isWorkerRoute = workerRoutes.some(route => url.startsWith(route));
 
     this.showClientHeader = !isWorkerRoute;

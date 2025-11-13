@@ -197,7 +197,7 @@ export class AuthService {
     this.currentUserSubj.next(user);
   }
 
-  // logout: llama al backend y solo tras respuesta exitosa limpia el storage y emite null
+  // logout: limpiar inmediatamente y enviar request en segundo plano
   logout(): void {
     let email: string | null = null;
     try {
@@ -214,19 +214,14 @@ export class AuthService {
       if (rawToken) { token = String(rawToken).trim(); }
     } catch (e) { token = null; }
 
+    // Limpiar de inmediato para no depender de la respuesta del backend
+    this.clearAuthAndCart();
+
+    // Disparar request al backend en segundo plano (best-effort)
     if (email && token) {
-      this.logoutRequest({ email, token }).subscribe({
-        next: (res) => {
-          this.clearAuthAndCart();
-        },
-        error: (err) => {
-          console.warn('[AuthService] logoutRequest failed, clearing local data anyway', err);
-          this.clearAuthAndCart();
-        }
-      });
-    } else {
-      // fallback: limpiar localmente
-      this.clearAuthAndCart();
+      try {
+        this.logoutRequest({ email, token }).subscribe({ next: () => {}, error: () => {} });
+      } catch {}
     }
   }
 

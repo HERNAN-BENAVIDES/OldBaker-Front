@@ -148,23 +148,50 @@ export class MisPedidosComponent implements OnInit {
   }
 
   getEstadoClass(estado: string): string {
+    const e = String(estado || '').trim().toUpperCase();
     const statusMap: { [key: string]: string } = {
       'PAID': 'estado-completado',
+      'APPROVED': 'estado-completado',
+      'AUTHORIZED': 'estado-completado',
       'PENDING': 'estado-pendiente',
+      'IN_PROCESS': 'estado-pendiente',
+      'PROCESSING': 'estado-pendiente',
+      'PENDING_PAYMENT': 'estado-pendiente',
       'CANCELLED': 'estado-cancelado',
-      'FAILED': 'estado-cancelado'
+      'CANCELED': 'estado-cancelado',
+      'FAILED': 'estado-cancelado',
+      'REJECTED': 'estado-cancelado',
+      'REFUNDED': 'estado-cancelado',
+      'CHARGED_BACK': 'estado-cancelado'
     };
-    return statusMap[estado] || 'estado-pendiente';
+    if (statusMap[e]) return statusMap[e];
+    // Heurística por patrones para estados no mapeados explícitamente
+    if (e.includes('APPROV') || e.includes('PAID') || e.includes('AUTHORIZ')) return 'estado-completado';
+    if (e.includes('PEND') || e.includes('PROCESS') || e.includes('IN_PROGRESS')) return 'estado-pendiente';
+    if (e.includes('CANCEL') || e.includes('REJECT') || e.includes('FAIL') || e.includes('REFUND') || e.includes('CHARG')) return 'estado-cancelado';
+    return 'estado-pendiente';
   }
 
   getEstadoTexto(estado: string): string {
+    const e = String(estado || '').trim().toUpperCase();
     const statusText: { [key: string]: string } = {
       'PAID': 'Pagado',
+      'APPROVED': 'Aprobado',
+      'AUTHORIZED': 'Autorizado',
       'PENDING': 'Pendiente',
+      'IN_PROCESS': 'En proceso',
+      'PROCESSING': 'En proceso',
+      'PENDING_PAYMENT': 'Pendiente de pago',
       'CANCELLED': 'Cancelado',
-      'FAILED': 'Fallido'
+      'CANCELED': 'Cancelado',
+      'FAILED': 'Fallido',
+      'REJECTED': 'Rechazado',
+      'REFUNDED': 'Reembolsado',
+      'CHARGED_BACK': 'Contracargo'
     };
-    return statusText[estado] || estado;
+    if (statusText[e]) return statusText[e];
+    // Fallback legible
+    return estado ? estado.charAt(0).toUpperCase() + estado.slice(1).toLowerCase().replace(/_/g, ' ') : 'Pendiente';
   }
 
   getDeliveryStatusClass(estado?: string): string {
